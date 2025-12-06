@@ -984,15 +984,9 @@ const PDFExport = {
     convertToInternalUrl(url, propertyId) {
         // Always create internal link based on property ID (ignore external URL)
         if (propertyId) {
-            // Get base URL from current location
-            const baseUrl = window.location.origin;
-            
-            // For deployed version (Vercel, Netlify, etc.) - use absolute path
-            if (window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1')) {
-                return `${baseUrl}/client/property.html?id=${propertyId}`;
-            }
-            // For local development
-            return `${baseUrl}/src/client/property.html?id=${propertyId}`;
+            // Use relative path that works both locally and on deployment
+            // From broker pages: ../client/property.html
+            return `../client/property.html?id=${propertyId}`;
         }
         // If no property ID, return empty string (should not happen)
         return '#';
