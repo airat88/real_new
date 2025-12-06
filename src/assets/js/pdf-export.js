@@ -186,7 +186,7 @@ const PDFExport = {
     },
 
     // Load image as base64 with better error handling
-    async loadImageAsBase64(url, timeout = 5000) {
+    async loadImageAsBase64(url, timeout = 10000) {
         return new Promise((resolve) => {
             if (!url) {
                 resolve(null);
@@ -199,7 +199,7 @@ const PDFExport = {
                 return;
             }
 
-            // Convert Google Drive URLs to thumbnail format
+            // Convert Google Drive URLs to thumbnail format (cors-enabled)
             let imageUrl = url;
             if (url.includes('drive.google.com')) {
                 let fileId = null;
@@ -209,17 +209,20 @@ const PDFExport = {
                     fileId = url.split('id=')[1]?.split('&')[0];
                 }
                 if (fileId) {
-                    imageUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
+                    // Use uc endpoint which has better CORS support
+                    imageUrl = `https://drive.google.com/uc?export=view&id=${fileId}`;
                 }
             }
 
             const img = new Image();
+            // Try with and without CORS
             img.crossOrigin = 'anonymous';
 
             let resolved = false;
             const timeoutId = setTimeout(() => {
                 if (!resolved) {
                     resolved = true;
+                    console.log('Image load timeout:', url);
                     resolve(null);
                 }
             }, timeout);
@@ -231,8 +234,8 @@ const PDFExport = {
 
                 try {
                     const canvas = document.createElement('canvas');
-                    const maxWidth = 200;
-                    const maxHeight = 150;
+                    const maxWidth = 300;
+                    const maxHeight = 220;
 
                     let width = img.naturalWidth || img.width;
                     let height = img.naturalHeight || img.height;
@@ -254,17 +257,26 @@ const PDFExport = {
                     ctx.fillRect(0, 0, width, height);
                     ctx.drawImage(img, 0, 0, width, height);
 
-                    resolve(canvas.toDataURL('image/jpeg', 0.8));
+                    resolve(canvas.toDataURL('image/jpeg', 0.85));
                 } catch (e) {
+                    console.error('Error converting image to base64:', e);
                     resolve(null);
                 }
             };
 
-            img.onerror = () => {
+            img.onerror = (e) => {
                 if (resolved) return;
                 resolved = true;
                 clearTimeout(timeoutId);
-                resolve(null);
+                console.log('Image load error:', url, e);
+                
+                // Try without CORS as fallback
+                if (img.crossOrigin) {
+                    img.crossOrigin = null;
+                    img.src = imageUrl;
+                } else {
+                    resolve(null);
+                }
             };
 
             img.src = imageUrl;
@@ -274,20 +286,30 @@ const PDFExport = {
     // Create placeholder image as base64
     createPlaceholderImage(text = 'No image') {
         const canvas = document.createElement('canvas');
-        canvas.width = 150;
-        canvas.height = 100;
+        canvas.width = 220;
+        canvas.height = 160;
         const ctx = canvas.getContext('2d');
 
         // Background
-        ctx.fillStyle = '#e5e7eb';
-        ctx.fillRect(0, 0, 150, 100);
+        ctx.fillStyle = '#f3f4f6';
+        ctx.fillRect(0, 0, 220, 160);
+        
+        // Border
+        ctx.strokeStyle = '#d1d5db';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(0, 0, 220, 160);
 
-        // Text
+        // Icon (camera/image icon)
         ctx.fillStyle = '#9ca3af';
-        ctx.font = '12px Arial';
+        ctx.font = 'bold 24px Arial';
         ctx.textAlign = 'center';
         ctx.textBaseline = 'middle';
-        ctx.fillText(text, 75, 50);
+        ctx.fillText('📷', 110, 70);
+
+        // Text
+        ctx.fillStyle = '#6b7280';
+        ctx.font = '12px Arial';
+        ctx.fillText(text, 110, 100);
 
         return canvas.toDataURL('image/png');
     },
@@ -417,13 +439,13 @@ const PDFExport = {
 
                 const propertyTable = {
                     table: {
-                        widths: [100, '*'],
+                        widths: [120, '*'],
                         body: [[
                             // Image column
                             {
                                 image: img,
-                                width: 90,
-                                height: 65,
+                                width: 110,
+                                height: 80,
                                 margin: [0, 5, 0, 5]
                             },
                             // Details column
