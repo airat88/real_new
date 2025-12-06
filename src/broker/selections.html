@@ -792,7 +792,6 @@
                 <!-- Content loaded dynamically -->
             </div>
             <div class="modal__footer">
-                <a href="#" id="propertyModalLink" target="_blank" class="btn btn-primary">View Property Details</a>
                 <button class="btn btn-secondary" onclick="closePropertyModal()">Close</button>
             </div>
         </div>
@@ -1219,21 +1218,6 @@
             `;
 
             document.getElementById('propertyModalContent').innerHTML = content;
-
-            // Always use internal property page (ignore external URL from sheets)
-            const linkBtn = document.getElementById('propertyModalLink');
-            if (prop.id) {
-                // Build proper URL for property page
-                const currentPath = window.location.pathname;
-                const baseUrl = window.location.origin;
-                const propertyUrl = `${baseUrl}${currentPath.replace(/\/broker\/.*/, '/client/property.html')}?id=${prop.id}`;
-                
-                linkBtn.href = propertyUrl;
-                linkBtn.textContent = 'View Property Details';
-                linkBtn.style.display = '';
-            } else {
-                linkBtn.style.display = 'none';
-            }
 
             document.getElementById('propertyDetailModal').classList.add('modal-overlay--open');
         }

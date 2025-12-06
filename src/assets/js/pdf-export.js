@@ -453,13 +453,7 @@ const PDFExport = {
                                         text: stats,
                                         style: 'propertyStats',
                                         margin: [0, 3, 0, 0]
-                                    },
-                                    prop.id ? {
-                                        text: this.t('viewListing', lang) + ' →',
-                                        style: 'propertyLink',
-                                        link: this.convertToInternalUrl(null, prop.id),
-                                        margin: [0, 5, 0, 0]
-                                    } : {}
+                                    }
                                 ],
                                 margin: [10, 5, 5, 5]
                             }
@@ -922,17 +916,6 @@ const PDFExport = {
             });
         }
 
-        // Add link - always use internal link (ignore external URL from sheets)
-        if (prop.id) {
-            const internalUrl = this.convertToInternalUrl(null, prop.id);
-            priceStack.push({
-                text: 'Link →',
-                style: 'reactionLink',
-                link: internalUrl,
-                alignment: 'right',
-                margin: [0, 3, 0, 0]
-            });
-        }
 
         const row = {
             table: {
@@ -981,25 +964,6 @@ const PDFExport = {
     },
 
     // Convert external URL to internal format
-    convertToInternalUrl(url, propertyId) {
-        // Always create internal link based on property ID (ignore external URL)
-        if (propertyId) {
-            // Build path that works everywhere
-            const currentPath = window.location.pathname;
-            const baseUrl = window.location.origin;
-            
-            // If we're in /broker/ or /src/broker/, go to /client/property.html
-            // This works on Vercel (root=src) and locally (root=/)
-            if (currentPath.includes('/broker/')) {
-                return `${baseUrl}${currentPath.replace(/\/broker\/.*/, '/client/property.html')}?id=${propertyId}`;
-            }
-            
-            // Fallback to relative path
-            return `../client/property.html?id=${propertyId}`;
-        }
-        // If no property ID, return empty string (should not happen)
-        return '#';
-    }
 };
 
 // Export
