@@ -1769,9 +1769,9 @@
                 </div>
                 ` : ''}
 
-                ${property.url ? `
-                <a href="${property.url}" target="_blank" class="property-detail__link">
-                    🔗 View Original Listing
+                ${property.id ? `
+                <a href="${window.location.origin}/client/property.html?id=${property.id}" target="_blank" class="property-detail__link">
+                    🔗 View Property Details
                 </a>
                 ` : ''}
             `;

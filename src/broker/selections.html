@@ -792,7 +792,7 @@
                 <!-- Content loaded dynamically -->
             </div>
             <div class="modal__footer">
-                <a href="#" id="propertyModalLink" target="_blank" class="btn btn-primary">View Original Listing</a>
+                <a href="#" id="propertyModalLink" target="_blank" class="btn btn-primary">View Property Details</a>
                 <button class="btn btn-secondary" onclick="closePropertyModal()">Close</button>
             </div>
         </div>
@@ -1220,10 +1220,14 @@
 
             document.getElementById('propertyModalContent').innerHTML = content;
 
-            // Set link URL
+            // Always use internal property page (ignore external URL from sheets)
             const linkBtn = document.getElementById('propertyModalLink');
-            if (prop.url) {
-                linkBtn.href = prop.url;
+            if (prop.id) {
+                // Create internal link to property page
+                const baseUrl = window.location.origin;
+                const propertyUrl = `${baseUrl}/client/property.html?id=${prop.id}`;
+                linkBtn.href = propertyUrl;
+                linkBtn.textContent = 'View Property Details';
                 linkBtn.style.display = '';
             } else {
                 linkBtn.style.display = 'none';

@@ -454,10 +454,10 @@ const PDFExport = {
                                         style: 'propertyStats',
                                         margin: [0, 3, 0, 0]
                                     },
-                                    prop.url ? {
+                                    prop.id ? {
                                         text: this.t('viewListing', lang) + ' →',
                                         style: 'propertyLink',
-                                        link: this.convertToInternalUrl(prop.url, prop.id),
+                                        link: this.convertToInternalUrl(null, prop.id),
                                         margin: [0, 5, 0, 0]
                                     } : {}
                                 ],
@@ -922,9 +922,9 @@ const PDFExport = {
             });
         }
 
-        // Add link if available - convert to internal link format
-        if (prop.url) {
-            const internalUrl = this.convertToInternalUrl(prop.url, prop.id);
+        // Add link - always use internal link (ignore external URL from sheets)
+        if (prop.id) {
+            const internalUrl = this.convertToInternalUrl(null, prop.id);
             priceStack.push({
                 text: 'Link →',
                 style: 'reactionLink',
@@ -982,11 +982,10 @@ const PDFExport = {
 
     // Convert external URL to internal format
     convertToInternalUrl(url, propertyId) {
-        // If it's already an internal URL or we have a property ID, create internal link
+        // Always create internal link based on property ID (ignore external URL)
         if (propertyId) {
             // Get base URL from current location
             const baseUrl = window.location.origin;
-            const basePath = window.location.pathname.includes('/broker/') ? '..' : '.';
             
             // For deployed version (Vercel, Netlify, etc.) - use absolute path
             if (window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1')) {
@@ -995,8 +994,8 @@ const PDFExport = {
             // For local development
             return `${baseUrl}/src/client/property.html?id=${propertyId}`;
         }
-        // Otherwise return original URL
-        return url;
+        // If no property ID, return empty string (should not happen)
+        return '#';
     }
 };
 
