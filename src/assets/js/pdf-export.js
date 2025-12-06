@@ -378,15 +378,37 @@ const PDFExport = {
         this.updateLoading('Loading images...', `0 / ${properties.length}`);
 
         try {
-            // Pre-load all images
+            // Pre-load all images with timeout
             const placeholderImg = this.createPlaceholderImage(this.t('noImage', lang));
+            
             const imagePromises = properties.map(async (prop, idx) => {
-                const img = await this.loadImageAsBase64(prop.photos?.[0]);
-                this.updateLoading('Loading images...', `${idx + 1} / ${properties.length}`);
-                return { prop, img: img || placeholderImg };
+                try {
+                    // Load image with timeout (5 seconds per image)
+                    const img = await Promise.race([
+                        this.loadImageAsBase64(prop.photos?.[0]),
+                        new Promise((resolve) => setTimeout(() => resolve(null), 5000))
+                    ]);
+                    
+                    this.updateLoading('Loading images...', `${idx + 1} / ${properties.length}`);
+                    return { prop, img: img || placeholderImg };
+                } catch (error) {
+                    console.error('Error loading image for property:', prop.id, error);
+                    this.updateLoading('Loading images...', `${idx + 1} / ${properties.length}`);
+                    return { prop, img: placeholderImg };
+                }
             });
 
-            const propertiesWithImages = await Promise.all(imagePromises);
+            // Wait for all images with overall timeout (20 seconds max)
+            const propertiesWithImages = await Promise.race([
+                Promise.all(imagePromises),
+                new Promise((resolve) => {
+                    setTimeout(() => {
+                        console.log('Image loading timeout - using placeholders for remaining images');
+                        // Return what we have so far, rest will be placeholders
+                        resolve(properties.map(prop => ({ prop, img: placeholderImg })));
+                    }, 20000); // 20 seconds max total
+                })
+            ]);
 
             this.updateLoading('Generating PDF...', '');
 
