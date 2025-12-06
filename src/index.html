@@ -1,0 +1,719 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyprus Real Estate | Smart Property Selection</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="assets/css/common.css">
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+
+    <!-- PWA -->
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#1e1b4b">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <link rel="apple-touch-icon" href="assets/icons/icon-192.png">
+
+    <style>
+        /* Landing specific styles */
+        .landing {
+            min-height: 100vh;
+            background: var(--gradient-dark);
+            overflow-x: hidden;
+        }
+
+        /* Navigation */
+        .nav {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            z-index: 100;
+            padding: var(--space-md) var(--space-xl);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            background: transparent;
+            transition: background var(--transition);
+        }
+
+        .nav.scrolled {
+            background: rgba(30, 27, 75, 0.95);
+            backdrop-filter: blur(10px);
+        }
+
+        .nav__logo {
+            display: flex;
+            align-items: center;
+            gap: var(--space-sm);
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: var(--white);
+            text-decoration: none;
+        }
+
+        .nav__links {
+            display: flex;
+            align-items: center;
+            gap: var(--space-lg);
+        }
+
+        .nav__link {
+            color: rgba(255, 255, 255, 0.8);
+            text-decoration: none;
+            font-size: 0.875rem;
+            transition: color var(--transition);
+        }
+
+        .nav__link:hover {
+            color: var(--white);
+        }
+
+        .nav__burger {
+            display: none;
+            width: 40px;
+            height: 40px;
+            border: none;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: var(--radius-lg);
+            cursor: pointer;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+        }
+
+        .nav__burger span {
+            display: block;
+            width: 20px;
+            height: 2px;
+            background: var(--white);
+            border-radius: 2px;
+            transition: all var(--transition);
+        }
+
+        .nav__burger.active span:nth-child(1) {
+            transform: rotate(45deg) translate(5px, 5px);
+        }
+
+        .nav__burger.active span:nth-child(2) {
+            opacity: 0;
+        }
+
+        .nav__burger.active span:nth-child(3) {
+            transform: rotate(-45deg) translate(5px, -5px);
+        }
+
+        .nav__mobile {
+            display: none;
+            position: fixed;
+            top: 70px;
+            left: 0;
+            right: 0;
+            background: rgba(30, 27, 75, 0.98);
+            backdrop-filter: blur(10px);
+            padding: var(--space-lg);
+            flex-direction: column;
+            gap: var(--space-md);
+            z-index: 99;
+        }
+
+        .nav__mobile.active {
+            display: flex;
+        }
+
+        .nav__mobile .nav__link {
+            display: block;
+            padding: var(--space-md);
+            text-align: center;
+        }
+
+        .nav__mobile .btn {
+            width: 100%;
+            text-align: center;
+        }
+
+        /* Hero */
+        .hero {
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            padding: 120px var(--space-xl) var(--space-2xl);
+            position: relative;
+        }
+
+        .hero__content {
+            max-width: 600px;
+            color: var(--white);
+            z-index: 10;
+        }
+
+        .hero__badge {
+            display: inline-flex;
+            align-items: center;
+            gap: var(--space-sm);
+            padding: var(--space-sm) var(--space-md);
+            background: rgba(99, 102, 241, 0.2);
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: var(--radius-full);
+            font-size: 0.875rem;
+            margin-bottom: var(--space-lg);
+        }
+
+        .hero__title {
+            font-size: 3.5rem;
+            font-weight: 800;
+            line-height: 1.1;
+            margin-bottom: var(--space-lg);
+        }
+
+        .hero__title span {
+            background: var(--gradient-primary);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero__description {
+            font-size: 1.25rem;
+            opacity: 0.8;
+            margin-bottom: var(--space-xl);
+            line-height: 1.7;
+        }
+
+        .hero__actions {
+            display: flex;
+            gap: var(--space-md);
+            flex-wrap: wrap;
+        }
+
+        .hero__visual {
+            position: absolute;
+            right: -100px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 700px;
+            height: 700px;
+            opacity: 0.8;
+        }
+
+        .hero__phone {
+            position: absolute;
+            right: 10%;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 300px;
+            height: 600px;
+            background: var(--gray-900);
+            border-radius: 40px;
+            border: 8px solid var(--gray-800);
+            overflow: hidden;
+            box-shadow: var(--shadow-xl), 0 0 100px rgba(99, 102, 241, 0.3);
+        }
+
+        .hero__phone-screen {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(180deg, #1e1b4b 0%, #312e81 100%);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: var(--space-lg);
+        }
+
+        .hero__phone-card {
+            width: 100%;
+            aspect-ratio: 3/4;
+            background: url('https://images.unsplash.com/photo-1545324418-cc1a3fa10c00?w=400') center/cover;
+            border-radius: var(--radius-xl);
+            position: relative;
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0) rotate(-2deg); }
+            50% { transform: translateY(-10px) rotate(2deg); }
+        }
+
+        .hero__phone-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(180deg, transparent 50%, rgba(0,0,0,0.8) 100%);
+            border-radius: var(--radius-xl);
+        }
+
+        .hero__phone-info {
+            position: absolute;
+            bottom: var(--space-lg);
+            left: var(--space-lg);
+            right: var(--space-lg);
+            color: var(--white);
+            z-index: 10;
+        }
+
+        .hero__phone-price {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .hero__phone-title {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+
+        /* Features */
+        .features {
+            padding: var(--space-2xl) var(--space-xl);
+            background: var(--white);
+        }
+
+        .features__header {
+            text-align: center;
+            max-width: 600px;
+            margin: 0 auto var(--space-2xl);
+        }
+
+        .features__title {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-md);
+        }
+
+        .features__subtitle {
+            font-size: 1.125rem;
+            color: var(--gray-600);
+        }
+
+        .features__grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: var(--space-xl);
+            max-width: 1200px;
+            margin: 0 auto;
+        }
+
+        .feature-card {
+            text-align: center;
+            padding: var(--space-xl);
+        }
+
+        .feature-card__icon {
+            width: 80px;
+            height: 80px;
+            margin: 0 auto var(--space-lg);
+            background: var(--gradient-primary);
+            border-radius: var(--radius-xl);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .feature-card__title {
+            font-size: 1.25rem;
+            margin-bottom: var(--space-sm);
+        }
+
+        .feature-card__description {
+            color: var(--gray-600);
+            line-height: 1.7;
+        }
+
+        /* How it works */
+        .how-it-works {
+            padding: var(--space-2xl) var(--space-xl);
+            background: var(--gray-100);
+        }
+
+        .how-it-works__header {
+            text-align: center;
+            margin-bottom: var(--space-2xl);
+        }
+
+        .how-it-works__title {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-md);
+        }
+
+        .steps {
+            display: flex;
+            justify-content: center;
+            gap: var(--space-xl);
+            max-width: 1000px;
+            margin: 0 auto;
+        }
+
+        .step {
+            flex: 1;
+            text-align: center;
+            position: relative;
+        }
+
+        .step::after {
+            content: '→';
+            position: absolute;
+            right: -30px;
+            top: 40px;
+            font-size: 2rem;
+            color: var(--gray-400);
+        }
+
+        .step:last-child::after {
+            display: none;
+        }
+
+        .step__number {
+            width: 60px;
+            height: 60px;
+            margin: 0 auto var(--space-md);
+            background: var(--primary);
+            color: var(--white);
+            border-radius: var(--radius-full);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+
+        .step__title {
+            font-size: 1.125rem;
+            margin-bottom: var(--space-sm);
+        }
+
+        .step__description {
+            font-size: 0.875rem;
+            color: var(--gray-600);
+        }
+
+        /* CTA */
+        .cta {
+            padding: var(--space-2xl) var(--space-xl);
+            background: var(--gradient-dark);
+            text-align: center;
+            color: var(--white);
+        }
+
+        .cta__title {
+            font-size: 2.5rem;
+            margin-bottom: var(--space-md);
+        }
+
+        .cta__description {
+            font-size: 1.125rem;
+            opacity: 0.8;
+            margin-bottom: var(--space-xl);
+            max-width: 500px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* Footer */
+        .footer {
+            padding: var(--space-xl);
+            background: var(--gray-900);
+            color: var(--white);
+            text-align: center;
+        }
+
+        .footer__text {
+            opacity: 0.6;
+            font-size: 0.875rem;
+        }
+
+        /* Responsive */
+        @media (max-width: 1024px) {
+            .hero__phone {
+                display: none;
+            }
+
+            .features__grid {
+                grid-template-columns: 1fr;
+                max-width: 500px;
+            }
+
+            .steps {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .step::after {
+                content: '↓';
+                right: auto;
+                bottom: -30px;
+                top: auto;
+            }
+        }
+
+        @media (max-width: 768px) {
+            .hero__title {
+                font-size: 2.5rem;
+            }
+
+            .nav__links {
+                display: none;
+            }
+
+            .nav__burger {
+                display: flex;
+            }
+
+            .hero__description {
+                font-size: 1rem;
+            }
+
+            .hero__actions {
+                flex-direction: column;
+            }
+
+            .hero__actions .btn {
+                width: 100%;
+                text-align: center;
+            }
+
+            .cta__title,
+            .features__title,
+            .how-it-works__title {
+                font-size: 2rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="landing">
+        <!-- Navigation -->
+        <nav class="nav" id="nav">
+            <a href="index.html" class="nav__logo">
+                <span>🏠</span>
+                <span>RealEstate</span>
+            </a>
+            <div class="nav__links">
+                <a href="#features" class="nav__link">Features</a>
+                <a href="#how-it-works" class="nav__link">How it works</a>
+                <a href="broker/login.html" class="btn btn-primary">Broker Login</a>
+            </div>
+            <button class="nav__burger" id="navBurger" onclick="toggleNav()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </button>
+        </nav>
+
+        <!-- Mobile Navigation -->
+        <div class="nav__mobile" id="navMobile">
+            <a href="#features" class="nav__link" onclick="toggleNav()">Features</a>
+            <a href="#how-it-works" class="nav__link" onclick="toggleNav()">How it works</a>
+            <a href="broker/login.html" class="btn btn-primary">Broker Login</a>
+            <a href="client/swipe.html" class="btn btn-secondary">Try Demo</a>
+        </div>
+
+        <!-- Hero -->
+        <section class="hero">
+            <div class="hero__content">
+                <div class="hero__badge">
+                    🇨🇾 Cyprus Property Platform
+                </div>
+                <h1 class="hero__title">
+                    Find Your Dream Home with <span>Smart Selection</span>
+                </h1>
+                <p class="hero__description">
+                    The modern way to explore property options. Your broker creates personalized selections,
+                    you swipe through them like photos. Simple, fast, effective.
+                </p>
+                <div class="hero__actions">
+                    <a href="broker/login.html" class="btn btn-primary btn-lg">
+                        Broker Login
+                    </a>
+                    <a href="client/swipe.html" class="btn btn-secondary btn-lg">
+                        Try Demo Swipe
+                    </a>
+                </div>
+            </div>
+
+            <div class="hero__phone">
+                <div class="hero__phone-screen">
+                    <div class="hero__phone-card">
+                        <div class="hero__phone-info">
+                            <div class="hero__phone-price">€285,000</div>
+                            <div class="hero__phone-title">Emerald Bay Residences</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Features -->
+        <section class="features" id="features">
+            <div class="features__header">
+                <h2 class="features__title">Why Choose Us</h2>
+                <p class="features__subtitle">
+                    A smarter approach to property selection that saves time for both brokers and clients
+                </p>
+            </div>
+
+            <div class="features__grid">
+                <div class="feature-card">
+                    <div class="feature-card__icon">🎯</div>
+                    <h3 class="feature-card__title">Smart Filtering</h3>
+                    <p class="feature-card__description">
+                        Brokers apply precise filters to match client preferences.
+                        Only relevant properties make it to the selection.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-card__icon">👆</div>
+                    <h3 class="feature-card__title">Swipe Selection</h3>
+                    <p class="feature-card__description">
+                        Clients review properties with intuitive swipe gestures.
+                        Like it? Swipe right. Not interested? Swipe left.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-card__icon">📊</div>
+                    <h3 class="feature-card__title">Instant Results</h3>
+                    <p class="feature-card__description">
+                        Brokers see client preferences immediately.
+                        No more guessing what clients really want.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-card__icon">🔗</div>
+                    <h3 class="feature-card__title">Easy Sharing</h3>
+                    <p class="feature-card__description">
+                        Generate a unique link for each selection.
+                        No app download required for clients.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-card__icon">📱</div>
+                    <h3 class="feature-card__title">Mobile First</h3>
+                    <p class="feature-card__description">
+                        Optimized for phones and tablets.
+                        Clients can review properties anywhere.
+                    </p>
+                </div>
+
+                <div class="feature-card">
+                    <div class="feature-card__icon">📄</div>
+                    <h3 class="feature-card__title">Export Options</h3>
+                    <p class="feature-card__description">
+                        Generate beautiful PDFs, Excel reports.
+                        In English, Russian, or Greek.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- How it works -->
+        <section class="how-it-works" id="how-it-works">
+            <div class="how-it-works__header">
+                <h2 class="how-it-works__title">How It Works</h2>
+            </div>
+
+            <div class="steps">
+                <div class="step">
+                    <div class="step__number">1</div>
+                    <h3 class="step__title">Broker Creates Selection</h3>
+                    <p class="step__description">
+                        Filter properties by price, location, size and create a personalized selection
+                    </p>
+                </div>
+
+                <div class="step">
+                    <div class="step__number">2</div>
+                    <h3 class="step__title">Client Gets Link</h3>
+                    <p class="step__description">
+                        Share the selection link via WhatsApp, email or any messenger
+                    </p>
+                </div>
+
+                <div class="step">
+                    <div class="step__number">3</div>
+                    <h3 class="step__title">Swipe & Decide</h3>
+                    <p class="step__description">
+                        Client swipes through properties, marking favorites
+                    </p>
+                </div>
+
+                <div class="step">
+                    <div class="step__number">4</div>
+                    <h3 class="step__title">Get Results</h3>
+                    <p class="step__description">
+                        Broker sees exactly what client liked and takes action
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- CTA -->
+        <section class="cta">
+            <h2 class="cta__title">Ready to Transform Your Business?</h2>
+            <p class="cta__description">
+                Join Cyprus brokers who already use smart selection to close more deals
+            </p>
+            <a href="broker/login.html" class="btn btn-primary btn-lg">
+                Get Started Free
+            </a>
+        </section>
+
+        <!-- Footer -->
+        <footer class="footer">
+            <p class="footer__text">
+                © 2024 Cyprus Real Estate. Made with ❤️ in Cyprus.
+            </p>
+        </footer>
+    </div>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="assets/js/supabase-client.js"></script>
+
+    <script>
+        // Register Service Worker
+        if ('serviceWorker' in navigator) {
+            navigator.serviceWorker.register('sw.js')
+                .then(reg => console.log('SW registered'))
+                .catch(err => console.log('SW failed:', err));
+        }
+
+        // Navbar scroll effect
+        window.addEventListener('scroll', () => {
+            const nav = document.getElementById('nav');
+            nav.classList.toggle('scrolled', window.scrollY > 50);
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function(e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Mobile nav toggle
+        function toggleNav() {
+            const burger = document.getElementById('navBurger');
+            const mobile = document.getElementById('navMobile');
+            burger.classList.toggle('active');
+            mobile.classList.toggle('active');
+        }
+    </script>
+</body>
+</html>
