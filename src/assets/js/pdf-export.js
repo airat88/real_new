@@ -457,7 +457,7 @@ const PDFExport = {
                                     prop.url ? {
                                         text: this.t('viewListing', lang) + ' →',
                                         style: 'propertyLink',
-                                        link: prop.url,
+                                        link: this.convertToInternalUrl(prop.url, prop.id),
                                         margin: [0, 5, 0, 0]
                                     } : {}
                                 ],
@@ -984,8 +984,15 @@ const PDFExport = {
     convertToInternalUrl(url, propertyId) {
         // If it's already an internal URL or we have a property ID, create internal link
         if (propertyId) {
-            // Get base URL (assuming same domain)
+            // Get base URL from current location
             const baseUrl = window.location.origin;
+            const basePath = window.location.pathname.includes('/broker/') ? '..' : '.';
+            
+            // For deployed version (Vercel, Netlify, etc.) - use absolute path
+            if (window.location.hostname !== 'localhost' && !window.location.hostname.includes('127.0.0.1')) {
+                return `${baseUrl}/client/property.html?id=${propertyId}`;
+            }
+            // For local development
             return `${baseUrl}/src/client/property.html?id=${propertyId}`;
         }
         // Otherwise return original URL
