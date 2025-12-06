@@ -1185,7 +1185,8 @@
                     ` : ''}
                 </div>
 
-                <h2 class="property-detail__title">${prop.title || 'Property'}</h2>
+                <h2 class="property-detail__title">${prop.id || 'Property'}</h2>
+                ${prop.title ? `<div style="font-size: 0.875rem; color: var(--gray-600); margin-top: 8px; margin-bottom: 12px;">${prop.title}</div>` : ''}
                 <div class="property-detail__price">${prop.price || (prop.cleanPrice ? '€' + prop.cleanPrice.toLocaleString() : 'Price on request')}</div>
                 <div class="property-detail__location">📍 ${prop.location || 'Cyprus'}</div>
 

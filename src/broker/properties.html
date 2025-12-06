@@ -1053,7 +1053,8 @@
                         </div>
                         <div class="property-card-broker__body" onclick="toggleProperty('${p.id}')">
                             <div class="property-card-broker__price">${price} ${unitLabel}</div>
-                            <div class="property-card-broker__title">${p.title || 'Untitled'}</div>
+                            <div class="property-card-broker__title">${p.id || 'Untitled'}</div>
+                            ${p.title ? `<div class="property-card-broker__location" style="font-size: 0.75rem; color: var(--gray-500); margin-top: 4px;">${p.title}</div>` : ''}
                             <div class="property-card-broker__location">📍 ${p.location || 'Unknown'}</div>
                             <div class="property-card-broker__tags">
                                 <span class="property-card-broker__tag">🛏️ ${bedroomText}</span>
@@ -1723,7 +1724,8 @@
                     ${property.apartmentNo ? `<div class="property-detail__unit">Unit #${property.apartmentNo}</div>` : ''}
                 </div>
 
-                <div class="property-detail__title">${property.title || 'Untitled'}</div>
+                <div class="property-detail__title">${property.id || 'Untitled'}</div>
+                ${property.title ? `<div class="property-detail__location" style="font-size: 0.875rem; color: var(--gray-600); margin-top: 8px; margin-bottom: 8px;">${property.title}</div>` : ''}
                 <div class="property-detail__location">📍 ${property.location || 'Unknown'} ${property.type ? `• ${property.type}` : ''}</div>
 
                 <div class="property-detail__grid">

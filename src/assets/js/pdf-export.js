@@ -432,7 +432,7 @@ const PDFExport = {
                                     {
                                         columns: [
                                             {
-                                                text: `${index + 1}. ${(prop.title || 'Property').substring(0, 40)}`,
+                                                text: `${index + 1}. ${prop.id || 'Property'}`,
                                                 style: 'propertyTitle',
                                                 width: '*'
                                             },
@@ -443,6 +443,11 @@ const PDFExport = {
                                                 alignment: 'right'
                                             }
                                         ]
+                                    },
+                                    {
+                                        text: (prop.title || '').substring(0, 60),
+                                        style: 'propertyStats',
+                                        margin: [0, 2, 0, 0]
                                     },
                                     {
                                         text: prop.location || 'Cyprus',
@@ -929,8 +934,13 @@ const PDFExport = {
                             {
                                 text: [
                                     { text: icon + ' ', color: borderColor },
-                                    { text: (reaction.property_title || prop.title || 'Property').substring(0, 40), style: 'reactionTitle' }
+                                    { text: prop.id || 'Property', style: 'reactionTitle' }
                                 ]
+                            },
+                            {
+                                text: (reaction.property_title || prop.title || '').substring(0, 60),
+                                style: 'reactionDetails',
+                                margin: [0, 2, 0, 0]
                             },
                             {
                                 text: details,
