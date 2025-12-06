@@ -984,8 +984,17 @@ const PDFExport = {
     convertToInternalUrl(url, propertyId) {
         // Always create internal link based on property ID (ignore external URL)
         if (propertyId) {
-            // Use relative path that works both locally and on deployment
-            // From broker pages: ../client/property.html
+            // Build path that works everywhere
+            const currentPath = window.location.pathname;
+            const baseUrl = window.location.origin;
+            
+            // If we're in /broker/ or /src/broker/, go to /client/property.html
+            // This works on Vercel (root=src) and locally (root=/)
+            if (currentPath.includes('/broker/')) {
+                return `${baseUrl}${currentPath.replace(/\/broker\/.*/, '/client/property.html')}?id=${propertyId}`;
+            }
+            
+            // Fallback to relative path
             return `../client/property.html?id=${propertyId}`;
         }
         // If no property ID, return empty string (should not happen)

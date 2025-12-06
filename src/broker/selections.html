@@ -1223,8 +1223,11 @@
             // Always use internal property page (ignore external URL from sheets)
             const linkBtn = document.getElementById('propertyModalLink');
             if (prop.id) {
-                // Use relative path that works both locally and on deployment
-                const propertyUrl = `../client/property.html?id=${prop.id}`;
+                // Build proper URL for property page
+                const currentPath = window.location.pathname;
+                const baseUrl = window.location.origin;
+                const propertyUrl = `${baseUrl}${currentPath.replace(/\/broker\/.*/, '/client/property.html')}?id=${prop.id}`;
+                
                 linkBtn.href = propertyUrl;
                 linkBtn.textContent = 'View Property Details';
                 linkBtn.style.display = '';

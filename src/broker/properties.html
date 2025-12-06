@@ -1039,7 +1039,7 @@
                             <button class="property-card-broker__btn" onclick="openPropertyModal('${p.id}')" title="View details">
                                 👁️
                             </button>
-                            ${p.id ? `<button class="property-card-broker__btn" onclick="window.open('../client/property.html?id=${p.id}', '_blank')" title="View property details">🔗</button>` : ''}
+                            ${p.id ? `<button class="property-card-broker__btn" onclick="window.open(window.location.origin + window.location.pathname.replace(/\\/broker\\/.*/, '/client/property.html') + '?id=${p.id}', '_blank')" title="View property details">🔗</button>` : ''}
                         </div>
                         <div class="property-card-broker__image-wrapper" onclick="toggleProperty('${p.id}')">
                             <img src="${photos[0]}" alt="${p.title}" class="property-card-broker__image"
@@ -1770,7 +1770,7 @@
                 ` : ''}
 
                 ${property.id ? `
-                <a href="../client/property.html?id=${property.id}" target="_blank" class="property-detail__link">
+                <a href="${window.location.origin}${window.location.pathname.replace(/\/broker\/.*/, '/client/property.html')}?id=${property.id}" target="_blank" class="property-detail__link">
                     🔗 View Property Details
                 </a>
                 ` : ''}
