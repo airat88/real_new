@@ -7,6 +7,15 @@ const DataSync = {
     config: {
         CSV_PATH: '../base.csv',  // Path relative to HTML files in subdirectories
         CSV_PATH_ROOT: 'base.csv', // Path from root
+        
+        // Google Apps Script Image Proxy (optional)
+        // Если установлен - будет использоваться для проксирования Google Drive изображений
+        // Решает проблему CORS!
+        // Инструкция: см. GOOGLE-APPS-SCRIPT-IMAGE-PROXY.js
+        GOOGLE_APPS_SCRIPT_URL: null, // Установите: 'https://script.google.com/macros/s/YOUR_SCRIPT_ID/exec'
+        
+        // Use Apps Script proxy for Google Drive images
+        USE_APPS_SCRIPT_PROXY: false, // Установите true после деплоя скрипта
     },
 
     // In-memory cache (no localStorage to avoid quota issues)
@@ -215,17 +224,36 @@ const DataSync = {
         // Clean URL from any trailing characters
         url = url.replace(/[\s"'<>]+$/, '');
 
+        // Extract file ID from various Google Drive URL formats
+        let fileId = null;
+        
         // Google Drive file link: https://drive.google.com/file/d/FILE_ID/view
         const driveMatch = url.match(/drive\.google\.com\/file\/d\/([a-zA-Z0-9_-]+)/);
         if (driveMatch) {
-            const fileId = driveMatch[1];
-            return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
+            fileId = driveMatch[1];
         }
 
         // Google Drive open link: https://drive.google.com/open?id=FILE_ID
         const openMatch = url.match(/drive\.google\.com\/open\?id=([a-zA-Z0-9_-]+)/);
         if (openMatch) {
-            const fileId = openMatch[1];
+            fileId = openMatch[1];
+        }
+        
+        // Google Drive uc or thumbnail link: extract ID
+        const ucMatch = url.match(/[?&]id=([a-zA-Z0-9_-]+)/);
+        if (ucMatch) {
+            fileId = ucMatch[1];
+        }
+
+        // If we found a Google Drive file ID
+        if (fileId) {
+            // Use Google Apps Script proxy if configured
+            if (this.config.USE_APPS_SCRIPT_PROXY && this.config.GOOGLE_APPS_SCRIPT_URL) {
+                console.log('📸 Using Google Apps Script proxy for:', fileId);
+                return `${this.config.GOOGLE_APPS_SCRIPT_URL}?id=${fileId}`;
+            }
+            
+            // Otherwise use standard thumbnail endpoint (may have CORS issues)
             return `https://drive.google.com/thumbnail?id=${fileId}&sz=w800`;
         }
 
