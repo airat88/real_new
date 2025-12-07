@@ -186,148 +186,76 @@ const PDFExport = {
     },
 
     // Load image as base64 with better error handling
-    async loadImageAsBase64(url, timeout = 10000) {
-        return new Promise(async (resolve) => {
-            if (!url) {
+    async loadImageAsBase64(url, timeout = 5000) {
+        if (!url) return null;
+        
+        // Skip placeholder images
+        if (url.includes('unsplash.com')) return null;
+
+        // Convert Google Drive URLs
+        let imageUrl = url;
+        if (url.includes('drive.google.com')) {
+            let fileId = null;
+            if (url.includes('/d/')) {
+                fileId = url.split('/d/')[1]?.split('/')[0];
+            } else if (url.includes('id=')) {
+                fileId = url.split('id=')[1]?.split('&')[0];
+            }
+            if (fileId) {
+                imageUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
+            }
+        }
+
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+
+            const timeoutId = setTimeout(() => {
+                console.log('Image timeout:', imageUrl);
                 resolve(null);
-                return;
-            }
+            }, timeout);
 
-            // Skip placeholder images
-            if (url.includes('unsplash.com')) {
-                resolve(null);
-                return;
-            }
+            img.onload = () => {
+                clearTimeout(timeoutId);
+                try {
+                    const canvas = document.createElement('canvas');
+                    const maxWidth = 300;
+                    const maxHeight = 220;
 
-            // Convert Google Drive URLs - try multiple formats
-            let imageUrl = url;
-            let imageUrls = [url]; // Will try multiple URLs
-            
-            if (url.includes('drive.google.com')) {
-                let fileId = null;
-                if (url.includes('/d/')) {
-                    fileId = url.split('/d/')[1]?.split('/')[0];
-                } else if (url.includes('id=')) {
-                    fileId = url.split('id=')[1]?.split('&')[0];
-                }
-                if (fileId) {
-                    // Try different URL formats (some work better than others)
-                    imageUrls = [
-                        `https://drive.google.com/uc?export=download&id=${fileId}`,
-                        `https://drive.google.com/uc?export=view&id=${fileId}`,
-                        `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`,
-                        `https://lh3.googleusercontent.com/d/${fileId}=w400`
-                    ];
-                    imageUrl = imageUrls[0];
-                    console.log('Google Drive URLs to try:', imageUrls);
-                }
-            }
+                    let width = img.naturalWidth || img.width;
+                    let height = img.naturalHeight || img.height;
 
-            try {
-                // Try fetch first with all URL variants
-                for (const tryUrl of imageUrls) {
-                    try {
-                        const response = await Promise.race([
-                            fetch(tryUrl, { mode: 'no-cors' }), // Try no-cors mode
-                            new Promise((_, reject) => 
-                                setTimeout(() => reject(new Error('Fetch timeout')), 3000)
-                            )
-                        ]);
-
-                        if (response.ok || response.type === 'opaque') {
-                            try {
-                                const blob = await response.blob();
-                                const reader = new FileReader();
-                                
-                                const result = await new Promise((res, rej) => {
-                                    reader.onloadend = () => res(reader.result);
-                                    reader.onerror = () => rej(new Error('FileReader error'));
-                                    reader.readAsDataURL(blob);
-                                });
-                                
-                                if (result) {
-                                    console.log('Successfully loaded via fetch:', tryUrl);
-                                    resolve(result);
-                                    return;
-                                }
-                            } catch (blobError) {
-                                console.log('Blob processing failed:', blobError.message);
-                                continue;
-                            }
-                        }
-                    } catch (e) {
-                        console.log('Fetch attempt failed for:', tryUrl, e.message);
-                        continue;
+                    if (width > maxWidth) {
+                        height = (maxWidth / width) * height;
+                        width = maxWidth;
                     }
+                    if (height > maxHeight) {
+                        width = (maxHeight / height) * width;
+                        height = maxHeight;
+                    }
+
+                    canvas.width = width;
+                    canvas.height = height;
+
+                    const ctx = canvas.getContext('2d');
+                    ctx.fillStyle = '#f5f5f5';
+                    ctx.fillRect(0, 0, width, height);
+                    ctx.drawImage(img, 0, 0, width, height);
+
+                    resolve(canvas.toDataURL('image/jpeg', 0.85));
+                } catch (e) {
+                    console.error('Canvas error:', e);
+                    resolve(null);
                 }
-            } catch (fetchError) {
-                console.log('All fetch attempts failed:', fetchError.message);
-            }
+            };
 
-            // Fallback to Image() method - try all URLs
-            for (const tryUrl of imageUrls) {
-                const success = await new Promise((imgResolve) => {
-                    const img = new Image();
-                    img.crossOrigin = 'anonymous';
+            img.onerror = () => {
+                clearTimeout(timeoutId);
+                console.log('Image error:', imageUrl);
+                resolve(null);
+            };
 
-                    const imgTimeout = setTimeout(() => {
-                        console.log('Image timeout:', tryUrl);
-                        imgResolve(false);
-                    }, 3000);
-
-                    img.onload = () => {
-                        clearTimeout(imgTimeout);
-                        
-                        try {
-                            const canvas = document.createElement('canvas');
-                            const maxWidth = 300;
-                            const maxHeight = 220;
-
-                            let width = img.naturalWidth || img.width;
-                            let height = img.naturalHeight || img.height;
-
-                            if (width > maxWidth) {
-                                height = (maxWidth / width) * height;
-                                width = maxWidth;
-                            }
-                            if (height > maxHeight) {
-                                width = (maxHeight / height) * width;
-                                height = maxHeight;
-                            }
-
-                            canvas.width = width;
-                            canvas.height = height;
-
-                            const ctx = canvas.getContext('2d');
-                            ctx.fillStyle = '#f5f5f5';
-                            ctx.fillRect(0, 0, width, height);
-                            ctx.drawImage(img, 0, 0, width, height);
-
-                            const dataUrl = canvas.toDataURL('image/jpeg', 0.85);
-                            console.log('Successfully loaded via Image():', tryUrl);
-                            resolve(dataUrl);
-                            imgResolve(true);
-                        } catch (e) {
-                            console.error('Canvas error:', e);
-                            imgResolve(false);
-                        }
-                    };
-
-                    img.onerror = () => {
-                        clearTimeout(imgTimeout);
-                        console.log('Image error:', tryUrl);
-                        imgResolve(false);
-                    };
-
-                    img.src = tryUrl;
-                });
-
-                if (success) return;
-            }
-
-            // All attempts failed
-            console.error('All image loading attempts failed for:', url);
-            resolve(null);
+            img.src = imageUrl;
         });
     },
 
