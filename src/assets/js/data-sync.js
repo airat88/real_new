@@ -98,14 +98,17 @@ const DataSync = {
             return 0;
         };
 
-        // Generate stable ID from URL + ApartmentNo (to make unique per unit)
-        const url = getString('URL', 'url', 'Link');
-        const apartmentNo = getString('ApartmentNo', 'Unit', 'UnitNo');
-        const uniqueKey = url + '_' + apartmentNo + '_' + index;
-        const stableId = 'prop_' + this.hashCode(uniqueKey);
+        // Extract project code from ProjectTitle (e.g., "A100" from "A100 - ARARAT...")
+        const projectTitle = getString('ProjectTitle', 'Title', 'Name', 'Property');
+        const projectCodeMatch = projectTitle.match(/^([A-Z]+\d+)/);
+        const projectCode = projectCodeMatch ? projectCodeMatch[1] : 'PROP';
+        
+        // Generate ID: ProjectCode_ApartmentNo (e.g., A100_601)
+        const apartmentNo = getString('ApartmentNo', 'Unit', 'UnitNo', 'Apartment');
+        const stableId = apartmentNo ? `${projectCode}_${apartmentNo}` : `prop_${this.hashCode(projectTitle + index)}`;
 
         // Parse values
-        const title = getString('ProjectTitle', 'Title', 'Name', 'Property');
+        const title = projectTitle;
         const cleanPrice = getNumber('CleanPrice', 'Price', 'price');
 
         // Skip invalid entries
@@ -114,8 +117,12 @@ const DataSync = {
         }
 
         const totalArea = getNumber('TotalArea', 'Area', 'area', 'Size');
+        
+        // Parse coordinates (NEW!)
+        const latitude = parseFloat(getString('Latitude', 'lat', 'Lat'));
+        const longitude = parseFloat(getString('Longitude', 'lng', 'Lon', 'long'));
 
-        // Parse photos
+        // Parse photos (PhotoPaths or PhotoURLs)
         const photosStr = getString('PhotoURLs', 'PhotoPaths', 'Photos', 'Images');
         const photos = this.parsePhotos(photosStr);
 
@@ -138,6 +145,11 @@ const DataSync = {
             status: getString('PropertyStatus', 'Status', 'status'),
             location: getString('Location', 'City', 'Address', 'location'),
             district: getString('District', 'district'),
+            apartmentNo: apartmentNo,
+
+            // Coordinates (NEW!)
+            latitude: !isNaN(latitude) ? latitude : null,
+            longitude: !isNaN(longitude) ? longitude : null,
 
             // Rooms
             bedrooms: getNumber('Bedrooms', 'bedrooms', 'Beds'),
@@ -147,8 +159,9 @@ const DataSync = {
             area: totalArea,
             insideArea: getNumber('InsideArea', 'insideArea'),
             coveredVeranda: getNumber('CoveredVeranda', 'coveredVeranda'),
-            uncoveredVeranda: getNumber('Uncovered Veranda', 'UncoveredVeranda'),
+            uncoveredVeranda: getNumber('UncoveredVeranda', 'Uncovered Veranda', 'uncoveredVeranda'),
             basement: getNumber('Basement', 'basement'),
+            plot: getNumber('Plot', 'plot'),
 
             // Price
             price: getString('Price', 'price') || `€${cleanPrice.toLocaleString()}`,
@@ -160,7 +173,7 @@ const DataSync = {
             photos: photos.length > 0 ? photos : [
                 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'
             ],
-            url: url,
+            url: getString('URL', 'url', 'Link'),
 
             // Description
             features: getString('Features', 'Amenities', 'features'),
@@ -179,39 +192,55 @@ const DataSync = {
 
         const str = String(photosStr);
 
-        // Try multiple separators - the CSV might use different formats
-        // Common patterns: comma, semicolon, newline, pipe, or space between URLs
-        let urls = [];
+        // Try multiple separators
+        let paths = [];
 
         // Check if it's a JSON array
         if (str.startsWith('[')) {
             try {
-                urls = JSON.parse(str);
+                paths = JSON.parse(str);
             } catch (e) {
                 // Not valid JSON, continue with string parsing
             }
         }
 
-        if (urls.length === 0) {
-            // Split by common separators, but be careful with URLs that contain commas
-            // Google Drive URLs typically don't have commas, so split on comma is safe
-            urls = str
-                .split(/[\n|;]+|(?:,\s*(?=https?:))/)  // Split on newline, pipe, semicolon, or comma followed by http
-                .map(url => url.trim())
-                .filter(url => url);
+        if (paths.length === 0) {
+            // Split by common separators
+            // PhotoPaths use comma+space: ", "
+            paths = str
+                .split(/,\s*/)
+                .map(p => p.trim())
+                .filter(p => p);
         }
 
-        // Extract URLs from text (in case mixed with other content)
-        const extractedUrls = [];
-        urls.forEach(text => {
-            // Match full URLs including Google Drive
+        // Process each path/URL
+        const processedUrls = [];
+        
+        paths.forEach(text => {
+            // Skip if empty
+            if (!text) return;
+            
+            // Check if it's a local Google Drive path (/content/drive/...)
+            if (text.includes('/content/drive/') || text.startsWith('/')) {
+                // Extract filename from path
+                // Example: /content/drive/.../images.A100-01.jpg → images.A100-01.jpg
+                const filename = text.split('/').pop();
+                
+                // Try to extract file ID from filename if available
+                // For now, we'll skip local paths since we can't convert them
+                // User needs to populate PhotoURLs column with actual Drive URLs
+                console.log('Skipping local path (populate PhotoURLs column):', filename);
+                return;
+            }
+            
+            // Match HTTP/HTTPS URLs
             const urlMatches = text.match(/https?:\/\/[^\s,;|"'<>]+/g);
             if (urlMatches) {
-                extractedUrls.push(...urlMatches);
+                processedUrls.push(...urlMatches);
             }
         });
 
-        return extractedUrls
+        return processedUrls
             .map(url => this.convertToDirectUrl(url.trim()))
             .filter(url => url) // Remove nulls
             .slice(0, 10); // Limit to 10 photos
