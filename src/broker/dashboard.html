@@ -1,4 +1,4 @@
-<!DOCTYPE html>demo
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -234,47 +234,38 @@
                 .catch(err => console.log('SW failed:', err));
         }
 
-// ✅ ВСТАВИТЬ:
-function checkAuth() {
-    console.log('🔍 Dashboard checking auth...');
-    
-    const session = localStorage.getItem('broker_session');
-    console.log('Session from localStorage:', session);
-    
-    if (!session) {
-        console.log('❌ No session, redirecting to login');
-        window.location.href = 'login.html';
-        return false;
-    }
-    
-    try {
-        const userData = JSON.parse(session);
-        console.log('✅ Logged in as:', userData.email);
-        
-        // Update user info in sidebar
-        const userName = userData.email.split('@')[0];
-        const userNameEl = document.querySelector('.user-name');
-        if (userNameEl) {
-            userNameEl.textContent = userName;
-        }
-        
-        // Load dashboard data
-        loadDashboardData();
-        return true;
-        
-    } catch (e) {
-        console.error('❌ Invalid session:', e);
-        localStorage.removeItem('broker_session');
-        window.location.href = 'login.html';
-        return false;
-    }
-}
+        // Check authentication
+        async function checkAuth() {
+            if (!SupabaseClient.init()) {
+                window.location.href = 'login.html';
+                return;
+            }
 
-function logout() {
-    console.log('🚪 Logging out...');
-    localStorage.removeItem('broker_session');
-    window.location.href = 'login.html';
-}
+            const { data: { session } } = await SupabaseClient.client.auth.getSession();
+
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Update user info in sidebar
+            const userName = session.user.email.split('@')[0];
+            const userNameEl = document.querySelector('.user-name');
+            if (userNameEl) {
+                userNameEl.textContent = userName;
+            }
+
+            // Load dashboard data
+            loadDashboardData();
+        }
+
+        // Logout function
+        async function logout() {
+            if (SupabaseClient.client) {
+                await SupabaseClient.client.auth.signOut();
+            }
+            window.location.href = 'login.html';
+        }
 
         // Load dashboard data
         async function loadDashboardData() {
