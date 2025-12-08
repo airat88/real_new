@@ -236,36 +236,56 @@
 
         // Check authentication
         async function checkAuth() {
+            // Сначала проверяем localStorage (демо-режим)
+            const localStorageSession = localStorage.getItem('broker_session');
+            
+            if (localStorageSession) {
+                // Демо-режим: показываем данные без Supabase
+                const sessionData = JSON.parse(localStorageSession);
+                const userNameEl = document.querySelector('.user-name');
+                if (userNameEl) {
+                    userNameEl.textContent = sessionData.email.split('@')[0];
+                }
+                loadDemoDashboardData(); // Функция для демо-статистики
+                return;
+            }
+            
+            // Если нет localStorage, пробуем Supabase
             if (!SupabaseClient.init()) {
                 window.location.href = 'login.html';
                 return;
             }
-
+        
             const { data: { session } } = await SupabaseClient.client.auth.getSession();
-
+        
             if (!session) {
                 window.location.href = 'login.html';
                 return;
             }
-
-            // Update user info in sidebar
+        
+            // Реальный режим с Supabase
             const userName = session.user.email.split('@')[0];
             const userNameEl = document.querySelector('.user-name');
             if (userNameEl) {
                 userNameEl.textContent = userName;
             }
-
-            // Load dashboard data
-            loadDashboardData();
+        
+            loadDashboardData(); // Существующая функция с Supabase
         }
-
-        // Logout function
+        
         async function logout() {
+            // Удаляем оба варианта сессий
+            localStorage.removeItem('broker_session');
+            
             if (SupabaseClient.client) {
                 await SupabaseClient.client.auth.signOut();
             }
-            window.location.href = 'login.html';
-        }
+    
+    window.location.href = 'login.html';
+}
+    
+    window.location.href = 'login.html';
+}
 
         // Load dashboard data
         async function loadDashboardData() {
