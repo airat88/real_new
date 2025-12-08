@@ -5,8 +5,8 @@
 const SupabaseClient = {
     // Configuration
     config: {
-        url: 'https://pqvosxakhpkfyojmtofy.supabase.co',
-        anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxdm9zeGFraHBrZnlvam10b2Z5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4NTExMzEsImV4cCI6MjA4MDQyNzEzMX0.Ib7Q9slrhgZhX6rXi2FqpWP8jwYmtkncmLz9OZR_mRY'
+        url: 'https://prgngcwhnehifzrsiktq.supabase.co',
+        anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByZ25nY3dobmVoaWZ6cnNpa3RxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjEyODYsImV4cCI6MjA4MDU5NzI4Nn0.4sIeFKd7-r96hD2DzuUydajUktzuUCQcD1NKesbAVC0'
     },
 
     // Default broker ID for MVP (no auth)
