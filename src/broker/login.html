@@ -148,6 +148,16 @@
         .demo-info strong {
             color: var(--gray-800);
         }
+
+        .demo-info code {
+            background: white;
+            padding: 2px 6px;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Courier New', monospace;
+            font-size: 0.85em;
+            color: var(--gray-900);
+            border: 1px solid var(--gray-300);
+        }
     </style>
 </head>
 <body>
@@ -181,8 +191,8 @@
 
             <div class="demo-info">
                 <strong>Demo Account:</strong><br>
-                Email: <a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="2f4d5d40444a5d6f4a574e425f434a014c4042">[email&#160;protected]</a><br>
-                Password: demo123
+                Email: <code>broker@example.com</code><br>
+                Password: <code>demo123</code>
             </div>
 
             <div class="login-footer">
@@ -191,28 +201,26 @@
         </div>
     </div>
 
-    <!-- Supabase -->
-    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../assets/js/supabase-client.js"></script>
-
     <script>
+        // Demo accounts (no Supabase needed)
+        const DEMO_ACCOUNTS = {
+            'broker@example.com': 'demo123',
+            'admin@example.com': 'admin123'
+        };
+
         // Check if already logged in
-        async function checkAuth() {
-            if (!SupabaseClient.init()) return;
-
-            const { data: { session } } = await SupabaseClient.client.auth.getSession();
-
+        function checkAuth() {
+            const session = localStorage.getItem('broker_session');
             if (session) {
-                // Already logged in, redirect to dashboard
                 window.location.href = 'dashboard.html';
             }
         }
 
         // Handle login form submission
-        async function handleLogin(event) {
+        function handleLogin(event) {
             event.preventDefault();
 
-            const email = document.getElementById('email').value;
+            const email = document.getElementById('email').value.trim();
             const password = document.getElementById('password').value;
             const btn = document.getElementById('loginBtn');
             const errorEl = document.getElementById('errorMessage');
@@ -224,25 +232,41 @@
             btn.disabled = true;
             btn.textContent = 'Signing in...';
 
-            try {
-                if (!SupabaseClient.init()) {
-                    throw new Error('Failed to initialize Supabase');
+            // Simulate async delay
+            setTimeout(() => {
+                // Check credentials
+                if (DEMO_ACCOUNTS[email] && DEMO_ACCOUNTS[email] === password) {
+                    // Success!
+                    console.log('Login successful:', email);
+                    
+                    // Save session
+                    localStorage.setItem('broker_session', JSON.stringify({
+                        email: email,
+                        loginTime: new Date().toISOString()
+                    }));
+
+                    // Redirect to dashboard
+                    window.location.href = 'dashboard.html';
+
+                } else {
+                    // Error
+                    console.error('Login failed: Invalid credentials');
+                    errorEl.textContent = 'Invalid email or password. Try: broker@example.com / demo123';
+                    errorEl.classList.add('visible');
+                    
+                    // Re-enable button
+                    btn.disabled = false;
+                    btn.textContent = 'Sign In';
                 }
+            }, 500);
+        }
 
-                const { data, error } = await SupabaseClient.client.auth.signInWithPassword({
-                    email: email,
-                    password: password
-                });
+            btn.disabled = false;
+            btn.textContent = 'Sign In';
+        }
 
-                if (error) {
-                    throw error;
-                }
-
-                console.log('Login successful:', data);
-
-                // Redirect to dashboard
-                window.location.href = 'dashboard.html';
-
-            } catch (error) {
-                console.error('Login error:', error);
-                errorEl.textContent = error.message || 'Invalid email or passwo
+        // Initialize
+        checkAuth();
+    </script>
+</body>
+</html>
