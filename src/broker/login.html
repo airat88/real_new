@@ -191,8 +191,8 @@
 
             <div class="demo-info">
                 <strong>Demo Account:</strong><br>
-                Email: <code>broker@test.com</code><br>
-                Password: <code>Test123!</code>
+                Email: <code>broker@example.com</code><br>
+                Password: <code>demo123</code>
             </div>
 
             <div class="login-footer">
@@ -204,8 +204,8 @@
     <script>
         // Demo accounts (no Supabase needed)
         const DEMO_ACCOUNTS = {
-    'broker@test.com': 'Test123!',
-    'admin@example.com': 'admin123'
+            'broker@example.com': 'demo123',
+            'admin@example.com': 'admin123'
         };
 
         // Check if already logged in
@@ -261,7 +261,7 @@
                     console.log('Password entered:', password);
                     console.log('Expected password:', DEMO_ACCOUNTS[email]);
                     
-                    errorEl.textContent = 'Invalid email or password. Try: broker@test.com / Test123!';
+                    errorEl.textContent = 'Invalid email or password. Try: broker@example.com / demo123';
                     errorEl.style.display = 'block';
                     errorEl.classList.add('visible');
                     
