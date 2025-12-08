@@ -439,12 +439,7 @@
             return date.toLocaleDateString();
         }
 
-
-        //checkAuth();
-        
-        SupabaseClient.init();
-        loadDashboardData();
-
+        checkAuth();
 
         function openCreateModal() {
             document.getElementById('createModal').classList.add('modal-overlay--open');
