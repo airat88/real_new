@@ -225,8 +225,11 @@
             const btn = document.getElementById('loginBtn');
             const errorEl = document.getElementById('errorMessage');
 
+            console.log('Login attempt:', email); // Debug
+
             // Hide previous error
             errorEl.classList.remove('visible');
+            errorEl.style.display = 'none';
 
             // Disable button
             btn.disabled = true;
@@ -234,10 +237,13 @@
 
             // Simulate async delay
             setTimeout(() => {
+                console.log('Checking credentials...'); // Debug
+                console.log('Available accounts:', Object.keys(DEMO_ACCOUNTS)); // Debug
+                
                 // Check credentials
                 if (DEMO_ACCOUNTS[email] && DEMO_ACCOUNTS[email] === password) {
                     // Success!
-                    console.log('Login successful:', email);
+                    console.log('✅ Login successful:', email);
                     
                     // Save session
                     localStorage.setItem('broker_session', JSON.stringify({
@@ -250,8 +256,13 @@
 
                 } else {
                     // Error
-                    console.error('Login failed: Invalid credentials');
+                    console.error('❌ Login failed');
+                    console.log('Email entered:', email);
+                    console.log('Password entered:', password);
+                    console.log('Expected password:', DEMO_ACCOUNTS[email]);
+                    
                     errorEl.textContent = 'Invalid email or password. Try: broker@example.com / demo123';
+                    errorEl.style.display = 'block';
                     errorEl.classList.add('visible');
                     
                     // Re-enable button
@@ -259,10 +270,6 @@
                     btn.textContent = 'Sign In';
                 }
             }, 500);
-        }
-
-            btn.disabled = false;
-            btn.textContent = 'Sign In';
         }
 
         // Initialize

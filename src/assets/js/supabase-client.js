@@ -1,12 +1,12 @@
 /* ============================================
-   SUPABASE CLIENT - Database Integration
+   SUPABASE CLIENT - Database Integration + Auth
    ============================================ */
 
 const SupabaseClient = {
     // Configuration
     config: {
-        url: 'https://pqvosxakhpkfyojmtofy.supabase.co',
-        anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxdm9zeGFraHBrZnlvam10b2Z5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4NTExMzEsImV4cCI6MjA4MDQyNzEzMX0.Ib7Q9slrhgZhX6rXi2FqpWP8jwYmtkncmLz9OZR_mRY'
+        url: 'https://prgngcwhnehifzrsiktq.supabase.co',
+        anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByZ25nY3dobmVoaWZ6cnNpa3RxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjEyODYsImV4cCI6MjA4MDU5NzI4Nn0.4sIeFKd7-r96hD2DzuUydajUktzuUCQcD1NKesbAVC0'
     },
 
     // Default broker ID for MVP (no auth)
@@ -26,12 +26,293 @@ const SupabaseClient = {
 
         this.client = supabase.createClient(this.config.url, this.config.anonKey);
         this.initialized = true;
-        console.log('Supabase client initialized');
+        console.log('✅ Supabase client initialized');
         return true;
     },
 
     // ============================================
-    // SELECTIONS
+    // AUTHENTICATION (NEW!)
+    // ============================================
+
+    // Sign up new user
+    async signUp(email, password, metadata = {}) {
+        if (!this.init()) throw new Error('Supabase not initialized');
+
+        const { data, error } = await this.client.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+                data: {
+                    user_type: metadata.user_type || 'client',
+                    full_name: metadata.full_name || '',
+                    ...metadata
+                }
+            }
+        });
+
+        if (error) {
+            console.error('❌ Sign up error:', error);
+            throw error;
+        }
+
+        console.log('✅ User signed up:', data.user?.email);
+        return { data, error };
+    },
+
+    // Sign in existing user
+    async signIn(email, password) {
+        if (!this.init()) throw new Error('Supabase not initialized');
+
+        const { data, error } = await this.client.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        if (error) {
+            console.error('❌ Sign in error:', error);
+            throw error;
+        }
+
+        console.log('✅ User signed in:', data.user?.email);
+        return { data, error };
+    },
+
+    // Sign out current user
+    async signOut() {
+        if (!this.init()) throw new Error('Supabase not initialized');
+
+        const { error } = await this.client.auth.signOut();
+
+        if (error) {
+            console.error('❌ Sign out error:', error);
+            throw error;
+        }
+
+        console.log('✅ User signed out');
+        return { error };
+    },
+
+    // Get current user
+    async getUser() {
+        if (!this.init()) return null;
+
+        const { data: { user } } = await this.client.auth.getUser();
+        return user;
+    },
+
+    // Get current session
+    async getSession() {
+        if (!this.init()) return null;
+
+        const { data: { session } } = await this.client.auth.getSession();
+        return session;
+    },
+
+    // Get user profile
+    async getUserProfile(userId) {
+        if (!this.init()) return null;
+
+        const { data, error } = await this.client
+            .from('profiles')
+            .select('*')
+            .eq('id', userId)
+            .single();
+
+        if (error) {
+            console.error('Error fetching profile:', error);
+            return null;
+        }
+
+        return data;
+    },
+
+    // Update user profile
+    async updateProfile(userId, updates) {
+        if (!this.init()) throw new Error('Supabase not initialized');
+
+        const { data, error } = await this.client
+            .from('profiles')
+            .update(updates)
+            .eq('id', userId)
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Error updating profile:', error);
+            throw error;
+        }
+
+        console.log('✅ Profile updated');
+        return data;
+    },
+
+    // Check if user is authenticated
+    async isAuthenticated() {
+        const session = await this.getSession();
+        return !!session;
+    },
+
+    // Listen to auth state changes
+    onAuthStateChange(callback) {
+        if (!this.init()) return null;
+
+        return this.client.auth.onAuthStateChange((event, session) => {
+            console.log('Auth state changed:', event);
+            callback(event, session);
+        });
+    },
+
+    // ============================================
+    // PROPERTIES (NEW!)
+    // ============================================
+
+    // Get all properties
+    async getProperties(filters = {}) {
+        if (!this.init()) return [];
+
+        let query = this.client
+            .from('properties')
+            .select('*');
+
+        // Apply filters
+        if (filters.location) {
+            query = query.eq('location', filters.location);
+        }
+        if (filters.bedrooms) {
+            query = query.eq('bedrooms', filters.bedrooms);
+        }
+        if (filters.minPrice) {
+            query = query.gte('clean_price', filters.minPrice);
+        }
+        if (filters.maxPrice) {
+            query = query.lte('clean_price', filters.maxPrice);
+        }
+
+        query = query.order('created_at', { ascending: false });
+
+        const { data, error } = await query;
+
+        if (error) {
+            console.error('Error fetching properties:', error);
+            return [];
+        }
+
+        return data || [];
+    },
+
+    // Get property by ID
+    async getPropertyById(propertyId) {
+        if (!this.init()) return null;
+
+        const { data, error } = await this.client
+            .from('properties')
+            .select('*')
+            .eq('id', propertyId)
+            .single();
+
+        if (error) {
+            console.error('Error fetching property:', error);
+            return null;
+        }
+
+        return data;
+    },
+
+    // ============================================
+    // FAVORITES (NEW!)
+    // ============================================
+
+    // Add to favorites
+    async addFavorite(propertyId, notes = '') {
+        if (!this.init()) throw new Error('Supabase not initialized');
+
+        const user = await this.getUser();
+        if (!user) throw new Error('User not authenticated');
+
+        const { data, error } = await this.client
+            .from('favorites')
+            .insert({
+                user_id: user.id,
+                property_id: propertyId,
+                notes: notes
+            })
+            .select()
+            .single();
+
+        if (error) {
+            console.error('Error adding favorite:', error);
+            throw error;
+        }
+
+        console.log('✅ Added to favorites:', propertyId);
+        return data;
+    },
+
+    // Remove from favorites
+    async removeFavorite(propertyId) {
+        if (!this.init()) throw new Error('Supabase not initialized');
+
+        const user = await this.getUser();
+        if (!user) throw new Error('User not authenticated');
+
+        const { error } = await this.client
+            .from('favorites')
+            .delete()
+            .eq('user_id', user.id)
+            .eq('property_id', propertyId);
+
+        if (error) {
+            console.error('Error removing favorite:', error);
+            throw error;
+        }
+
+        console.log('✅ Removed from favorites:', propertyId);
+        return true;
+    },
+
+    // Get user's favorites
+    async getFavorites() {
+        if (!this.init()) return [];
+
+        const user = await this.getUser();
+        if (!user) return [];
+
+        const { data, error } = await this.client
+            .from('favorites')
+            .select(`
+                *,
+                properties (*)
+            `)
+            .eq('user_id', user.id)
+            .order('created_at', { ascending: false });
+
+        if (error) {
+            console.error('Error fetching favorites:', error);
+            return [];
+        }
+
+        return data || [];
+    },
+
+    // Check if property is favorited
+    async isFavorite(propertyId) {
+        if (!this.init()) return false;
+
+        const user = await this.getUser();
+        if (!user) return false;
+
+        const { data, error } = await this.client
+            .from('favorites')
+            .select('id')
+            .eq('user_id', user.id)
+            .eq('property_id', propertyId)
+            .single();
+
+        return !!data && !error;
+    },
+
+    // ============================================
+    // SELECTIONS (EXISTING)
     // ============================================
 
     // Create a new selection
@@ -156,7 +437,7 @@ const SupabaseClient = {
     },
 
     // ============================================
-    // REACTIONS
+    // REACTIONS (EXISTING)
     // ============================================
 
     // Save a reaction (like/dislike)
@@ -204,7 +485,7 @@ const SupabaseClient = {
     },
 
     // ============================================
-    // CLIENTS
+    // CLIENTS (EXISTING)
     // ============================================
 
     // Get all clients for this broker
@@ -265,7 +546,7 @@ const SupabaseClient = {
     },
 
     // ============================================
-    // HELPERS
+    // HELPERS (EXISTING)
     // ============================================
 
     // Generate random token for selection link
