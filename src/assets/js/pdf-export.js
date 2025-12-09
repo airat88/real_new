@@ -272,13 +272,6 @@ const PDFExport = {
             img.src = imageUrl;
         });
     },
-                console.log('Image error:', imageUrl);
-                resolve(null);
-            };
-
-            img.src = imageUrl;
-        });
-    },
 
     // Create placeholder image as base64
     createPlaceholderImage(text = 'No image', propertyInfo = null) {
