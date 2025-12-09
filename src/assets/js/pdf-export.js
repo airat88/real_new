@@ -220,7 +220,7 @@ const PDFExport = {
 
         return new Promise((resolve) => {
             const img = new Image();
-            img.crossOrigin = 'anonymous';
+            //img.crossOrigin = 'anonymous';
 
             const timeoutId = setTimeout(() => {
                 console.log('Image timeout:', imageUrl);
