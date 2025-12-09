@@ -234,204 +234,55 @@
                 .catch(err => console.log('SW failed:', err));
         }
 
-                // Функция для загрузки демо-данных (когда вошли через localStorage)
-        async function loadDemoDashboardData() {
-            try {
-                console.log('Loading demo dashboard data...');
-
-                // Загружаем данные из CSV (локальные)
-                await DataSync.autoSync();
-                const properties = DataSync.getProperties();
-
-                // Обновляем статистику
-                document.getElementById('statProperties').textContent = properties.length;
-                document.getElementById('statPropertiesChange').textContent = 'From CSV';
-                document.getElementById('statPropertiesChange').className = 'stat-card__change stat-card__change--positive';
-
-                // Демо-данные для селекций
-                const demoSelections = [
-                    {
-                        id: 1,
-                        name: "Luxury Villas in Limassol",
-                        created_at: "2025-12-05T10:30:00Z",
-                        total_properties: 8,
-                        status: "active",
-                        liked_count: 3,
-                        disliked_count: 1
-                    },
-                    {
-                        id: 2,
-                        name: "Apartments for John Smith",
-                        created_at: "2025-12-03T14:20:00Z",
-                        total_properties: 5,
-                        status: "completed",
-                        liked_count: 4,
-                        disliked_count: 0,
-                        completed_at: "2025-12-07T09:15:00Z"
-                    },
-                    {
-                        id: 3,
-                        name: "Seafront Properties Paphos",
-                        created_at: "2025-12-01T11:45:00Z",
-                        total_properties: 12,
-                        status: "active",
-                        liked_count: 7,
-                        disliked_count: 2
-                    }
-                ];
-                
-                // Обновляем статистику селекций
-                document.getElementById('statSelections').textContent = demoSelections.filter(s => s.status === 'active').length;
-                document.getElementById('statSelectionsChange').textContent = `${demoSelections.length} total`;
-                document.getElementById('statSelectionsChange').className = 'stat-card__change';
-                
-                // Рассчитываем демо-статистику
-                let totalProperties = 0;
-                let totalViewed = 0;
-                let totalLiked = 0;
-                let totalReacted = 0;
-                
-                demoSelections.forEach(s => {
-                    totalProperties += s.total_properties;
-                    totalViewed += Math.floor(s.total_properties * 0.7); // 70% просмотрено
-                    totalLiked += s.liked_count;
-                    totalReacted += s.liked_count + s.disliked_count;
-                });
-
-                const viewRate = Math.round((totalViewed / totalProperties) * 100);
-                const likeRate = totalReacted > 0 ? Math.round((totalLiked / totalReacted) * 100) : 0;
-
-                document.getElementById('statViewRate').textContent = viewRate + '%';
-                document.getElementById('statViewRateChange').textContent = `${totalViewed}/${totalProperties} viewed`;
-                document.getElementById('statViewRateChange').className = 'stat-card__change';
-
-                document.getElementById('statLikeRate').textContent = likeRate + '%';
-                document.getElementById('statLikeRateChange').textContent = `${totalLiked} liked`;
-                document.getElementById('statLikeRateChange').className = 'stat-card__change';
-
-                // Рендерим демо-селекции
-                renderRecentSelections(demoSelections.slice(0, 3));
-
-                // Рендерим демо-активность
-                await renderRecentActivity(demoSelections);
-
-                console.log('Demo data loaded successfully');
-
-            } catch (error) {
-                console.error('Failed to load demo dashboard data:', error);
-
-                // Показываем placeholder данные при ошибке
-                document.getElementById('statProperties').textContent = '0';
-                document.getElementById('statSelections').textContent = '0';
-                document.getElementById('statViewRate').textContent = '0%';
-                document.getElementById('statLikeRate').textContent = '0%';
-
-                const container = document.getElementById('recentSelectionsList');
-                container.innerHTML = `
-                    <div class="selection-item">
-                        <div class="selection-item__info">
-                            <div class="selection-item__name">No selections yet</div>
-                            <div class="selection-item__meta">
-                                <span>Click "New Selection" to create one</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-            }
-        }
-
         // Check authentication
-                async function checkAuth() {
-            console.log('Checking authentication...');
-                
-            // Сначала проверяем localStorage (демо-режим)
-            const localStorageSession = localStorage.getItem('broker_session');
-                
-            if (localStorageSession) {
-                console.log('Demo session found in localStorage');
-                
-                try {
-                    // Демо-режим: показываем данные без Supabase
-                    const sessionData = JSON.parse(localStorageSession);
-                    console.log('Session data:', sessionData);
-                    
-                    // Обновляем имя пользователя в сайдбаре
-                    const userNameEl = document.querySelector('.user-name');
-                    const userRoleEl = document.querySelector('.user-role');
-                    const userAvatarEl = document.querySelector('.user-avatar');
-                    
-                    if (userNameEl) {
-                        userNameEl.textContent = sessionData.email.split('@')[0];
-                    }
-                    if (userRoleEl) {
-                        userRoleEl.textContent = 'Demo Broker';
-                    }
-                    if (userAvatarEl) {
-                        // Генерируем инициалы из email
-                        const initials = sessionData.email.substring(0, 2).toUpperCase();
-                        userAvatarEl.textContent = initials;
-                    }
-                    
-                    // Загружаем демо-данные
-                    await loadDemoDashboardData();
-                    
-                    console.log('Demo authentication successful');
-                    return; // Выходим из функции, НЕ переходим к Supabase
-                    
-                } catch (error) {
-                    console.error('Error parsing localStorage session:', error);
-                    // Если ошибка в localStorage, пробуем Supabase
-                }
-            }
+        async function checkAuth() {
+            // Check localStorage session (demo accounts)
+            const session = localStorage.getItem('broker_session');
             
-            // Если нет localStorage, пробуем Supabase
-            console.log('No localStorage session, trying Supabase...');
-            
-            if (!SupabaseClient || !SupabaseClient.init || !SupabaseClient.init()) {
-                console.log('Supabase not initialized, redirecting to login');
+            if (!session) {
                 window.location.href = 'login.html';
                 return;
             }
-        
+
             try {
-                const { data: { session } } = await SupabaseClient.client.auth.getSession();
-                console.log('Supabase session:', session);
-            
-                if (!session) {
-                    console.log('No Supabase session, redirecting to login');
-                    window.location.href = 'login.html';
-                    return;
-                }
-            
-                // Реальный режим с Supabase
-                console.log('Supabase authentication successful');
-                const userName = session.user.email.split('@')[0];
+                const sessionData = JSON.parse(session);
+                
+                // Update user info in sidebar
+                const userName = sessionData.email.split('@')[0];
                 const userNameEl = document.querySelector('.user-name');
                 if (userNameEl) {
-                    userNameEl.textContent = userName;
+                    userNameEl.textContent = userName.charAt(0).toUpperCase() + userName.slice(1);
                 }
-            
-                loadDashboardData(); // Существующая функция с Supabase
-                
-            } catch (error) {
-                console.error('Supabase auth error:', error);
+            } catch (e) {
+                console.error('Invalid session data:', e);
+                localStorage.removeItem('broker_session');
                 window.location.href = 'login.html';
+                return;
             }
+
+            // Initialize Supabase for data operations (not auth)
+            SupabaseClient.init();
+
+            // Load dashboard data
+            loadDashboardData();
         }
 
+        // Logout function
         async function logout() {
-            // Удаляем оба варианта сессий
+            // Clear localStorage session
             localStorage.removeItem('broker_session');
-
+            
+            // Also sign out from Supabase if needed
             if (SupabaseClient.client) {
-                await SupabaseClient.client.auth.signOut();
+                try {
+                    await SupabaseClient.client.auth.signOut();
+                } catch (e) {
+                    console.log('Supabase signout skipped:', e);
+                }
             }
-    
-    window.location.href = 'login.html';
-}
-    
-    window.location.href = 'login.html';
-}
+            
+            window.location.href = 'login.html';
+        }
 
         // Load dashboard data
         async function loadDashboardData() {

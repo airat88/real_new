@@ -875,24 +875,41 @@
 
         // Check authentication
         async function checkAuth() {
-            if (!SupabaseClient.init()) {
-                window.location.href = 'login.html';
-                return;
-            }
-
-            const { data: { session } } = await SupabaseClient.client.auth.getSession();
-
+            // Check localStorage session (demo accounts)
+            const session = localStorage.getItem('broker_session');
+            
             if (!session) {
                 window.location.href = 'login.html';
                 return;
             }
+
+            try {
+                JSON.parse(session); // Validate session data
+            } catch (e) {
+                console.error('Invalid session data:', e);
+                localStorage.removeItem('broker_session');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Initialize Supabase for data operations (not auth)
+            SupabaseClient.init();
         }
 
         // Logout function
         async function logout() {
+            // Clear localStorage session
+            localStorage.removeItem('broker_session');
+            
+            // Also sign out from Supabase if needed
             if (SupabaseClient.client) {
-                await SupabaseClient.client.auth.signOut();
+                try {
+                    await SupabaseClient.client.auth.signOut();
+                } catch (e) {
+                    console.log('Supabase signout skipped:', e);
+                }
             }
+            
             window.location.href = 'login.html';
         }
 
