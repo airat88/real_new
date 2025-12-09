@@ -220,8 +220,8 @@ const PDFExport = {
 
         return new Promise((resolve) => {
             const img = new Image();
-            img.crossOrigin = 'anonymous';
-
+            
+            // Try without CORS first
             const timeoutId = setTimeout(() => {
                 console.log('Image timeout:', imageUrl);
                 resolve(null);
@@ -257,6 +257,7 @@ const PDFExport = {
                     resolve(canvas.toDataURL('image/jpeg', 0.85));
                 } catch (e) {
                     console.error('Canvas error:', e);
+                    // If canvas fails, try to return image data URL directly
                     resolve(null);
                 }
             };
@@ -267,118 +268,167 @@ const PDFExport = {
                 resolve(null);
             };
 
+            // Try loading without CORS first, then with CORS
+            img.src = imageUrl;
+        });
+    },
+                console.log('Image error:', imageUrl);
+                resolve(null);
+            };
+
             img.src = imageUrl;
         });
     },
 
     // Create placeholder image as base64
-    createPlaceholderImage(text = 'No image') {
+    createPlaceholderImage(text = 'No image', propertyInfo = null) {
         const canvas = document.createElement('canvas');
-        canvas.width = 220;
-        canvas.height = 160;
+        canvas.width = 300;
+        canvas.height = 220;
         const ctx = canvas.getContext('2d');
 
-        // Background
-        ctx.fillStyle = '#f3f4f6';
-        ctx.fillRect(0, 0, 220, 160);
+        // Gradient background
+        const gradient = ctx.createLinearGradient(0, 0, 300, 220);
+        gradient.addColorStop(0, '#f8fafc');
+        gradient.addColorStop(1, '#e2e8f0');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, 300, 220);
         
         // Border
-        ctx.strokeStyle = '#d1d5db';
+        ctx.strokeStyle = '#cbd5e1';
         ctx.lineWidth = 2;
-        ctx.strokeRect(0, 0, 220, 160);
+        ctx.strokeRect(0, 0, 300, 220);
 
-        // Icon (camera/image icon)
-        ctx.fillStyle = '#9ca3af';
-        ctx.font = 'bold 24px Arial';
-        ctx.textAlign = 'center';
-        ctx.textBaseline = 'middle';
-        ctx.fillText('📷', 110, 70);
+        if (propertyInfo) {
+            // Property icon at top
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('🏠', 150, 80);
 
-        // Text
-        ctx.fillStyle = '#6b7280';
-        ctx.font = '12px Arial';
-        ctx.fillText(text, 110, 100);
+            // Property ID/title
+            ctx.fillStyle = '#475569';
+            ctx.font = 'bold 16px Arial';
+            ctx.fillText(propertyInfo.id || 'Property', 150, 140);
+
+            // Location
+            if (propertyInfo.location) {
+                ctx.fillStyle = '#64748b';
+                ctx.font = '14px Arial';
+                ctx.fillText('📍 ' + propertyInfo.location, 150, 165);
+            }
+
+            // "Photo not available" text
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = 'italic 12px Arial';
+            ctx.fillText(text, 150, 195);
+        } else {
+            // Simple placeholder
+            ctx.fillStyle = '#94a3b8';
+            ctx.font = 'bold 48px Arial';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillText('📷', 150, 90);
+
+            ctx.fillStyle = '#64748b';
+            ctx.font = '14px Arial';
+            ctx.fillText(text, 150, 150);
+        }
 
         return canvas.toDataURL('image/png');
     },
 
-    // Generate static map image using OpenStreetMap
-    async generateStaticMap(lat, lng, zoom = 15, width = 400, height = 200) {
-        if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
-            return null;
+    // Create map placeholder with coordinates
+    createMapPlaceholder(lat, lng, width = 400, height = 180) {
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+
+        // Gradient background (light blue to purple)
+        const gradient = ctx.createLinearGradient(0, 0, width, height);
+        gradient.addColorStop(0, '#e0e7ff');
+        gradient.addColorStop(1, '#f3e8ff');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+        
+        // Grid pattern for map-like appearance
+        ctx.strokeStyle = 'rgba(100, 116, 139, 0.1)';
+        ctx.lineWidth = 1;
+        for (let i = 0; i < width; i += 40) {
+            ctx.beginPath();
+            ctx.moveTo(i, 0);
+            ctx.lineTo(i, height);
+            ctx.stroke();
+        }
+        for (let i = 0; i < height; i += 40) {
+            ctx.beginPath();
+            ctx.moveTo(0, i);
+            ctx.lineTo(width, i);
+            ctx.stroke();
         }
 
-        try {
-            // Use OpenStreetMap tiles to create a static map
-            const tileSize = 256;
-            const scale = Math.pow(2, zoom);
-            
-            // Calculate tile coordinates
-            const tileX = Math.floor((lng + 180) / 360 * scale);
-            const tileY = Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * scale);
-            
-            // Create canvas
-            const canvas = document.createElement('canvas');
-            canvas.width = width;
-            canvas.height = height;
-            const ctx = canvas.getContext('2d');
-            
-            // Fill background
-            ctx.fillStyle = '#e5e7eb';
-            ctx.fillRect(0, 0, width, height);
-            
-            // Load and draw tile
-            const tileUrl = `https://tile.openstreetmap.org/${zoom}/${tileX}/${tileY}.png`;
-            const tileImg = await this.loadImageAsBase64(tileUrl, 3000);
-            
-            if (tileImg) {
-                const img = new Image();
-                await new Promise((resolve) => {
-                    img.onload = () => {
-                        // Calculate position to center the marker
-                        const pixelX = ((lng + 180) / 360 * scale * tileSize) % tileSize;
-                        const pixelY = ((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * scale * tileSize) % tileSize;
-                        
-                        const offsetX = width / 2 - pixelX;
-                        const offsetY = height / 2 - pixelY;
-                        
-                        ctx.drawImage(img, offsetX, offsetY);
-                        resolve();
-                    };
-                    img.src = tileImg;
-                });
-            }
-            
-            // Draw marker at center
-            const centerX = width / 2;
-            const centerY = height / 2;
-            
-            // Marker pin (red circle with white border)
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 12, 0, 2 * Math.PI);
-            ctx.fillStyle = '#ef4444';
-            ctx.fill();
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 3;
-            ctx.stroke();
-            
-            // Inner dot
-            ctx.beginPath();
-            ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
-            ctx.fillStyle = '#ffffff';
-            ctx.fill();
-            
-            // Add border to map
-            ctx.strokeStyle = '#d1d5db';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(0, 0, width, height);
-            
-            return canvas.toDataURL('image/png');
-            
-        } catch (error) {
-            console.error('Error generating static map:', error);
-            return null;
-        }
+        // Center marker (red pin)
+        const centerX = width / 2;
+        const centerY = height / 2 - 20;
+        
+        // Marker shadow
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+        ctx.beginPath();
+        ctx.ellipse(centerX, centerY + 35, 15, 5, 0, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Marker pin
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 15, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Marker border
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
+        // Inner dot
+        ctx.fillStyle = '#ffffff';
+        ctx.beginPath();
+        ctx.arc(centerX, centerY, 6, 0, 2 * Math.PI);
+        ctx.fill();
+        
+        // Pin bottom part
+        ctx.fillStyle = '#ef4444';
+        ctx.beginPath();
+        ctx.moveTo(centerX - 8, centerY + 12);
+        ctx.lineTo(centerX, centerY + 28);
+        ctx.lineTo(centerX + 8, centerY + 12);
+        ctx.closePath();
+        ctx.fill();
+        
+        // Pin bottom border
+        ctx.strokeStyle = '#ffffff';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+
+        // Coordinates text at bottom
+        ctx.fillStyle = '#64748b';
+        ctx.font = 'bold 14px Arial';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        const coordText = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        ctx.fillText(coordText, centerX, height - 25);
+        
+        // "View on Map" text
+        ctx.fillStyle = '#6366f1';
+        ctx.font = '12px Arial';
+        ctx.fillText('📍 Location', centerX, height - 8);
+        
+        // Border
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 2;
+        ctx.strokeRect(0, 0, width, height);
+
+        return canvas.toDataURL('image/png');
     },
 
     // Get Google Maps URL
@@ -451,11 +501,14 @@ const PDFExport = {
         this.updateLoading('Loading images...', `0 / ${properties.length}`);
 
         try {
-            // Pre-load all images with timeout
-            const placeholderImg = this.createPlaceholderImage(this.t('noImage', lang));
-            
             const imagePromises = properties.map(async (prop, idx) => {
                 try {
+                    // Create personalized placeholder for this property
+                    const propertyPlaceholder = this.createPlaceholderImage(
+                        this.t('noImage', lang),
+                        { id: prop.id, location: prop.location }
+                    );
+
                     // Load main photo
                     const mainImg = await Promise.race([
                         this.loadImageAsBase64(prop.photos?.[0]),
@@ -479,14 +532,14 @@ const PDFExport = {
                     // Generate map if coordinates available
                     let mapImg = null;
                     if (prop.latitude && prop.longitude && !isNaN(prop.latitude) && !isNaN(prop.longitude)) {
-                        mapImg = await this.generateStaticMap(prop.latitude, prop.longitude, 14, 400, 200);
+                        mapImg = this.createMapPlaceholder(prop.latitude, prop.longitude, 400, 180);
                     }
                     
                     this.updateLoading('Loading images...', `${idx + 1} / ${properties.length}`);
                     
                     return { 
                         prop, 
-                        mainImg: mainImg || placeholderImg,
+                        mainImg: mainImg || propertyPlaceholder,
                         additionalPhotos,
                         mapImg,
                         googleMapsUrl: this.getGoogleMapsUrl(prop.latitude, prop.longitude)
@@ -494,9 +547,13 @@ const PDFExport = {
                 } catch (error) {
                     console.error('Error loading images for property:', prop.id, error);
                     this.updateLoading('Loading images...', `${idx + 1} / ${properties.length}`);
+                    const propertyPlaceholder = this.createPlaceholderImage(
+                        this.t('noImage', lang),
+                        { id: prop.id, location: prop.location }
+                    );
                     return { 
                         prop, 
-                        mainImg: placeholderImg,
+                        mainImg: propertyPlaceholder,
                         additionalPhotos: [],
                         mapImg: null,
                         googleMapsUrl: null
@@ -510,13 +567,20 @@ const PDFExport = {
                 new Promise((resolve) => {
                     setTimeout(() => {
                         console.log('Image loading timeout - using placeholders for remaining images');
-                        resolve(properties.map(prop => ({ 
-                            prop, 
-                            mainImg: placeholderImg,
-                            additionalPhotos: [],
-                            mapImg: null,
-                            googleMapsUrl: null
-                        })));
+                        resolve(properties.map(prop => {
+                            const propertyPlaceholder = this.createPlaceholderImage(
+                                this.t('noImage', lang),
+                                { id: prop.id, location: prop.location }
+                            );
+                            return {
+                                prop, 
+                                mainImg: propertyPlaceholder,
+                                additionalPhotos: [],
+                                mapImg: prop.latitude && prop.longitude ? 
+                                    this.createMapPlaceholder(prop.latitude, prop.longitude, 400, 180) : null,
+                                googleMapsUrl: this.getGoogleMapsUrl(prop.latitude, prop.longitude)
+                            };
+                        }));
                     }, 30000); // 30 seconds max total
                 })
             ]);
