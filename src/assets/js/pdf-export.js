@@ -41,7 +41,11 @@ const PDFExport = {
             vat: 'VAT',
             licenseNumber: 'License No.',
             realEstateBroker: 'Real Estate Broker',
-            propertyId: 'Property ID'
+            propertyId: 'Property ID',
+            mapLocation: 'Location Map',
+            viewOnMap: 'View on Google Maps',
+            coordinates: 'Coordinates',
+            photos: 'Photos'
         },
         ru: {
             title: 'Подборка недвижимости',
@@ -78,7 +82,11 @@ const PDFExport = {
             vat: 'НДС',
             licenseNumber: 'Лицензия №',
             realEstateBroker: 'Агентство недвижимости',
-            propertyId: 'ID объекта'
+            propertyId: 'ID объекта',
+            mapLocation: 'Карта расположения',
+            viewOnMap: 'Открыть на картах Google',
+            coordinates: 'Координаты',
+            photos: 'Фотографии'
         },
         el: {
             title: 'Επιλογή Ακινήτων',
@@ -115,7 +123,11 @@ const PDFExport = {
             vat: 'ΦΠΑ',
             licenseNumber: 'Αριθμός Άδειας',
             realEstateBroker: 'Μεσιτικό Γραφείο',
-            propertyId: 'ID Ακινήτου'
+            propertyId: 'ID Ακινήτου',
+            mapLocation: 'Χάρτης Τοποθεσίας',
+            viewOnMap: 'Προβολή στο Google Maps',
+            coordinates: 'Συντεταγμένες',
+            photos: 'Φωτογραφίες'
         }
     },
 
@@ -290,6 +302,91 @@ const PDFExport = {
         return canvas.toDataURL('image/png');
     },
 
+    // Generate static map image using OpenStreetMap
+    async generateStaticMap(lat, lng, zoom = 15, width = 400, height = 200) {
+        if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
+            return null;
+        }
+
+        try {
+            // Use OpenStreetMap tiles to create a static map
+            const tileSize = 256;
+            const scale = Math.pow(2, zoom);
+            
+            // Calculate tile coordinates
+            const tileX = Math.floor((lng + 180) / 360 * scale);
+            const tileY = Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * scale);
+            
+            // Create canvas
+            const canvas = document.createElement('canvas');
+            canvas.width = width;
+            canvas.height = height;
+            const ctx = canvas.getContext('2d');
+            
+            // Fill background
+            ctx.fillStyle = '#e5e7eb';
+            ctx.fillRect(0, 0, width, height);
+            
+            // Load and draw tile
+            const tileUrl = `https://tile.openstreetmap.org/${zoom}/${tileX}/${tileY}.png`;
+            const tileImg = await this.loadImageAsBase64(tileUrl, 3000);
+            
+            if (tileImg) {
+                const img = new Image();
+                await new Promise((resolve) => {
+                    img.onload = () => {
+                        // Calculate position to center the marker
+                        const pixelX = ((lng + 180) / 360 * scale * tileSize) % tileSize;
+                        const pixelY = ((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * scale * tileSize) % tileSize;
+                        
+                        const offsetX = width / 2 - pixelX;
+                        const offsetY = height / 2 - pixelY;
+                        
+                        ctx.drawImage(img, offsetX, offsetY);
+                        resolve();
+                    };
+                    img.src = tileImg;
+                });
+            }
+            
+            // Draw marker at center
+            const centerX = width / 2;
+            const centerY = height / 2;
+            
+            // Marker pin (red circle with white border)
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 12, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ef4444';
+            ctx.fill();
+            ctx.strokeStyle = '#ffffff';
+            ctx.lineWidth = 3;
+            ctx.stroke();
+            
+            // Inner dot
+            ctx.beginPath();
+            ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+            ctx.fillStyle = '#ffffff';
+            ctx.fill();
+            
+            // Add border to map
+            ctx.strokeStyle = '#d1d5db';
+            ctx.lineWidth = 2;
+            ctx.strokeRect(0, 0, width, height);
+            
+            return canvas.toDataURL('image/png');
+            
+        } catch (error) {
+            console.error('Error generating static map:', error);
+            return null;
+        }
+    },
+
+    // Get Google Maps URL
+    getGoogleMapsUrl(lat, lng) {
+        if (!lat || !lng || isNaN(lat) || isNaN(lng)) return null;
+        return `https://www.google.com/maps?q=${lat},${lng}`;
+    },
+
     // Show loading overlay
     showLoading(message = 'Generating PDF...') {
         const existing = document.getElementById('pdfLoading');
@@ -359,30 +456,68 @@ const PDFExport = {
             
             const imagePromises = properties.map(async (prop, idx) => {
                 try {
-                    // Load image with timeout (5 seconds per image)
-                    const img = await Promise.race([
+                    // Load main photo
+                    const mainImg = await Promise.race([
                         this.loadImageAsBase64(prop.photos?.[0]),
                         new Promise((resolve) => setTimeout(() => resolve(null), 5000))
                     ]);
                     
+                    // Load up to 3 additional photos
+                    const additionalPhotos = [];
+                    const photosToLoad = (prop.photos || []).slice(1, 4); // Get photos 1-3
+                    
+                    for (const photoUrl of photosToLoad) {
+                        const photo = await Promise.race([
+                            this.loadImageAsBase64(photoUrl),
+                            new Promise((resolve) => setTimeout(() => resolve(null), 3000))
+                        ]);
+                        if (photo) {
+                            additionalPhotos.push(photo);
+                        }
+                    }
+                    
+                    // Generate map if coordinates available
+                    let mapImg = null;
+                    if (prop.latitude && prop.longitude && !isNaN(prop.latitude) && !isNaN(prop.longitude)) {
+                        mapImg = await this.generateStaticMap(prop.latitude, prop.longitude, 14, 400, 200);
+                    }
+                    
                     this.updateLoading('Loading images...', `${idx + 1} / ${properties.length}`);
-                    return { prop, img: img || placeholderImg };
+                    
+                    return { 
+                        prop, 
+                        mainImg: mainImg || placeholderImg,
+                        additionalPhotos,
+                        mapImg,
+                        googleMapsUrl: this.getGoogleMapsUrl(prop.latitude, prop.longitude)
+                    };
                 } catch (error) {
-                    console.error('Error loading image for property:', prop.id, error);
+                    console.error('Error loading images for property:', prop.id, error);
                     this.updateLoading('Loading images...', `${idx + 1} / ${properties.length}`);
-                    return { prop, img: placeholderImg };
+                    return { 
+                        prop, 
+                        mainImg: placeholderImg,
+                        additionalPhotos: [],
+                        mapImg: null,
+                        googleMapsUrl: null
+                    };
                 }
             });
 
-            // Wait for all images with overall timeout (20 seconds max)
+            // Wait for all images with overall timeout (30 seconds max)
             const propertiesWithImages = await Promise.race([
                 Promise.all(imagePromises),
                 new Promise((resolve) => {
                     setTimeout(() => {
                         console.log('Image loading timeout - using placeholders for remaining images');
-                        // Return what we have so far, rest will be placeholders
-                        resolve(properties.map(prop => ({ prop, img: placeholderImg })));
-                    }, 20000); // 20 seconds max total
+                        resolve(properties.map(prop => ({ 
+                            prop, 
+                            mainImg: placeholderImg,
+                            additionalPhotos: [],
+                            mapImg: null,
+                            googleMapsUrl: null
+                        })));
+                    }, 30000); // 30 seconds max total
                 })
             ]);
 
@@ -430,18 +565,19 @@ const PDFExport = {
             }
 
             // Properties
-            propertiesWithImages.forEach(({ prop, img }, index) => {
+            propertiesWithImages.forEach(({ prop, mainImg, additionalPhotos, mapImg, googleMapsUrl }, index) => {
                 const bedText = prop.bedrooms === 0 ? this.t('studio', lang) : `${prop.bedrooms} ${this.t('bed', lang)}`;
                 const areaText = prop.area ? `${prop.area} ${this.t('sqm', lang)}` : '';
                 const stats = [bedText, areaText, prop.type].filter(Boolean).join(' • ');
 
+                // Main property card with photo
                 const propertyTable = {
                     table: {
                         widths: [120, '*'],
                         body: [[
                             // Image column
                             {
-                                image: img,
+                                image: mainImg,
                                 width: 110,
                                 height: 80,
                                 margin: [0, 5, 0, 5]
@@ -498,6 +634,78 @@ const PDFExport = {
                 };
 
                 content.push(propertyTable);
+
+                // Additional photos section (if available)
+                if (additionalPhotos && additionalPhotos.length > 0) {
+                    const photoColumns = [];
+                    additionalPhotos.forEach(photo => {
+                        photoColumns.push({
+                            image: photo,
+                            width: additionalPhotos.length === 1 ? 150 : (additionalPhotos.length === 2 ? 120 : 100),
+                            margin: [0, 0, 5, 0]
+                        });
+                    });
+
+                    content.push({
+                        columns: photoColumns,
+                        margin: [0, 0, 0, 10]
+                    });
+                }
+
+                // Map section (if coordinates available)
+                if (mapImg || googleMapsUrl) {
+                    const mapContent = [];
+                    
+                    mapContent.push({
+                        text: `📍 ${this.t('mapLocation', lang)}`,
+                        style: 'mapTitle',
+                        margin: [0, 5, 0, 5]
+                    });
+
+                    if (mapImg) {
+                        mapContent.push({
+                            image: mapImg,
+                            width: 400,
+                            margin: [0, 0, 0, 5]
+                        });
+                    }
+
+                    if (googleMapsUrl) {
+                        mapContent.push({
+                            text: this.t('viewOnMap', lang),
+                            link: googleMapsUrl,
+                            style: 'mapLink',
+                            margin: [0, 0, 0, 5]
+                        });
+                    }
+
+                    if (prop.latitude && prop.longitude) {
+                        mapContent.push({
+                            text: `${this.t('coordinates', lang)}: ${prop.latitude.toFixed(5)}, ${prop.longitude.toFixed(5)}`,
+                            style: 'coordinates',
+                            margin: [0, 2, 0, 0]
+                        });
+                    }
+
+                    content.push({
+                        stack: mapContent,
+                        margin: [0, 0, 0, 15]
+                    });
+                }
+
+                // Separator between properties (except last one)
+                if (index < propertiesWithImages.length - 1) {
+                    content.push({
+                        canvas: [{
+                            type: 'line',
+                            x1: 0, y1: 0,
+                            x2: 515, y2: 0,
+                            lineWidth: 1,
+                            lineColor: '#e5e7eb'
+                        }],
+                        margin: [0, 10, 0, 15]
+                    });
+                }
             });
 
             // Document definition
@@ -544,6 +752,21 @@ const PDFExport = {
                     propertyLink: {
                         fontSize: 8,
                         color: '#6366f1'
+                    },
+                    mapTitle: {
+                        fontSize: 10,
+                        bold: true,
+                        color: '#374151'
+                    },
+                    mapLink: {
+                        fontSize: 8,
+                        color: '#6366f1',
+                        decoration: 'underline'
+                    },
+                    coordinates: {
+                        fontSize: 7,
+                        color: '#9ca3af',
+                        italics: true
                     }
                 },
                 defaultStyle: {
