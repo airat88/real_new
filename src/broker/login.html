@@ -187,13 +187,12 @@
                 </button>
             </form>
 
-            <div class="divider">Don't have an account?</div>
+            <div class="divider">or</div>
 
             <div class="demo-info">
-                <strong>New User?</strong><br>
-                <a href="register.html" style="color: var(--primary); text-decoration: none; font-weight: 600;">
-                    Create a new account →
-                </a>
+                <strong>Demo Account:</strong><br>
+                Email: <code>broker@example.com</code><br>
+                Password: <code>demo123</code>
             </div>
 
             <div class="login-footer">
@@ -202,19 +201,23 @@
         </div>
     </div>
 
-    <!-- Supabase -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <script src="../assets/js/supabase-client.js"></script>
-    <script src="../assets/js/auth-helper.js"></script>
-
     <script>
+        // Demo accounts (no Supabase needed)
+        const DEMO_ACCOUNTS = {
+            'broker@example.com': 'demo123',
+            'admin@example.com': 'admin123'
+        };
+
         // Check if already logged in
-        async function checkAuth() {
-            await AuthHelper.requireGuest();
+        function checkAuth() {
+            const session = localStorage.getItem('broker_session');
+            if (session) {
+                window.location.href = 'dashboard.html';
+            }
         }
 
         // Handle login form submission
-        async function handleLogin(event) {
+        function handleLogin(event) {
             event.preventDefault();
 
             const email = document.getElementById('email').value.trim();
@@ -222,7 +225,7 @@
             const btn = document.getElementById('loginBtn');
             const errorEl = document.getElementById('errorMessage');
 
-            console.log('Login attempt:', email);
+            console.log('Login attempt:', email); // Debug
 
             // Hide previous error
             errorEl.classList.remove('visible');
@@ -232,17 +235,33 @@
             btn.disabled = true;
             btn.textContent = 'Signing in...';
 
-            try {
-                // Use Supabase Auth
-                const result = await AuthHelper.handleLogin(email, password);
+            // Simulate async delay
+            setTimeout(() => {
+                console.log('Checking credentials...'); // Debug
+                console.log('Available accounts:', Object.keys(DEMO_ACCOUNTS)); // Debug
+                
+                // Check credentials
+                if (DEMO_ACCOUNTS[email] && DEMO_ACCOUNTS[email] === password) {
+                    // Success!
+                    console.log('✅ Login successful:', email);
+                    
+                    // Save session
+                    localStorage.setItem('broker_session', JSON.stringify({
+                        email: email,
+                        loginTime: new Date().toISOString()
+                    }));
 
-                if (result.success) {
-                    console.log('✅ Login successful');
                     // Redirect to dashboard
-                    window.location.href = 'properties.html';
+                    window.location.href = 'dashboard.html';
+
                 } else {
-                    // Show error
-                    errorEl.textContent = result.error;
+                    // Error
+                    console.error('❌ Login failed');
+                    console.log('Email entered:', email);
+                    console.log('Password entered:', password);
+                    console.log('Expected password:', DEMO_ACCOUNTS[email]);
+                    
+                    errorEl.textContent = 'Invalid email or password. Try: broker@example.com / demo123';
                     errorEl.style.display = 'block';
                     errorEl.classList.add('visible');
                     
@@ -250,16 +269,7 @@
                     btn.disabled = false;
                     btn.textContent = 'Sign In';
                 }
-            } catch (error) {
-                console.error('❌ Login error:', error);
-                errorEl.textContent = 'An error occurred. Please try again.';
-                errorEl.style.display = 'block';
-                errorEl.classList.add('visible');
-                
-                // Re-enable button
-                btn.disabled = false;
-                btn.textContent = 'Sign In';
-            }
+            }, 500);
         }
 
         // Initialize

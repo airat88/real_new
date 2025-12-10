@@ -225,7 +225,6 @@
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../assets/js/data-sync.js"></script>
     <script src="../assets/js/supabase-client.js"></script>
-    <script src="../assets/js/auth-helper.js"></script>
 
     <script>
         // Register Service Worker
@@ -237,38 +236,31 @@
 
         // Check authentication
         async function checkAuth() {
-            // Require authentication using AuthHelper
-            const authenticated = await AuthHelper.requireAuth('login.html');
+            // Check localStorage session (demo accounts)
+            const session = localStorage.getItem('broker_session');
             
-            if (!authenticated) return;
-
-            // Get current user info
-            const userInfo = await AuthHelper.getCurrentUserInfo();
-            
-            if (userInfo) {
-                // Update user info in sidebar
-                const userNameEl = document.querySelector('.user-name');
-                const userRoleEl = document.querySelector('.user-role');
-                const userAvatarEl = document.querySelector('.user-avatar');
-                
-                if (userNameEl) {
-                    userNameEl.textContent = userInfo.name || userInfo.email.split('@')[0];
-                }
-                if (userRoleEl) {
-                    userRoleEl.textContent = userInfo.role === 'broker' ? 'Broker' : 'Client';
-                }
-                if (userAvatarEl) {
-                    const initials = (userInfo.name || userInfo.email)
-                        .split(' ')
-                        .map(n => n[0])
-                        .join('')
-                        .toUpperCase()
-                        .slice(0, 2);
-                    userAvatarEl.textContent = initials;
-                }
+            if (!session) {
+                window.location.href = 'login.html';
+                return;
             }
 
-            // Initialize Supabase for data operations
+            try {
+                const sessionData = JSON.parse(session);
+                
+                // Update user info in sidebar
+                const userName = sessionData.email.split('@')[0];
+                const userNameEl = document.querySelector('.user-name');
+                if (userNameEl) {
+                    userNameEl.textContent = userName.charAt(0).toUpperCase() + userName.slice(1);
+                }
+            } catch (e) {
+                console.error('Invalid session data:', e);
+                localStorage.removeItem('broker_session');
+                window.location.href = 'login.html';
+                return;
+            }
+
+            // Initialize Supabase for data operations (not auth)
             SupabaseClient.init();
 
             // Load dashboard data
@@ -277,7 +269,19 @@
 
         // Logout function
         async function logout() {
-            await AuthHelper.logout('Are you sure you want to sign out?');
+            // Clear localStorage session
+            localStorage.removeItem('broker_session');
+            
+            // Also sign out from Supabase if needed
+            if (SupabaseClient.client) {
+                try {
+                    await SupabaseClient.client.auth.signOut();
+                } catch (e) {
+                    console.log('Supabase signout skipped:', e);
+                }
+            }
+            
+            window.location.href = 'login.html';
         }
 
         // Load dashboard data
