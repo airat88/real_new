@@ -5,8 +5,8 @@
 const SupabaseClient = {
     // Configuration
     config: {
-        url: 'https://pqvosxakhpkfyojmtofy.supabase.co',
-        anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InBxdm9zeGFraHBrZnlvam10b2Z5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjQ4NTExMzEsImV4cCI6MjA4MDQyNzEzMX0.Ib7Q9slrhgZhX6rXi2FqpWP8jwYmtkncmLz9OZR_mRY'
+        url: 'https://prgngcwhnehifzrsiktq.supabase.co',
+        anonKey: 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InByZ25nY3dobmVoaWZ6cnNpa3RxIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjUwMjEyODYsImV4cCI6MjA4MDU5NzI4Nn0.4sIeFKd7-r96hD2DzuUydajUktzuUCQcD1NKesbAVC0'
     },
 
     // Default broker ID for MVP (no auth)
@@ -28,6 +28,154 @@ const SupabaseClient = {
         this.initialized = true;
         console.log('Supabase client initialized');
         return true;
+    },
+
+    // ============================================
+    // AUTHENTICATION
+    // ============================================
+
+    // Sign up new user (broker or client)
+    async signUp(email, password, metadata = {}) {
+        if (!this.init()) throw new Error('Supabase not initialized');
+
+        const { data, error } = await this.client.auth.signUp({
+            email: email,
+            password: password,
+            options: {
+                data: metadata // { role: 'broker' or 'client', name, phone, etc }
+            }
+        });
+
+        if (error) {
+            console.error('Sign up error:', error);
+            throw error;
+        }
+
+        console.log('User signed up:', data);
+        return data;
+    },
+
+    // Sign in existing user
+    async signIn(email, password) {
+        if (!this.init()) throw new Error('Supabase not initialized');
+
+        const { data, error } = await this.client.auth.signInWithPassword({
+            email: email,
+            password: password
+        });
+
+        if (error) {
+            console.error('Sign in error:', error);
+            throw error;
+        }
+
+        console.log('User signed in:', data);
+        return data;
+    },
+
+    // Sign out current user
+    async signOut() {
+        if (!this.init()) throw new Error('Supabase not initialized');
+
+        const { error } = await this.client.auth.signOut();
+
+        if (error) {
+            console.error('Sign out error:', error);
+            throw error;
+        }
+
+        console.log('User signed out');
+        return true;
+    },
+
+    // Get current session
+    async getSession() {
+        if (!this.init()) return null;
+
+        const { data, error } = await this.client.auth.getSession();
+
+        if (error) {
+            console.error('Get session error:', error);
+            return null;
+        }
+
+        return data.session;
+    },
+
+    // Get current user
+    async getUser() {
+        if (!this.init()) return null;
+
+        const { data, error } = await this.client.auth.getUser();
+
+        if (error) {
+            console.error('Get user error:', error);
+            return null;
+        }
+
+        return data.user;
+    },
+
+    // Listen to auth state changes
+    onAuthStateChange(callback) {
+        if (!this.init()) return null;
+
+        const { data } = this.client.auth.onAuthStateChange((event, session) => {
+            console.log('Auth state changed:', event, session?.user?.email);
+            callback(event, session);
+        });
+
+        return data; // returns { subscription } object
+    },
+
+    // Reset password request
+    async resetPassword(email) {
+        if (!this.init()) throw new Error('Supabase not initialized');
+
+        const { data, error } = await this.client.auth.resetPasswordForEmail(email, {
+            redirectTo: `${window.location.origin}/src/broker/reset-password.html`
+        });
+
+        if (error) {
+            console.error('Reset password error:', error);
+            throw error;
+        }
+
+        return data;
+    },
+
+    // Update user password
+    async updatePassword(newPassword) {
+        if (!this.init()) throw new Error('Supabase not initialized');
+
+        const { data, error } = await this.client.auth.updateUser({
+            password: newPassword
+        });
+
+        if (error) {
+            console.error('Update password error:', error);
+            throw error;
+        }
+
+        return data;
+    },
+
+    // Check if user is authenticated
+    async isAuthenticated() {
+        const session = await this.getSession();
+        return session !== null;
+    },
+
+    // Get user ID (helper)
+    async getUserId() {
+        const user = await this.getUser();
+        return user?.id || null;
+    },
+
+    // Get user role from metadata
+    async getUserRole() {
+        const user = await this.getUser();
+        return user?.user_metadata?.role || null;
     },
 
     // ============================================
