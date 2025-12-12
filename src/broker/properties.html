@@ -666,7 +666,7 @@
                         <div class="filter-group">
                             <label class="filter-group__label">Delivery Date</label>
                             <div class="delivery-filter">
-                                <select class="input" id="deliveryFilter" onchange="applyFilters()">
+                                <select class="input" id="deliveryFilter">
                                     <option value="">All delivery dates</option>
                                     <option value="delivered">Already delivered</option>
                                     <option value="3months">Within 3 months</option>
@@ -693,10 +693,10 @@
                     <div style="margin-top: var(--space-md); display: flex; gap: var(--space-md); align-items: center;">
                         <label class="filter-group__label" style="margin: 0;">VAT Options:</label>
                         <label class="checkbox-filter">
-                            <input type="checkbox" id="showWithVAT" checked onchange="applyFilters()"> Show prices incl. VAT
+                            <input type="checkbox" id="showWithVAT" checked> Show prices incl. VAT
                         </label>
                         <label class="checkbox-filter">
-                            <input type="checkbox" id="vatExemptOnly" onchange="applyFilters()"> VAT exempt only
+                            <input type="checkbox" id="vatExemptOnly"> VAT exempt only
                         </label>
                     </div>
 
@@ -2058,6 +2058,13 @@
         document.getElementById('hasPool').addEventListener('change', () => { updateActiveFiltersCount(); renderProperties(); });
         document.getElementById('hasParking').addEventListener('change', () => { updateActiveFiltersCount(); renderProperties(); });
         document.getElementById('hasSeaView').addEventListener('change', () => { updateActiveFiltersCount(); renderProperties(); });
+
+        // Delivery date filter
+        document.getElementById('deliveryFilter').addEventListener('change', () => { updateActiveFiltersCount(); renderProperties(); });
+        
+        // VAT filters
+        document.getElementById('showWithVAT').addEventListener('change', () => { updateActiveFiltersCount(); renderProperties(); });
+        document.getElementById('vatExemptOnly').addEventListener('change', () => { updateActiveFiltersCount(); renderProperties(); });
 
         // Initialize bedroom chips
         initBedroomChips();
