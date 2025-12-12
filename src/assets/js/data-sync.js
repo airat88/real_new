@@ -98,6 +98,136 @@ const DataSync = {
             return 0;
         };
 
+        // Parse VAT information from price string
+        const parseVATInfo = (priceStr) => {
+            const result = {
+                hasVAT: false,
+                vatRate: 0,
+                priceWithVAT: 0,
+                priceWithoutVAT: 0,
+                isVATExempt: false
+            };
+
+            if (!priceStr) return result;
+
+            const str = String(priceStr).toLowerCase();
+            
+            // Check if price includes "+ VAT" or "VAT" mention
+            result.hasVAT = str.includes('vat') || str.includes('+ vat');
+            
+            // Extract numeric price
+            const cleanPrice = parseFloat(str.replace(/[€$£\s,+vat]/gi, ''));
+            
+            if (isNaN(cleanPrice)) return result;
+
+            // Determine VAT status based on price string and property status
+            // VAT exempt: resale or pre-2004 properties
+            const status = getString('PropertyStatus', 'Status', 'status').toLowerCase();
+            
+            if (str.includes('vat exempt') || status.includes('resale') || 
+                status.includes('re-sale') || status.includes('secondary market')) {
+                result.isVATExempt = true;
+                result.priceWithVAT = cleanPrice;
+                result.priceWithoutVAT = cleanPrice;
+                result.vatRate = 0;
+            } 
+            // If "+ VAT" is mentioned, assume it's price without VAT
+            else if (str.includes('+ vat')) {
+                result.priceWithoutVAT = cleanPrice;
+                // Default to 19% VAT for new property (can be 5% in some cases)
+                result.vatRate = 19;
+                result.priceWithVAT = cleanPrice * (1 + result.vatRate / 100);
+            }
+            // If just "VAT" is mentioned but no "+", likely price includes VAT
+            else if (str.includes('vat')) {
+                result.priceWithVAT = cleanPrice;
+                result.vatRate = 19; // Assume 19%
+                result.priceWithoutVAT = cleanPrice / (1 + result.vatRate / 100);
+            }
+            // No VAT mention - assume price is as-is
+            else {
+                result.priceWithVAT = cleanPrice;
+                result.priceWithoutVAT = cleanPrice;
+                result.vatRate = 0;
+            }
+
+            return result;
+        };
+
+        // Parse delivery date from status string
+        const parseDeliveryDate = (statusStr) => {
+            if (!statusStr) return null;
+
+            const str = String(statusStr);
+            
+            // Already delivered
+            if (/delivered|completed|ready/i.test(str)) {
+                return { status: 'delivered', text: 'Delivered', date: new Date() };
+            }
+
+            // Extract months pattern: "X months", "up to X months", "X-Y months"
+            const monthsMatch = str.match(/(\d+)[\s-]*(?:to[\s-]*)?(\d+)?[\s-]*months?/i);
+            if (monthsMatch) {
+                const months = parseInt(monthsMatch[2] || monthsMatch[1]);
+                const deliveryDate = new Date();
+                deliveryDate.setMonth(deliveryDate.getMonth() + months);
+                return {
+                    status: 'scheduled',
+                    text: `${months} months`,
+                    date: deliveryDate,
+                    monthsRemaining: months
+                };
+            }
+
+            // Extract specific date: "December 2025", "Q4 2025"
+            const dateMatch = str.match(/(January|February|March|April|May|June|July|August|September|October|November|December)\s+(\d{4})/i);
+            if (dateMatch) {
+                const monthNames = ['january', 'february', 'march', 'april', 'may', 'june',
+                                  'july', 'august', 'september', 'october', 'november', 'december'];
+                const month = monthNames.indexOf(dateMatch[1].toLowerCase());
+                const year = parseInt(dateMatch[2]);
+                const deliveryDate = new Date(year, month, 1);
+                return {
+                    status: 'scheduled',
+                    text: `${dateMatch[1]} ${year}`,
+                    date: deliveryDate
+                };
+            }
+
+            // Extract quarter: "Q1 2025", "Q2 2026"
+            const quarterMatch = str.match(/Q([1-4])\s+(\d{4})/i);
+            if (quarterMatch) {
+                const quarter = parseInt(quarterMatch[1]);
+                const year = parseInt(quarterMatch[2]);
+                const month = (quarter - 1) * 3; // Q1=0, Q2=3, Q3=6, Q4=9
+                const deliveryDate = new Date(year, month, 1);
+                return {
+                    status: 'scheduled',
+                    text: `Q${quarter} ${year}`,
+                    date: deliveryDate
+                };
+            }
+
+            // Extract year only: "2025", "2026"
+            const yearMatch = str.match(/\b(20\d{2})\b/);
+            if (yearMatch) {
+                const year = parseInt(yearMatch[1]);
+                const deliveryDate = new Date(year, 0, 1);
+                return {
+                    status: 'scheduled',
+                    text: `${year}`,
+                    date: deliveryDate
+                };
+            }
+
+            // Unknown/unparseable
+            return {
+                status: 'unknown',
+                text: str,
+                date: null
+            };
+        };
+
         // Extract project code from ProjectTitle (e.g., "A100" from "A100 - ARARAT...")
         const projectTitle = getString('ProjectTitle', 'Title', 'Name', 'Property');
         const projectCodeMatch = projectTitle.match(/^([A-Z]+\d+)/);
@@ -122,6 +252,14 @@ const DataSync = {
         const latitude = parseFloat(getString('Latitude', 'lat', 'Lat'));
         const longitude = parseFloat(getString('Longitude', 'lng', 'Lon', 'long'));
 
+        // Parse VAT information
+        const priceString = getString('Price', 'price');
+        const vatInfo = parseVATInfo(priceString);
+
+        // Parse delivery/status information
+        const statusString = getString('PropertyStatus', 'Status', 'status');
+        const deliveryInfo = parseDeliveryDate(statusString);
+
         // Parse photos (PhotoPaths or PhotoURLs)
         const photosStr = getString('PhotoURLs', 'PhotoPaths', 'Photos', 'Images');
         const photos = this.parsePhotos(photosStr);
@@ -129,6 +267,10 @@ const DataSync = {
         // Debug first few properties
         if (index <= 3) {
             console.log(`DEBUG Property #${index}:`);
+            console.log('  - Price string:', priceString);
+            console.log('  - VAT info:', vatInfo);
+            console.log('  - Status string:', statusString);
+            console.log('  - Delivery info:', deliveryInfo);
             console.log('  - PhotoURLs raw (first 300 chars):', photosStr?.substring(0, 300));
             console.log('  - Photos parsed:', photos.length, photos);
         }
@@ -142,7 +284,7 @@ const DataSync = {
             // Main fields
             title: title || 'Untitled Property',
             type: getString('ApartmentType', 'Type', 'PropertyType', 'type'),
-            status: getString('PropertyStatus', 'Status', 'status'),
+            status: statusString,
             location: getString('Location', 'City', 'Address', 'location'),
             district: getString('District', 'district'),
             apartmentNo: apartmentNo,
@@ -163,11 +305,22 @@ const DataSync = {
             basement: getNumber('Basement', 'basement'),
             plot: getNumber('Plot', 'plot'),
 
-            // Price
-            price: getString('Price', 'price') || `€${cleanPrice.toLocaleString()}`,
-            cleanPrice: cleanPrice,
-            priceSqm: getNumber('Pricepersqm', 'PricePerSqm') || (totalArea > 0 ? Math.round(cleanPrice / totalArea) : 0),
+            // Price - now with VAT info
+            price: priceString || `€${vatInfo.priceWithVAT.toLocaleString()}`,
+            cleanPrice: vatInfo.priceWithVAT || getNumber('CleanPrice', 'Price', 'price'),
+            priceWithoutVAT: vatInfo.priceWithoutVAT,
+            priceWithVAT: vatInfo.priceWithVAT,
+            hasVAT: vatInfo.hasVAT,
+            vatRate: vatInfo.vatRate,
+            isVATExempt: vatInfo.isVATExempt,
+            priceSqm: getNumber('Pricepersqm', 'PricePerSqm') || (totalArea > 0 ? Math.round(vatInfo.priceWithVAT / totalArea) : 0),
             currency: getString('CurrencyType', 'Currency') || 'EUR',
+
+            // Delivery information
+            deliveryInfo: deliveryInfo,
+            deliveryStatus: deliveryInfo?.status,
+            deliveryText: deliveryInfo?.text,
+            deliveryDate: deliveryInfo?.date,
 
             // Media
             photos: photos.length > 0 ? photos : [
