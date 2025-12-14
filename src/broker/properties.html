@@ -725,6 +725,37 @@
                             </div>
                         </div>
                         <div class="filter-group">
+                            <label class="filter-group__label">Main Type</label>
+                            <div class="multi-select" id="mainTypeMultiSelect">
+                                <div class="multi-select__trigger" onclick="toggleMultiSelect('mainType')">
+                                    <span class="multi-select__text" id="mainTypeText">All main types</span>
+                                    <span class="multi-select__arrow">▼</span>
+                                </div>
+                                <div class="multi-select__dropdown" id="mainTypeDropdown">
+                                    <label class="multi-select__option" data-value="Apartments">
+                                        <input type="checkbox" value="Apartments" onchange="onMultiSelectChange('mainType')">
+                                        <span>Apartments</span>
+                                    </label>
+                                    <label class="multi-select__option" data-value="Commercial property">
+                                        <input type="checkbox" value="Commercial property" onchange="onMultiSelectChange('mainType')">
+                                        <span>Commercial property</span>
+                                    </label>
+                                    <label class="multi-select__option" data-value="Plots">
+                                        <input type="checkbox" value="Plots" onchange="onMultiSelectChange('mainType')">
+                                        <span>Plots</span>
+                                    </label>
+                                    <label class="multi-select__option" data-value="Townhouses">
+                                        <input type="checkbox" value="Townhouses" onchange="onMultiSelectChange('mainType')">
+                                        <span>Townhouses</span>
+                                    </label>
+                                    <label class="multi-select__option" data-value="Villas/bungalows">
+                                        <input type="checkbox" value="Villas/bungalows" onchange="onMultiSelectChange('mainType')">
+                                        <span>Villas/bungalows</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="filter-group">
                             <label class="filter-group__label">Delivery Date</label>
                             <div class="delivery-filter">
                                 <select class="input" id="deliveryFilter">
@@ -1296,6 +1327,7 @@
         let selectedLocations = [];
         let selectedTypes = [];
         let selectedStatuses = [];
+        let selectedMainTypes = [];
 
         // Get filtered properties
         function getFilteredProperties() {
@@ -1349,6 +1381,22 @@
                 if (selectedStatuses.length > 0) {
                     const propStatus = (p.status || '').toLowerCase();
                     const matches = selectedStatuses.some(s => propStatus === s.toLowerCase());
+                    if (!matches) return false;
+                }
+
+                // Main Type - multi-select
+                if (selectedMainTypes.length > 0) {
+                    const propMainType = (p.mainType || p.type || '').toLowerCase();
+                    const matches = selectedMainTypes.some(mt => {
+                        const mtLower = mt.toLowerCase();
+                        // Check if property main type matches
+                        if (propMainType.includes(mtLower)) return true;
+                        // Special case for Villas/bungalows
+                        if (mtLower === 'villas/bungalows' && (propMainType.includes('villa') || propMainType.includes('bungalow'))) return true;
+                        // Special case for Commercial property
+                        if (mtLower === 'commercial property' && propMainType.includes('commercial')) return true;
+                        return false;
+                    });
                     if (!matches) return false;
                 }
 
@@ -1493,6 +1541,9 @@
             } else if (type === 'status') {
                 selectedStatuses = values;
                 updateMultiSelectText('status', values, 'All statuses');
+            } else if (type === 'mainType') {
+                selectedMainTypes = values;
+                updateMultiSelectText('mainType', values, 'All main types');
             }
 
             updateActiveFiltersCount();
@@ -1553,10 +1604,12 @@
             selectedLocations = [];
             selectedTypes = [];
             selectedStatuses = [];
+            selectedMainTypes = [];
             document.querySelectorAll('.multi-select__dropdown input[type="checkbox"]').forEach(cb => cb.checked = false);
             updateMultiSelectText('location', [], 'All locations');
             updateMultiSelectText('type', [], 'All types');
             updateMultiSelectText('status', [], 'All statuses');
+            updateMultiSelectText('mainType', [], 'All main types');
 
             // Clear bedroom selection
             selectedBedrooms = '';
@@ -1576,6 +1629,7 @@
             if (selectedLocations.length > 0) count++;
             if (selectedTypes.length > 0) count++;
             if (selectedStatuses.length > 0) count++;
+            if (selectedMainTypes.length > 0) count++;
             if (document.getElementById('priceMin').value || document.getElementById('priceMax').value) count++;
             if (selectedBedrooms !== '') count++;
             if (document.getElementById('areaMin').value || document.getElementById('areaMax').value) count++;
