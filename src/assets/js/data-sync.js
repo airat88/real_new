@@ -154,6 +154,27 @@ const DataSync = {
             return result;
         };
 
+        // Determine Main Type from Apartment Type
+        const determineMainType = (apartmentType) => {
+            const type = (apartmentType || '').toLowerCase();
+            
+            if (type.includes('apartment') || type.includes('квартир') || type.includes('студия') || type.includes('studio')) {
+                return 'Apartments';
+            } else if (type.includes('commercial') || type.includes('коммерческ') || type.includes('office') || type.includes('офис')) {
+                return 'Commercial property';
+            } else if (type.includes('plot') || type.includes('участ') || type.includes('земель') || type.includes('land')) {
+                return 'Plots';
+            } else if (type.includes('townhouse') || type.includes('таунхаус') || type.includes('maisonette') || type.includes('мезонет')) {
+                return 'Townhouses/Maisonette';
+            } else if (type.includes('villa') || type.includes('bungalow') || 
+                       type.includes('вилл') || type.includes('бунгал') || 
+                       type.includes('коттедж') || type.includes('дом') || type.includes('house')) {
+                return 'Villas/Bungalows';
+            }
+            
+            return 'Other';
+        };
+
         // Parse delivery date from status string
         const parseDeliveryDate = (statusStr) => {
             if (!statusStr) return null;
@@ -284,6 +305,7 @@ const DataSync = {
             // Main fields
             title: title || 'Untitled Property',
             type: getString('ApartmentType', 'Type', 'PropertyType', 'type'),
+            mainType: getString('Main_type', 'MainType', 'Category') || determineMainType(getString('ApartmentType', 'Type', 'PropertyType', 'type')),
             status: statusString,
             location: getString('Location', 'City', 'Address', 'location'),
             district: getString('District', 'district'),

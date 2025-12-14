@@ -1174,3 +1174,33 @@
         display: none;
     }
 }
+/* =========================================
+   FIX FOR mainType FILTER
+   Add this code to the END of broker.css
+   ========================================= */
+
+/* Multi-select arrow styling */
+.multi-select__arrow {
+    font-size: 0.7rem;
+    color: var(--gray-500);
+    transition: transform 0.2s ease;
+    margin-left: auto;
+    pointer-events: none; /* Prevent arrow from blocking clicks */
+}
+
+/* Rotate arrow when dropdown is open */
+.multi-select__trigger.active .multi-select__arrow {
+    transform: rotate(180deg);
+    color: var(--primary);
+}
+
+/* Highlight selected values */
+.multi-select__text.has-value {
+    color: var(--gray-900);
+    font-weight: 500;
+}
+
+/* Ensure dropdown appears above other elements */
+.multi-select__dropdown.open {
+    z-index: 1000;
+}
