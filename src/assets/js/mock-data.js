@@ -152,6 +152,7 @@ const PropertyData = {
             locations: [...new Set(properties.map(p => p.location).filter(Boolean))].sort(),
             types: [...new Set(properties.map(p => p.type).filter(Boolean))].sort(),
             statuses: [...new Set(properties.map(p => p.status).filter(Boolean))].sort(),
+            mainTypes: [...new Set(properties.map(p => p.mainType).filter(Boolean))].sort(),
             bedroomOptions: [...new Set(properties.map(p => p.bedrooms).filter(b => b !== undefined))].sort((a, b) => a - b)
         };
     },
