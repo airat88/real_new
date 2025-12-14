@@ -1390,17 +1390,19 @@
                     const matches = selectedMainTypes.some(mt => {
                         const mtLower = mt.toLowerCase();
                         
-                        // Check for partial matches based on selected main type
+                        // Check for partial matches based on selected main type (English and Russian)
                         if (mtLower === 'apartments') {
-                            return propType.includes('apartment');
+                            return propType.includes('apartment') || propType.includes('квартир');
                         } else if (mtLower === 'commercial property') {
-                            return propType.includes('commercial');
+                            return propType.includes('commercial') || propType.includes('коммерческ');
                         } else if (mtLower === 'plots') {
-                            return propType.includes('plot');
+                            return propType.includes('plot') || propType.includes('участ') || propType.includes('земель');
                         } else if (mtLower === 'townhouses') {
-                            return propType.includes('townhouse');
+                            return propType.includes('townhouse') || propType.includes('таунхаус');
                         } else if (mtLower === 'villas/bungalows') {
-                            return propType.includes('villa') || propType.includes('bungalow');
+                            return propType.includes('villa') || propType.includes('bungalow') || 
+                                   propType.includes('вилл') || propType.includes('бунгал') || 
+                                   propType.includes('коттедж') || propType.includes('дом');
                         }
                         
                         return false;
