@@ -1384,17 +1384,25 @@
                     if (!matches) return false;
                 }
 
-                // Main Type - multi-select
+                // Main Type - multi-select (checks partial matches in 'type' field)
                 if (selectedMainTypes.length > 0) {
-                    const propMainType = (p.mainType || p.type || '').toLowerCase();
+                    const propType = (p.type || '').toLowerCase();
                     const matches = selectedMainTypes.some(mt => {
                         const mtLower = mt.toLowerCase();
-                        // Check if property main type matches
-                        if (propMainType.includes(mtLower)) return true;
-                        // Special case for Villas/bungalows
-                        if (mtLower === 'villas/bungalows' && (propMainType.includes('villa') || propMainType.includes('bungalow'))) return true;
-                        // Special case for Commercial property
-                        if (mtLower === 'commercial property' && propMainType.includes('commercial')) return true;
+                        
+                        // Check for partial matches based on selected main type
+                        if (mtLower === 'apartments') {
+                            return propType.includes('apartment');
+                        } else if (mtLower === 'commercial property') {
+                            return propType.includes('commercial');
+                        } else if (mtLower === 'plots') {
+                            return propType.includes('plot');
+                        } else if (mtLower === 'townhouses') {
+                            return propType.includes('townhouse');
+                        } else if (mtLower === 'villas/bungalows') {
+                            return propType.includes('villa') || propType.includes('bungalow');
+                        }
+                        
                         return false;
                     });
                     if (!matches) return false;
