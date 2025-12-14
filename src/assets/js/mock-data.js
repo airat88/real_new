@@ -8,7 +8,6 @@ const FALLBACK_PROPERTIES = [
         id: 'prop_001',
         title: 'Emerald Bay Residences',
         type: 'Apartment',
-        mainType: 'Apartments',
         status: 'New',
         location: 'Limassol, Cyprus',
         bedrooms: 3,
@@ -30,7 +29,6 @@ const FALLBACK_PROPERTIES = [
         id: 'prop_002',
         title: 'Marina Heights Tower',
         type: 'Apartment',
-        mainType: 'Apartments',
         status: 'Under Construction',
         location: 'Larnaca, Cyprus',
         bedrooms: 2,
@@ -51,7 +49,6 @@ const FALLBACK_PROPERTIES = [
         id: 'prop_003',
         title: 'Olive Grove Villa',
         type: 'Villa',
-        mainType: 'Villas/Bungalows',
         status: 'Resale',
         location: 'Paphos, Cyprus',
         bedrooms: 4,
@@ -154,7 +151,6 @@ const PropertyData = {
         return {
             locations: [...new Set(properties.map(p => p.location).filter(Boolean))].sort(),
             types: [...new Set(properties.map(p => p.type).filter(Boolean))].sort(),
-            mainTypes: [...new Set(properties.map(p => p.mainType).filter(Boolean))].sort(),
             statuses: [...new Set(properties.map(p => p.status).filter(Boolean))].sort(),
             bedroomOptions: [...new Set(properties.map(p => p.bedrooms).filter(b => b !== undefined))].sort((a, b) => a - b)
         };
