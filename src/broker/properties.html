@@ -605,21 +605,6 @@
 
                 <!-- Filters Panel -->
                 <div class="filters-panel">
-                    <!-- VAT Information Banner -->
-                    <div style="background: var(--primary)10; border-left: 3px solid var(--primary); padding: var(--space-md); margin-bottom: var(--space-lg); border-radius: var(--radius);">
-                        <div style="display: flex; align-items: start; gap: var(--space-sm);">
-                            <span style="font-size: 1.25rem;">ℹ️</span>
-                            <div style="flex: 1;">
-                                <strong style="display: block; margin-bottom: 4px; color: var(--gray-800);">VAT Information for Cyprus Property</strong>
-                                <p style="font-size: 0.875rem; color: var(--gray-600); margin: 0; line-height: 1.5;">
-                                    • New immovable property: 19% VAT (or 5% with conditions)<br>
-                                    • Resale property: VAT exempt<br>
-                                    • Property with building permit before May 1, 2004: VAT exempt
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="filters-panel__header">
                         <span class="filters-panel__title">
                             Filters <span class="active-filters-badge" id="activeFiltersCount" style="display:none">0</span>
@@ -663,22 +648,6 @@
                                 <div class="multi-select__dropdown" id="statusDropdown"></div>
                             </div>
                         </div>
-                        <div class="filter-group">
-                            <label class="filter-group__label">Delivery Date</label>
-                            <div class="delivery-filter">
-                                <select class="input" id="deliveryFilter" onchange="applyFilters()">
-                                    <option value="">All delivery dates</option>
-                                    <option value="delivered">Already delivered</option>
-                                    <option value="3months">Within 3 months</option>
-                                    <option value="6months">Within 6 months</option>
-                                    <option value="12months">Within 12 months</option>
-                                    <option value="2024">2024</option>
-                                    <option value="2025">2025</option>
-                                    <option value="2026">2026</option>
-                                    <option value="2027+">2027 or later</option>
-                                </select>
-                            </div>
-                        </div>
                         <div class="filter-group" style="grid-column: span 1;">
                             <label class="filter-group__label">Price (€)</label>
                             <div class="price-range-inputs">
@@ -687,17 +656,6 @@
                                 <input type="number" class="input" placeholder="Max" id="priceMax">
                             </div>
                         </div>
-                    </div>
-
-                    <!-- VAT Filter -->
-                    <div style="margin-top: var(--space-md); display: flex; gap: var(--space-md); align-items: center;">
-                        <label class="filter-group__label" style="margin: 0;">VAT Options:</label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" id="showWithVAT" checked onchange="applyFilters()"> Show prices incl. VAT
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" id="vatExemptOnly" onchange="applyFilters()"> VAT exempt only
-                        </label>
                     </div>
 
                     <!-- Bedrooms chips -->
@@ -1101,36 +1059,10 @@
             const html = properties.map(p => {
                 const bedroomText = p.bedrooms === 0 ? 'Studio' : `${p.bedrooms} bed`;
                 const photos = p.photos && p.photos.length > 0 ? p.photos : ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'];
-                
-                // Format price with VAT info
-                let priceHTML = '';
-                if (p.isVATExempt) {
-                    priceHTML = `€${p.cleanPrice.toLocaleString()} <span style="font-size: 0.75rem; color: var(--gray-500);">(VAT exempt)</span>`;
-                } else if (p.hasVAT && p.priceWithoutVAT > 0) {
-                    priceHTML = `
-                        <div>€${p.priceWithVAT.toLocaleString()} <span style="font-size: 0.75rem; color: var(--gray-500);">(incl. ${p.vatRate}% VAT)</span></div>
-                        <div style="font-size: 0.875rem; color: var(--gray-600); margin-top: 2px;">€${p.priceWithoutVAT.toLocaleString()} <span style="font-size: 0.75rem;">excl. VAT</span></div>
-                    `;
-                } else {
-                    priceHTML = p.price || `€${(p.cleanPrice || 0).toLocaleString()}`;
-                }
-                
+                const price = p.price || `€${(p.cleanPrice || 0).toLocaleString()}`;
                 const unitLabel = p.apartmentNo ? `#${p.apartmentNo}` : '';
                 const hasMultiplePhotos = photos.length > 1;
                 const photosJson = JSON.stringify(photos).replace(/"/g, '&quot;');
-
-                // Format delivery info badge
-                let deliveryBadge = '';
-                if (p.deliveryInfo) {
-                    const status = p.deliveryInfo.status;
-                    let badgeColor = 'var(--gray-500)';
-                    if (status === 'delivered') badgeColor = 'var(--success)';
-                    else if (status === 'scheduled') badgeColor = 'var(--primary)';
-                    
-                    deliveryBadge = `<span class="property-card-broker__delivery-badge" style="background: ${badgeColor}20; color: ${badgeColor}; padding: 2px 8px; border-radius: 4px; font-size: 0.75rem; font-weight: 500;">
-                        ${p.deliveryInfo.text}
-                    </span>`;
-                }
 
                 return `
                     <div class="property-card-broker ${selectedProperties.has(p.id) ? 'selected' : ''}"
@@ -1155,10 +1087,10 @@
                             ` : ''}
                         </div>
                         <div class="property-card-broker__body" onclick="toggleProperty('${p.id}')">
-                            <div class="property-card-broker__price">${priceHTML} ${unitLabel}</div>
+                            <div class="property-card-broker__price">${price} ${unitLabel}</div>
                             <div class="property-card-broker__title">${p.id || 'Untitled'}</div>
                             ${p.title ? `<div class="property-card-broker__location" style="font-size: 0.75rem; color: var(--gray-500); margin-top: 4px;">${p.title}</div>` : ''}
-                            <div class="property-card-broker__location">📍 ${p.location || 'Unknown'}${deliveryBadge ? ` ${deliveryBadge}` : ''}</div>
+                            <div class="property-card-broker__location">📍 ${p.location || 'Unknown'}</div>
                             <div class="property-card-broker__tags">
                                 <span class="property-card-broker__tag">🛏️ ${bedroomText}</span>
                                 <span class="property-card-broker__tag">📐 ${p.area || 0} m²</span>
@@ -1224,12 +1156,6 @@
             const hasParking = document.getElementById('hasParking').checked;
             const hasSeaView = document.getElementById('hasSeaView').checked;
 
-            // Delivery date filter
-            const deliveryFilter = document.getElementById('deliveryFilter')?.value || '';
-            
-            // VAT filters
-            const vatExemptOnly = document.getElementById('vatExemptOnly')?.checked || false;
-
             return allProperties.filter(p => {
                 // Search
                 if (search) {
@@ -1279,41 +1205,6 @@
                 // Price per sqm
                 const priceSqm = p.priceSqm || 0;
                 if (priceSqm > 0 && (priceSqm < priceSqmMin || priceSqm > priceSqmMax)) return false;
-
-                // Delivery date filter
-                if (deliveryFilter) {
-                    const now = new Date();
-                    const deliveryDate = p.deliveryDate ? new Date(p.deliveryDate) : null;
-                    
-                    if (deliveryFilter === 'delivered') {
-                        if (p.deliveryStatus !== 'delivered') return false;
-                    } else if (deliveryFilter === '3months') {
-                        if (!deliveryDate) return false;
-                        const threeMonthsLater = new Date(now.getTime() + 90 * 24 * 60 * 60 * 1000);
-                        if (deliveryDate > threeMonthsLater || p.deliveryStatus === 'delivered') return false;
-                    } else if (deliveryFilter === '6months') {
-                        if (!deliveryDate) return false;
-                        const sixMonthsLater = new Date(now.getTime() + 180 * 24 * 60 * 60 * 1000);
-                        if (deliveryDate > sixMonthsLater || p.deliveryStatus === 'delivered') return false;
-                    } else if (deliveryFilter === '12months') {
-                        if (!deliveryDate) return false;
-                        const twelveMonthsLater = new Date(now.getTime() + 365 * 24 * 60 * 60 * 1000);
-                        if (deliveryDate > twelveMonthsLater || p.deliveryStatus === 'delivered') return false;
-                    } else if (deliveryFilter.match(/^\d{4}$/)) {
-                        // Specific year
-                        if (!deliveryDate) return false;
-                        const year = parseInt(deliveryFilter);
-                        if (deliveryDate.getFullYear() !== year) return false;
-                    } else if (deliveryFilter === '2027+') {
-                        if (!deliveryDate) return false;
-                        if (deliveryDate.getFullYear() < 2027) return false;
-                    }
-                }
-
-                // VAT filters
-                if (vatExemptOnly && !p.isVATExempt) {
-                    return false;
-                }
 
                 // Veranda
                 if (hasVeranda && !((p.coveredVeranda || 0) > 0 || (p.uncoveredVeranda || 0) > 0)) {
@@ -1836,21 +1727,6 @@
             const price = property.price || `€${(property.cleanPrice || 0).toLocaleString()}`;
             const isSelected = selectedProperties.has(id);
 
-            // Format price with VAT info
-            let priceHTML = '';
-            if (property.isVATExempt) {
-                priceHTML = `€${property.cleanPrice.toLocaleString()} <span style="font-size: 0.75rem; color: var(--gray-500); font-weight: normal;">(VAT exempt)</span>`;
-            } else if (property.hasVAT && property.priceWithoutVAT > 0) {
-                priceHTML = `
-                    €${property.priceWithVAT.toLocaleString()} 
-                    <span style="font-size: 0.875rem; color: var(--gray-500); font-weight: normal; display: block; margin-top: 4px;">
-                        incl. ${property.vatRate}% VAT (€${property.priceWithoutVAT.toLocaleString()} excl. VAT)
-                    </span>
-                `;
-            } else {
-                priceHTML = property.price || `€${(property.cleanPrice || 0).toLocaleString()}`;
-            }
-
             // Parse features
             const features = property.features ? property.features.split(/[,;]/).map(f => f.trim()).filter(f => f) : [];
 
@@ -1879,21 +1755,13 @@
                 </div>
 
                 <div class="property-detail__header">
-                    <div class="property-detail__price">${priceHTML}</div>
+                    <div class="property-detail__price">${price}</div>
                     ${property.apartmentNo ? `<div class="property-detail__unit">Unit #${property.apartmentNo}</div>` : ''}
                 </div>
 
                 <div class="property-detail__title">${property.id || 'Untitled'}</div>
                 ${property.title ? `<div class="property-detail__location" style="font-size: 0.875rem; color: var(--gray-600); margin-top: 8px; margin-bottom: 8px;">${property.title}</div>` : ''}
                 <div class="property-detail__location">📍 ${property.location || 'Unknown'} ${property.type ? `• ${property.type}` : ''}</div>
-                
-                ${property.deliveryInfo && property.deliveryInfo.status !== 'unknown' ? `
-                <div style="margin-top: 12px; padding: 8px 12px; background: ${property.deliveryInfo.status === 'delivered' ? 'var(--success)' : 'var(--primary)'}20; border-radius: 8px; display: inline-block;">
-                    <span style="font-size: 0.875rem; color: ${property.deliveryInfo.status === 'delivered' ? 'var(--success)' : 'var(--primary)'}; font-weight: 500;">
-                        ${property.deliveryInfo.status === 'delivered' ? '✓ ' : '📅 '}${property.deliveryInfo.text}
-                    </span>
-                </div>
-                ` : ''}
 
                 <div class="property-detail__grid">
                     <div class="property-detail__stat">
