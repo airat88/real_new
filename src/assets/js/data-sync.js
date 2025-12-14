@@ -305,7 +305,7 @@ const DataSync = {
             // Main fields
             title: title || 'Untitled Property',
             type: getString('ApartmentType', 'Type', 'PropertyType', 'type'),
-            mainType: getString('MainType', 'Category') || determineMainType(getString('ApartmentType', 'Type', 'PropertyType', 'type')),
+            mainType: getString('Main_type', 'MainType', 'Category') || determineMainType(getString('ApartmentType', 'Type', 'PropertyType', 'type')),
             status: statusString,
             location: getString('Location', 'City', 'Address', 'location'),
             district: getString('District', 'district'),
