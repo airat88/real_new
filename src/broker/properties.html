@@ -732,26 +732,7 @@
                                     <span class="multi-select__arrow">▼</span>
                                 </div>
                                 <div class="multi-select__dropdown" id="mainTypeDropdown">
-                                    <label class="multi-select__option" data-value="Apartments">
-                                        <input type="checkbox" value="Apartments" onchange="onMultiSelectChange('mainType')">
-                                        <span>Apartments</span>
-                                    </label>
-                                    <label class="multi-select__option" data-value="Commercial property">
-                                        <input type="checkbox" value="Commercial property" onchange="onMultiSelectChange('mainType')">
-                                        <span>Commercial property</span>
-                                    </label>
-                                    <label class="multi-select__option" data-value="Plots">
-                                        <input type="checkbox" value="Plots" onchange="onMultiSelectChange('mainType')">
-                                        <span>Plots</span>
-                                    </label>
-                                    <label class="multi-select__option" data-value="Townhouses">
-                                        <input type="checkbox" value="Townhouses" onchange="onMultiSelectChange('mainType')">
-                                        <span>Townhouses</span>
-                                    </label>
-                                    <label class="multi-select__option" data-value="Villas/bungalows">
-                                        <input type="checkbox" value="Villas/bungalows" onchange="onMultiSelectChange('mainType')">
-                                        <span>Villas/bungalows</span>
-                                    </label>
+                                    <!-- Filled dynamically by updateFilters() -->
                                 </div>
                             </div>
                         </div>
@@ -1384,29 +1365,10 @@
                     if (!matches) return false;
                 }
 
-                // Main Type - multi-select (checks partial matches in 'type' field)
+                // Main Type - multi-select (exact match from CSV field)
                 if (selectedMainTypes.length > 0) {
-                    const propType = (p.type || '').toLowerCase();
-                    const matches = selectedMainTypes.some(mt => {
-                        const mtLower = mt.toLowerCase();
-                        
-                        // Check for partial matches based on selected main type (English and Russian)
-                        if (mtLower === 'apartments') {
-                            return propType.includes('apartment') || propType.includes('квартир');
-                        } else if (mtLower === 'commercial property') {
-                            return propType.includes('commercial') || propType.includes('коммерческ');
-                        } else if (mtLower === 'plots') {
-                            return propType.includes('plot') || propType.includes('участ') || propType.includes('земель');
-                        } else if (mtLower === 'townhouses') {
-                            return propType.includes('townhouse') || propType.includes('таунхаус');
-                        } else if (mtLower === 'villas/bungalows') {
-                            return propType.includes('villa') || propType.includes('bungalow') || 
-                                   propType.includes('вилл') || propType.includes('бунгал') || 
-                                   propType.includes('коттедж') || propType.includes('дом');
-                        }
-                        
-                        return false;
-                    });
+                    const propMainType = (p.mainType || '').toLowerCase();
+                    const matches = selectedMainTypes.some(mt => propMainType === mt.toLowerCase());
                     if (!matches) return false;
                 }
 
@@ -1515,6 +1477,15 @@
                 <label class="multi-select__option" data-value="${status}">
                     <input type="checkbox" value="${status}" onchange="onMultiSelectChange('status')">
                     <span>${status}</span>
+                </label>
+            `).join('');
+
+            // Main Types - multi-select (dynamic from CSV)
+            const mainTypeDropdown = document.getElementById('mainTypeDropdown');
+            mainTypeDropdown.innerHTML = options.mainTypes.map(mainType => `
+                <label class="multi-select__option" data-value="${mainType}">
+                    <input type="checkbox" value="${mainType}" onchange="onMultiSelectChange('mainType')">
+                    <span>${mainType}</span>
                 </label>
             `).join('');
         }
