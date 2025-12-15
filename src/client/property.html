@@ -288,9 +288,6 @@
             crossorigin=""></script>
     <script src="../assets/js/data-sync.js"></script>
     <script>
-        // VAT rate for Cyprus
-        const VAT_RATE = 0.19;
-
         // Get property ID from URL
         const urlParams = new URLSearchParams(window.location.search);
         const propertyId = urlParams.get('id');
@@ -305,13 +302,6 @@
                 if (!isNaN(num)) return '€' + num.toLocaleString();
             }
             return price || 'Price on request';
-        }
-
-        // Calculate price with VAT
-        function calculateWithVAT(price) {
-            const numPrice = typeof price === 'number' ? price : parseInt((price || '').toString().replace(/[^\d]/g, ''));
-            if (isNaN(numPrice)) return null;
-            return Math.round(numPrice * (1 + VAT_RATE));
         }
 
         // Photo navigation
@@ -374,9 +364,8 @@
             if (prop.parking) features.push('Parking');
             if (prop.seaView) features.push('Sea View');
 
-            // Calculate prices
+            // Get price from source
             const basePrice = prop.cleanPrice || parseInt((prop.price || '').toString().replace(/[^\d]/g, ''));
-            const priceWithVAT = calculateWithVAT(basePrice);
 
             const html = `
                 <div class="property-gallery">
@@ -394,7 +383,6 @@
                     
                     <div class="property-price">
                         ${formatPrice(basePrice)}
-                        <span class="price-vat">(${formatPrice(priceWithVAT)} incl. VAT)</span>
                     </div>
 
                     <div class="property-location">

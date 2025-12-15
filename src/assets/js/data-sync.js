@@ -98,7 +98,7 @@ const DataSync = {
             return 0;
         };
 
-        // Parse VAT information from price string
+        // Parse price from source - no calculations, just clean extraction
         const parseVATInfo = (priceStr) => {
             const result = {
                 hasVAT: false,
@@ -110,46 +110,17 @@ const DataSync = {
 
             if (!priceStr) return result;
 
-            const str = String(priceStr).toLowerCase();
+            const str = String(priceStr);
             
-            // Check if price includes "+ VAT" or "VAT" mention
-            result.hasVAT = str.includes('vat') || str.includes('+ vat');
-            
-            // Extract numeric price
+            // Extract numeric price as-is from source
             const cleanPrice = parseFloat(str.replace(/[€$£\s,+vat]/gi, ''));
             
             if (isNaN(cleanPrice)) return result;
 
-            // Determine VAT status based on price string and property status
-            // VAT exempt: resale or pre-2004 properties
-            const status = getString('PropertyStatus', 'Status', 'status').toLowerCase();
-            
-            if (str.includes('vat exempt') || status.includes('resale') || 
-                status.includes('re-sale') || status.includes('secondary market')) {
-                result.isVATExempt = true;
-                result.priceWithVAT = cleanPrice;
-                result.priceWithoutVAT = cleanPrice;
-                result.vatRate = 0;
-            } 
-            // If "+ VAT" is mentioned, assume it's price without VAT
-            else if (str.includes('+ vat')) {
-                result.priceWithoutVAT = cleanPrice;
-                // Default to 19% VAT for new property (can be 5% in some cases)
-                result.vatRate = 19;
-                result.priceWithVAT = cleanPrice * (1 + result.vatRate / 100);
-            }
-            // If just "VAT" is mentioned but no "+", likely price includes VAT
-            else if (str.includes('vat')) {
-                result.priceWithVAT = cleanPrice;
-                result.vatRate = 19; // Assume 19%
-                result.priceWithoutVAT = cleanPrice / (1 + result.vatRate / 100);
-            }
-            // No VAT mention - assume price is as-is
-            else {
-                result.priceWithVAT = cleanPrice;
-                result.priceWithoutVAT = cleanPrice;
-                result.vatRate = 0;
-            }
+            // Store the original price from source without any calculations
+            result.priceWithVAT = cleanPrice;
+            result.priceWithoutVAT = cleanPrice;
+            result.vatRate = 0;
 
             return result;
         };

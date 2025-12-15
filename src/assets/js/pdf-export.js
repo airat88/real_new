@@ -36,9 +36,6 @@ const PDFExport = {
             bed: 'bed',
             sqm: 'sqm',
             noImage: 'No image',
-            withVAT: 'incl. VAT',
-            withoutVAT: 'excl. VAT',
-            vat: 'VAT',
             licenseNumber: 'License No.',
             realEstateBroker: 'Real Estate Broker',
             propertyId: 'Property ID',
@@ -77,9 +74,6 @@ const PDFExport = {
             bed: 'спал.',
             sqm: 'м²',
             noImage: 'Нет фото',
-            withVAT: 'с НДС',
-            withoutVAT: 'без НДС',
-            vat: 'НДС',
             licenseNumber: 'Лицензия №',
             realEstateBroker: 'Агентство недвижимости',
             propertyId: 'ID объекта',
@@ -118,9 +112,6 @@ const PDFExport = {
             bed: 'υπν.',
             sqm: 'τ.μ.',
             noImage: 'Χωρίς εικόνα',
-            withVAT: 'με ΦΠΑ',
-            withoutVAT: 'χωρίς ΦΠΑ',
-            vat: 'ΦΠΑ',
             licenseNumber: 'Αριθμός Άδειας',
             realEstateBroker: 'Μεσιτικό Γραφείο',
             propertyId: 'ID Ακινήτου',
@@ -136,51 +127,16 @@ const PDFExport = {
         return this.translations[lang]?.[key] || this.translations.en[key] || key;
     },
 
-    // VAT rate for Cyprus
-    VAT_RATE: 0.19,
-
-    // Calculate price with/without VAT
-    calculateVAT(price, includeVAT = true) {
-        const numPrice = typeof price === 'number' ? price : parseInt((price || '').toString().replace(/[^\d]/g, ''));
-        if (isNaN(numPrice)) return null;
-        
-        if (includeVAT) {
-            return Math.round(numPrice * (1 + this.VAT_RATE));
-        } else {
-            return numPrice;
-        }
-    },
-
-    // Format price with VAT options
-    formatPrice(price, options = {}) {
-        const { showVAT = false, showBoth = false } = options;
-        
+    // Format price from source
+    formatPrice(price) {
         if (typeof price === 'number') {
-            if (showBoth) {
-                const withoutVAT = price;
-                const withVAT = this.calculateVAT(price, true);
-                return {
-                    withoutVAT: '€' + withoutVAT.toLocaleString(),
-                    withVAT: '€' + withVAT.toLocaleString()
-                };
-            }
-            const amount = showVAT ? this.calculateVAT(price, true) : price;
-            return '€' + amount.toLocaleString();
+            return '€' + price.toLocaleString();
         }
         if (typeof price === 'string') {
             if (price.includes('€')) return price;
             const num = parseInt(price.replace(/[^\d]/g, ''));
             if (!isNaN(num)) {
-                if (showBoth) {
-                    const withoutVAT = num;
-                    const withVAT = this.calculateVAT(num, true);
-                    return {
-                        withoutVAT: '€' + withoutVAT.toLocaleString(),
-                        withVAT: '€' + withVAT.toLocaleString()
-                    };
-                }
-                const amount = showVAT ? this.calculateVAT(num, true) : num;
-                return '€' + amount.toLocaleString();
+                return '€' + num.toLocaleString();
             }
         }
         return price || 'N/A';
@@ -1121,35 +1077,16 @@ const PDFExport = {
         const bedText = prop.bedrooms === 0 ? this.t('studio', lang) : `${prop.bedrooms} ${this.t('bed', lang)}`;
         const details = `${prop.location || 'Cyprus'} • ${bedText} • ${prop.area || '-'} ${this.t('sqm', lang)}`;
 
-        // Calculate prices
+        // Get price from source
         const basePrice = prop.cleanPrice || parseInt((prop.price || '').toString().replace(/[^\d]/g, '')) || 0;
-        const priceWithoutVAT = this.formatPrice(basePrice);
-        const priceWithVAT = this.formatPrice(this.calculateVAT(basePrice, true));
+        const price = this.formatPrice(basePrice);
 
         // Build price stack
         const priceStack = [
             {
-                text: priceWithoutVAT,
+                text: price,
                 style: 'reactionPrice',
                 alignment: 'right'
-            },
-            {
-                text: this.t('withoutVAT', lang),
-                style: 'reactionDetails',
-                alignment: 'right',
-                margin: [0, 1, 0, 0]
-            },
-            {
-                text: priceWithVAT,
-                style: 'reactionPriceVAT',
-                alignment: 'right',
-                margin: [0, 3, 0, 0]
-            },
-            {
-                text: this.t('withVAT', lang),
-                style: 'reactionDetails',
-                alignment: 'right',
-                margin: [0, 1, 0, 3]
             }
         ];
 

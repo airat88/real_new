@@ -666,21 +666,6 @@
 
                 <!-- Filters Panel -->
                 <div class="filters-panel">
-                    <!-- VAT Information Banner -->
-                    <div style="background: var(--primary)10; border-left: 3px solid var(--primary); padding: var(--space-md); margin-bottom: var(--space-lg); border-radius: var(--radius);">
-                        <div style="display: flex; align-items: start; gap: var(--space-sm);">
-                            <span style="font-size: 1.25rem;">ℹ️</span>
-                            <div style="flex: 1;">
-                                <strong style="display: block; margin-bottom: 4px; color: var(--gray-800);">VAT Information for Cyprus Property</strong>
-                                <p style="font-size: 0.875rem; color: var(--gray-600); margin: 0; line-height: 1.5;">
-                                    • New immovable property: 19% VAT (or 5% with conditions)<br>
-                                    • Resale property: VAT exempt<br>
-                                    • Property with building permit before May 1, 2004: VAT exempt
-                                </p>
-                            </div>
-                        </div>
-                    </div>
-
                     <div class="filters-panel__header">
                         <span class="filters-panel__title">
                             Filters <span class="active-filters-badge" id="activeFiltersCount" style="display:none">0</span>
@@ -770,17 +755,6 @@
                                 </div>
                             </div>
                         </div>
-                    </div>
-
-                    <!-- VAT Filter -->
-                    <div style="margin-top: var(--space-md); display: flex; gap: var(--space-md); align-items: center;">
-                        <label class="filter-group__label" style="margin: 0;">VAT Options:</label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" id="showWithVAT" checked> Show prices incl. VAT
-                        </label>
-                        <label class="checkbox-filter">
-                            <input type="checkbox" id="vatExemptOnly"> VAT exempt only
-                        </label>
                     </div>
 
                     <!-- Bedrooms chips -->
@@ -1207,18 +1181,8 @@
                 const bedroomText = p.bedrooms === 0 ? 'Studio' : `${p.bedrooms} bed`;
                 const photos = p.photos && p.photos.length > 0 ? p.photos : ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'];
                 
-                // Format price with VAT info
-                let priceHTML = '';
-                if (p.isVATExempt) {
-                    priceHTML = `€${p.cleanPrice.toLocaleString()} <span style="font-size: 0.75rem; color: var(--gray-500);">(VAT exempt)</span>`;
-                } else if (p.hasVAT && p.priceWithoutVAT > 0) {
-                    priceHTML = `
-                        <div>€${p.priceWithVAT.toLocaleString()} <span style="font-size: 0.75rem; color: var(--gray-500);">(incl. ${p.vatRate}% VAT)</span></div>
-                        <div style="font-size: 0.875rem; color: var(--gray-600); margin-top: 2px;">€${p.priceWithoutVAT.toLocaleString()} <span style="font-size: 0.75rem;">excl. VAT</span></div>
-                    `;
-                } else {
-                    priceHTML = p.price || `€${(p.cleanPrice || 0).toLocaleString()}`;
-                }
+                // Format price from source
+                const priceHTML = p.price || `€${(p.cleanPrice || 0).toLocaleString()}`;
                 
                 const unitLabel = p.apartmentNo ? `#${p.apartmentNo}` : '';
                 const hasMultiplePhotos = photos.length > 1;
@@ -1332,9 +1296,6 @@
 
             // Delivery date filter
             const deliveryFilter = document.getElementById('deliveryFilter')?.value || '';
-            
-            // VAT filters
-            const vatExemptOnly = document.getElementById('vatExemptOnly')?.checked || false;
 
             return allProperties.filter(p => {
                 // Search
@@ -1422,11 +1383,6 @@
                         if (!deliveryDate) return false;
                         if (deliveryDate.getFullYear() < 2027) return false;
                     }
-                }
-
-                // VAT filters
-                if (vatExemptOnly && !p.isVATExempt) {
-                    return false;
                 }
 
                 // Veranda
@@ -1965,20 +1921,8 @@
             const price = property.price || `€${(property.cleanPrice || 0).toLocaleString()}`;
             const isSelected = selectedProperties.has(id);
 
-            // Format price with VAT info
-            let priceHTML = '';
-            if (property.isVATExempt) {
-                priceHTML = `€${property.cleanPrice.toLocaleString()} <span style="font-size: 0.75rem; color: var(--gray-500); font-weight: normal;">(VAT exempt)</span>`;
-            } else if (property.hasVAT && property.priceWithoutVAT > 0) {
-                priceHTML = `
-                    €${property.priceWithVAT.toLocaleString()} 
-                    <span style="font-size: 0.875rem; color: var(--gray-500); font-weight: normal; display: block; margin-top: 4px;">
-                        incl. ${property.vatRate}% VAT (€${property.priceWithoutVAT.toLocaleString()} excl. VAT)
-                    </span>
-                `;
-            } else {
-                priceHTML = property.price || `€${(property.cleanPrice || 0).toLocaleString()}`;
-            }
+            // Format price from source
+            const priceHTML = property.price || `€${(property.cleanPrice || 0).toLocaleString()}`;
 
             // Parse features
             const features = property.features ? property.features.split(/[,;]/).map(f => f.trim()).filter(f => f) : [];
@@ -2190,10 +2134,6 @@
 
         // Delivery date filter
         document.getElementById('deliveryFilter').addEventListener('change', () => { updateActiveFiltersCount(); renderProperties(); });
-        
-        // VAT filters
-        document.getElementById('showWithVAT').addEventListener('change', () => { updateActiveFiltersCount(); renderProperties(); });
-        document.getElementById('vatExemptOnly').addEventListener('change', () => { updateActiveFiltersCount(); renderProperties(); });
 
         // Initialize bedroom chips
         initBedroomChips();

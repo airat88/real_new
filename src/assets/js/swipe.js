@@ -14,9 +14,6 @@ class SwipeApp {
         this.startY = 0;
         this.currentX = 0;
 
-        // VAT rate for Cyprus
-        this.VAT_RATE = 0.19;
-
         // Supabase integration
         this.selectionId = null;
         this.selectionToken = null;
@@ -25,25 +22,16 @@ class SwipeApp {
         this.loadProperties().then(() => this.init());
     }
 
-    // Calculate price with VAT
-    calculateWithVAT(price) {
-        const numPrice = typeof price === 'number' ? price : parseInt((price || '').toString().replace(/[^\d]/g, ''));
-        if (isNaN(numPrice)) return null;
-        return Math.round(numPrice * (1 + this.VAT_RATE));
-    }
-
     // Format price
-    formatPrice(price, includeVAT = false) {
+    formatPrice(price) {
         if (typeof price === 'number') {
-            const amount = includeVAT ? this.calculateWithVAT(price) : price;
-            return '€' + amount.toLocaleString();
+            return '€' + price.toLocaleString();
         }
         if (typeof price === 'string') {
             if (price.includes('€')) return price;
             const num = parseInt(price.replace(/[^\d]/g, ''));
             if (!isNaN(num)) {
-                const amount = includeVAT ? this.calculateWithVAT(num) : num;
-                return '€' + amount.toLocaleString();
+                return '€' + num.toLocaleString();
             }
         }
         return price || 'Price on request';
@@ -251,10 +239,9 @@ class SwipeApp {
         const bedroomText = property.bedrooms === 0 ? 'Studio' : `${property.bedrooms} bed`;
         const photo = (property.photos && property.photos[0]) || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800';
         
-        // Calculate prices
+        // Get price from source
         const basePrice = property.cleanPrice || parseInt((property.price || '').toString().replace(/[^\d]/g, '')) || 0;
-        const priceWithoutVAT = this.formatPrice(basePrice);
-        const priceWithVAT = this.formatPrice(basePrice, true);
+        const price = this.formatPrice(basePrice);
         
         const photos = property.photos || [photo];
 
@@ -280,8 +267,7 @@ class SwipeApp {
 
             <div class="property-card__content">
                 <div class="property-card__price">
-                    <div>${priceWithoutVAT}</div>
-                    <div style="font-size: 0.85em; color: #10b981; margin-top: 4px;">${priceWithVAT} incl. VAT</div>
+                    <div>${price}</div>
                 </div>
                 <div class="property-card__title">${property.title || 'Property'}</div>
                 <div class="property-card__location">
@@ -555,10 +541,9 @@ class SwipeApp {
         const bedroomText = property.bedrooms === 0 ? 'Studio' : property.bedrooms;
         const photos = property.photos || ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'];
         
-        // Calculate prices
+        // Get price from source
         const basePrice = property.cleanPrice || parseInt((property.price || '').toString().replace(/[^\d]/g, '')) || 0;
-        const priceWithoutVAT = this.formatPrice(basePrice);
-        const priceWithVAT = this.formatPrice(basePrice, true);
+        const price = this.formatPrice(basePrice);
 
         modal.querySelector('.details-modal__body').innerHTML = `
             <div class="details-gallery">
@@ -577,8 +562,7 @@ class SwipeApp {
 
             <div class="details-info">
                 <div class="details-price">
-                    <div>${priceWithoutVAT}</div>
-                    <div style="font-size: 0.85em; color: #10b981; margin-top: 4px;">${priceWithVAT} incl. VAT</div>
+                    <div>${price}</div>
                 </div>
                 <div class="details-title">${property.title || 'Property'}</div>
                 <div class="details-location">
