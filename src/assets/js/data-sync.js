@@ -284,10 +284,8 @@ const DataSync = {
             basement: getNumber('Basement', 'basement'),
             plot: getNumber('Plot', 'plot'),
 
-            // Price - use original price from source
-            price: priceString 
-                ? priceString.replace(/\s*\+\s*VAT/gi, '').trim() // Remove "+ VAT" text but keep the price
-                : (vatInfo.priceWithVAT > 0 ? `€${vatInfo.priceWithVAT.toLocaleString()}` : 'Price on request'),
+            // Price - use original price from source as-is
+            price: priceString || (vatInfo.priceWithVAT > 0 ? `€${vatInfo.priceWithVAT.toLocaleString()}` : 'Price on request'),
             cleanPrice: vatInfo.priceWithVAT || 0,
             priceWithoutVAT: vatInfo.priceWithoutVAT,
             priceWithVAT: vatInfo.priceWithVAT,
