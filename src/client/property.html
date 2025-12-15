@@ -386,6 +386,14 @@
                         <span>📍</span>
                         <span>${prop.location || 'Cyprus'}</span>
                     </div>
+                    
+                    ${prop.url ? `
+                    <div style="margin-top: 20px;">
+                        <a href="${prop.url}" target="_blank" class="btn btn-primary" style="text-decoration: none; display: inline-block; padding: 12px 24px; background: var(--primary); color: white; border-radius: 8px; font-weight: 500;">
+                            🔗 View on Website
+                        </a>
+                    </div>
+                    ` : ''}
 
                     <div class="property-specs">
                         <div class="spec-item">

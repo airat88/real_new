@@ -1960,6 +1960,14 @@
                 ${property.title ? `<div class="property-detail__location" style="font-size: 0.875rem; color: var(--gray-600); margin-top: 8px; margin-bottom: 8px;">${property.title}</div>` : ''}
                 <div class="property-detail__location">📍 ${property.location || 'Unknown'} ${property.type ? `• ${property.type}` : ''}</div>
                 
+                ${property.url ? `
+                <div style="margin-top: 16px;">
+                    <a href="${property.url}" target="_blank" class="btn btn-primary" style="text-decoration: none; display: inline-block;">
+                        🔗 View on Website
+                    </a>
+                </div>
+                ` : ''}
+                
                 ${property.deliveryInfo && property.deliveryInfo.status !== 'unknown' ? `
                 <div style="margin-top: 12px; padding: 8px 12px; background: ${property.deliveryInfo.status === 'delivered' ? 'var(--success)' : 'var(--primary)'}20; border-radius: 8px; display: inline-block;">
                     <span style="font-size: 0.875rem; color: ${property.deliveryInfo.status === 'delivered' ? 'var(--success)' : 'var(--primary)'}; font-weight: 500;">

@@ -3,9 +3,10 @@
    ============================================ */
 
 class SwipeApp {
-    constructor() {
-        this.properties = [];
-        this.selectionName = 'Property Selection';
+    constructor(containerId = null, options = {}) {
+        this.containerId = containerId;
+        this.properties = options.properties || [];
+        this.selectionName = options.selectionName || 'Property Selection';
         this.currentIndex = 0;
         this.reactions = [];
         this.currentPhotoIndex = 0;
@@ -15,11 +16,17 @@ class SwipeApp {
         this.currentX = 0;
 
         // Supabase integration
-        this.selectionId = null;
-        this.selectionToken = null;
-        this.selectionData = null;
+        this.selectionId = options.selectionId || null;
+        this.selectionToken = options.selectionToken || null;
+        this.selectionData = options.selectionData || null;
 
-        this.loadProperties().then(() => this.init());
+        // If properties were provided directly, skip loading and init immediately
+        if (options.properties && options.properties.length > 0) {
+            console.log(`📦 Using provided properties: ${this.properties.length}`);
+            this.init();
+        } else {
+            this.loadProperties().then(() => this.init());
+        }
     }
 
     // Format price
@@ -51,13 +58,15 @@ class SwipeApp {
 
             // First sync data if needed
             if (typeof DataSync !== 'undefined' && !DataSync.isLoaded()) {
-                await DataSync.syncProperties();
+                await DataSync.loadFromCSV();
             }
 
             // Get all properties
-            const allProperties = typeof PropertyData !== 'undefined'
-                ? PropertyData.getAll()
-                : (typeof MOCK_PROPERTIES !== 'undefined' ? MOCK_PROPERTIES : []);
+            const allProperties = typeof DataSync !== 'undefined' && DataSync.isLoaded()
+                ? DataSync.getProperties()
+                : (typeof PropertyData !== 'undefined'
+                    ? PropertyData.getAll()
+                    : (typeof MOCK_PROPERTIES !== 'undefined' ? MOCK_PROPERTIES : []));
 
             // Filter by preview IDs
             const ids = previewIds.split(',');
@@ -91,10 +100,17 @@ class SwipeApp {
                 this.selectionData = selection;
                 this.selectionName = selection.name || 'Property Selection';
 
-                // Get property data from localStorage (synced from Google Sheets)
-                const allProperties = typeof PropertyData !== 'undefined'
-                    ? PropertyData.getAll()
-                    : (typeof MOCK_PROPERTIES !== 'undefined' ? MOCK_PROPERTIES : []);
+                // Load CSV data if not already loaded
+                if (typeof DataSync !== 'undefined' && !DataSync.isLoaded()) {
+                    await DataSync.loadFromCSV();
+                }
+
+                // Get property data
+                const allProperties = typeof DataSync !== 'undefined' && DataSync.isLoaded()
+                    ? DataSync.getProperties()
+                    : (typeof PropertyData !== 'undefined'
+                        ? PropertyData.getAll()
+                        : (typeof MOCK_PROPERTIES !== 'undefined' ? MOCK_PROPERTIES : []));
 
                 // Filter properties by IDs in selection
                 const propertyIds = selection.property_ids || [];
@@ -182,11 +198,41 @@ class SwipeApp {
             return;
         }
 
+        // Create structure if container ID was provided
+        if (this.containerId) {
+            this.createStructure();
+        }
+
         this.renderHeader();
         this.renderCards();
         this.renderActions();
         this.bindEvents();
         this.updateProgress();
+    }
+
+    createStructure() {
+        const container = document.getElementById(this.containerId);
+        if (!container) {
+            console.error('Container not found:', this.containerId);
+            return;
+        }
+
+        container.innerHTML = `
+            <div class="swipe-container">
+                <div class="swipe-header"></div>
+                <div class="cards-stack"></div>
+                <div class="swipe-actions"></div>
+            </div>
+
+            <!-- Details Modal -->
+            <div class="details-modal">
+                <div class="details-modal__overlay"></div>
+                <div class="details-modal__content">
+                    <button class="details-modal__close">✕</button>
+                    <div class="details-modal__body"></div>
+                </div>
+            </div>
+        `;
     }
 
     showEmptyState() {
@@ -567,6 +613,14 @@ class SwipeApp {
                     <span>📍</span>
                     <span>${property.location || 'Cyprus'}</span>
                 </div>
+                
+                ${property.url ? `
+                <div style="margin-top: 20px;">
+                    <a href="${property.url}" target="_blank" class="btn btn-primary" style="text-decoration: none; display: inline-block; padding: 12px 24px; border-radius: 8px; font-weight: 500;">
+                        🔗 View on Website
+                    </a>
+                </div>
+                ` : ''}
 
                 <div class="details-stats">
                     <div class="details-stat">
