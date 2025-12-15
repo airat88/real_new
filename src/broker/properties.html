@@ -1182,7 +1182,7 @@
                 const photos = p.photos && p.photos.length > 0 ? p.photos : ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'];
                 
                 // Format price from source
-                const priceHTML = p.price || `€${(p.cleanPrice || 0).toLocaleString()}`;
+                const priceHTML = p.price || (p.cleanPrice > 0 ? `€${p.cleanPrice.toLocaleString()}` : 'Price on request');
                 
                 const unitLabel = p.apartmentNo ? `#${p.apartmentNo}` : '';
                 const hasMultiplePhotos = photos.length > 1;
@@ -1922,7 +1922,7 @@
             const isSelected = selectedProperties.has(id);
 
             // Format price from source
-            const priceHTML = property.price || `€${(property.cleanPrice || 0).toLocaleString()}`;
+            const priceHTML = property.price || (property.cleanPrice > 0 ? `€${property.cleanPrice.toLocaleString()}` : 'Price on request');
 
             // Parse features
             const features = property.features ? property.features.split(/[,;]/).map(f => f.trim()).filter(f => f) : [];

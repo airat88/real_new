@@ -24,13 +24,13 @@ class SwipeApp {
 
     // Format price
     formatPrice(price) {
-        if (typeof price === 'number') {
+        if (typeof price === 'number' && price > 0) {
             return '€' + price.toLocaleString();
         }
         if (typeof price === 'string') {
             if (price.includes('€')) return price;
             const num = parseInt(price.replace(/[^\d]/g, ''));
-            if (!isNaN(num)) {
+            if (!isNaN(num) && num > 0) {
                 return '€' + num.toLocaleString();
             }
         }
@@ -240,8 +240,7 @@ class SwipeApp {
         const photo = (property.photos && property.photos[0]) || 'https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800';
         
         // Get price from source
-        const basePrice = property.cleanPrice || parseInt((property.price || '').toString().replace(/[^\d]/g, '')) || 0;
-        const price = this.formatPrice(basePrice);
+        const price = property.price || 'Price on request';
         
         const photos = property.photos || [photo];
 
@@ -542,8 +541,7 @@ class SwipeApp {
         const photos = property.photos || ['https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'];
         
         // Get price from source
-        const basePrice = property.cleanPrice || parseInt((property.price || '').toString().replace(/[^\d]/g, '')) || 0;
-        const price = this.formatPrice(basePrice);
+        const price = property.price || 'Price on request';
 
         modal.querySelector('.details-modal__body').innerHTML = `
             <div class="details-gallery">

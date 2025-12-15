@@ -129,13 +129,13 @@ const PDFExport = {
 
     // Format price from source
     formatPrice(price) {
-        if (typeof price === 'number') {
+        if (typeof price === 'number' && price > 0) {
             return '€' + price.toLocaleString();
         }
         if (typeof price === 'string') {
             if (price.includes('€')) return price;
             const num = parseInt(price.replace(/[^\d]/g, ''));
-            if (!isNaN(num)) {
+            if (!isNaN(num) && num > 0) {
                 return '€' + num.toLocaleString();
             }
         }
@@ -549,7 +549,7 @@ const PDFExport = {
                                                 width: '*'
                                             },
                                             {
-                                                text: this.formatPrice(prop.cleanPrice || prop.price),
+                                                text: prop.price || (prop.cleanPrice > 0 ? this.formatPrice(prop.cleanPrice) : 'Price on request'),
                                                 style: 'propertyPrice',
                                                 width: 'auto',
                                                 alignment: 'right'
@@ -1078,8 +1078,7 @@ const PDFExport = {
         const details = `${prop.location || 'Cyprus'} • ${bedText} • ${prop.area || '-'} ${this.t('sqm', lang)}`;
 
         // Get price from source
-        const basePrice = prop.cleanPrice || parseInt((prop.price || '').toString().replace(/[^\d]/g, '')) || 0;
-        const price = this.formatPrice(basePrice);
+        const price = prop.price || 'Price on request';
 
         // Build price stack
         const priceStack = [

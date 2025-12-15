@@ -112,10 +112,17 @@ const DataSync = {
 
             const str = String(priceStr);
             
-            // Extract numeric price as-is from source
-            const cleanPrice = parseFloat(str.replace(/[€$£\s,+vat]/gi, ''));
+            // Check if it's "Price upon request" or similar
+            if (str.toLowerCase().includes('request') || str.toLowerCase().includes('запрос')) {
+                return result; // Return zeros, will be handled as "Price on request"
+            }
             
-            if (isNaN(cleanPrice)) return result;
+            // Extract numeric price as-is from source
+            // Remove currency symbols, spaces, and text like "VAT", "+", but keep numbers and commas/dots
+            const cleanStr = str.replace(/[€$£\s+vat]/gi, '');
+            const cleanPrice = parseFloat(cleanStr.replace(/,/g, '')); // Remove commas for parseFloat
+            
+            if (isNaN(cleanPrice) || cleanPrice <= 0) return result;
 
             // Store the original price from source without any calculations
             result.priceWithVAT = cleanPrice;
@@ -277,9 +284,11 @@ const DataSync = {
             basement: getNumber('Basement', 'basement'),
             plot: getNumber('Plot', 'plot'),
 
-            // Price - now with VAT info
-            price: priceString || `€${vatInfo.priceWithVAT.toLocaleString()}`,
-            cleanPrice: vatInfo.priceWithVAT || getNumber('CleanPrice', 'Price', 'price'),
+            // Price - use original price from source
+            price: priceString 
+                ? priceString.replace(/\s*\+\s*VAT/gi, '').trim() // Remove "+ VAT" text but keep the price
+                : (vatInfo.priceWithVAT > 0 ? `€${vatInfo.priceWithVAT.toLocaleString()}` : 'Price on request'),
+            cleanPrice: vatInfo.priceWithVAT || 0,
             priceWithoutVAT: vatInfo.priceWithoutVAT,
             priceWithVAT: vatInfo.priceWithVAT,
             hasVAT: vatInfo.hasVAT,

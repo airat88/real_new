@@ -294,12 +294,12 @@
 
         // Format price
         function formatPrice(price) {
-            if (typeof price === 'number') {
+            if (typeof price === 'number' && price > 0) {
                 return '€' + price.toLocaleString();
             }
             if (typeof price === 'string') {
                 const num = parseInt(price.replace(/[^\d]/g, ''));
-                if (!isNaN(num)) return '€' + num.toLocaleString();
+                if (!isNaN(num) && num > 0) return '€' + num.toLocaleString();
             }
             return price || 'Price on request';
         }
@@ -364,9 +364,6 @@
             if (prop.parking) features.push('Parking');
             if (prop.seaView) features.push('Sea View');
 
-            // Get price from source
-            const basePrice = prop.cleanPrice || parseInt((prop.price || '').toString().replace(/[^\d]/g, ''));
-
             const html = `
                 <div class="property-gallery">
                     <img src="${photo}" id="propertyImage" alt="${prop.title || 'Property'}"
@@ -382,7 +379,7 @@
                     <h1 class="property-title">${prop.title || 'Property for Sale'}</h1>
                     
                     <div class="property-price">
-                        ${formatPrice(basePrice)}
+                        ${prop.price || 'Price on request'}
                     </div>
 
                     <div class="property-location">
