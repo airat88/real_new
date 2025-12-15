@@ -24,7 +24,142 @@
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="../assets/icons/icon-192.png">
 
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+
     <style>
+        .share-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s;
+        }
+        
+        .share-modal-content {
+            background: white;
+            border-radius: 20px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            animation: slideUp 0.3s;
+        }
+        
+        .share-header {
+            padding: 24px;
+            border-bottom: 1px solid #e5e7eb;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .share-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+        }
+        
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #666;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            transition: background 0.3s;
+        }
+        
+        .close-btn:hover {
+            background: #f3f4f6;
+        }
+        
+        .share-body {
+            padding: 24px;
+        }
+        
+        .link-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .link-input {
+            flex: 1;
+            padding: 12px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            font-family: 'Courier New', monospace;
+            font-size: 0.9rem;
+        }
+        
+        .share-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+        }
+        
+        .share-btn {
+            padding: 15px;
+            border: 2px solid #e5e7eb;
+            border-radius: 8px;
+            background: white;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .share-btn:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .qr-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.8);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 10000;
+        }
+        
+        .qr-content {
+            background: white;
+            padding: 30px;
+            border-radius: 20px;
+            text-align: center;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
+        
+        @keyframes slideUp {
+            from {
+                transform: translateY(50px);
+                opacity: 0;
+            }
+            to {
+                transform: translateY(0);
+                opacity: 1;
+            }
+        }
+
         .selections-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -481,6 +616,27 @@
             color: var(--primary);
             border-radius: var(--radius);
             font-size: 0.875rem;
+        }
+
+        .toast-notification {
+            position: fixed;
+            bottom: -100px;
+            right: 30px;
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            padding: 16px 24px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.2);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            font-weight: 600;
+            z-index: 9999;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .toast-notification.show {
+            bottom: 30px;
         }
 
         @media (max-width: 600px) {
@@ -956,7 +1112,7 @@
                                 </div>
                             </div>
                             <div class="selection-card__actions">
-                                <button class="btn btn-secondary" onclick="copyLink('${s.token}')">Copy Link</button>
+                                <button class="btn btn-secondary" onclick="showShareModal('${s.token}')">📤 Share</button>
                                 <button class="btn btn-secondary" onclick="previewSelection('${s.token}')">Preview</button>
                                 <button class="btn btn-primary" onclick="viewSelectionDetails('${s.id}')">Details</button>
                             </div>
@@ -998,8 +1154,28 @@
         function copyLink(token) {
             const link = SupabaseClient.buildSelectionLink(token);
             navigator.clipboard.writeText(link).then(() => {
-                alert('Link copied to clipboard!');
+                showToast('✓ Ссылка скопирована в буфер обмена!');
             });
+        }
+
+        function showToast(message) {
+            // Создаём элемент уведомления
+            const toast = document.createElement('div');
+            toast.className = 'toast-notification';
+            toast.innerHTML = `
+                <span style="font-size: 1.2rem;">✓</span>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+
+            // Показываем с анимацией
+            setTimeout(() => toast.classList.add('show'), 10);
+
+            // Убираем через 3 секунды
+            setTimeout(() => {
+                toast.classList.remove('show');
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
         }
 
         async function deleteSelection(id) {
@@ -1322,6 +1498,104 @@
                 }
             }
         });
+
+        function showShareModal(token) {
+            const link = SupabaseClient.buildSelectionLink(token);
+            const selection = selections.find(s => s.token === token);
+
+            const modal = document.createElement('div');
+            modal.className = 'share-modal';
+            modal.onclick = (e) => {
+                if (e.target === modal) modal.remove();
+            };
+
+            modal.innerHTML = `
+                <div class="share-modal-content">
+                    <div class="share-header">
+                        <h2>📤 Поделиться подборкой</h2>
+                        <button onclick="this.parentElement.parentElement.parentElement.remove()" class="close-btn">✕</button>
+                    </div>
+
+                    <div class="share-body">
+                        <p style="color: #666; margin-bottom: 20px;">
+                            Поделитесь ссылкой с клиентом. Регистрация не требуется!
+                        </p>
+
+                        <div class="link-box">
+                            <input type="text" readonly value="${link}" class="link-input">
+                            <button onclick="quickCopy('${link}')" class="btn btn-primary">
+                                📋 Копировать
+                            </button>
+                        </div>
+
+                        <div class="share-options">
+                            <button onclick="shareWhatsApp('${link}', '${selection.name}')" class="share-btn">
+                                💬 WhatsApp
+                            </button>
+                            <button onclick="shareEmail('${link}', '${selection.name}')" class="share-btn">
+                                ✉️ Email
+                            </button>
+                            <button onclick="shareTelegram('${link}', '${selection.name}')" class="share-btn">
+                                ✈️ Telegram
+                            </button>
+                            <button onclick="showQR('${link}')" class="share-btn">
+                                📱 QR-код
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.body.appendChild(modal);
+        }
+
+        function quickCopy(link) {
+            navigator.clipboard.writeText(link);
+            showToast('✓ Ссылка скопирована!');
+        }
+
+        function shareWhatsApp(link, name) {
+            const text = `Посмотрите подборку недвижимости: ${name}\n${link}`;
+            window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
+        function shareEmail(link, name) {
+            const subject = `Подборка недвижимости: ${name}`;
+            const body = `Здравствуйте!\n\nПосмотрите подборку:\n${link}`;
+            window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        }
+
+        function shareTelegram(link, name) {
+            window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(name)}`, '_blank');
+        }
+
+        function showQR(link) {
+            const qrModal = document.createElement('div');
+            qrModal.className = 'qr-modal';
+            qrModal.onclick = (e) => {
+                if (e.target === qrModal) qrModal.remove();
+            };
+
+            qrModal.innerHTML = `
+                <div class="qr-content">
+                    <h3>Отсканируйте QR-код</h3>
+                    <div id="qrcode" style="padding: 20px; background: white; border-radius: 8px; margin: 20px auto;"></div>
+                    <button onclick="this.parentElement.parentElement.remove()" class="btn btn-primary">
+                        Закрыть
+                    </button>
+                </div>
+            `;
+            
+            document.body.appendChild(qrModal);
+            
+            new QRCode(document.getElementById('qrcode'), {
+                text: link,
+                width: 256,
+                height: 256,
+                colorDark: '#1e1b4b',
+                colorLight: '#ffffff'
+            });
+        }
 
         // Mobile menu toggle
         function toggleMobileMenu() {
