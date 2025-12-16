@@ -118,12 +118,25 @@
             cursor: pointer;
             font-weight: 600;
             transition: all 0.3s;
+            text-align: center;
+            line-height: 1.3;
         }
         
         .share-btn:hover {
             border-color: var(--primary-color);
             transform: translateY(-2px);
             box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        }
+        
+        .share-btn[title] {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border-color: #667eea;
+        }
+        
+        .share-btn[title]:hover {
+            transform: translateY(-2px) scale(1.02);
+            box-shadow: 0 6px 20px rgba(102, 126, 234, 0.3);
         }
         
         .qr-modal {
@@ -1522,11 +1535,69 @@
             const selectionName = selection ? selection.name : 'Property Selection';
             console.log('Selection found:', selection);
 
+            // Get client information
+            const client = selection?.clients || null;
+            const clientEmail = client?.email || null;
+            const clientPhone = client?.phone || null;
+            const clientName = client?.name || selection?.client_name || null;
+
+            console.log('Client info:', { clientName, clientEmail, clientPhone });
+
             const modal = document.createElement('div');
             modal.className = 'share-modal';
             modal.onclick = (e) => {
                 if (e.target === modal) modal.remove();
             };
+
+            // Build share options HTML
+            let shareOptionsHTML = '';
+
+            // WhatsApp button - with or without phone
+            if (clientPhone) {
+                // Direct WhatsApp to client's phone
+                const cleanPhone = clientPhone.replace(/[^0-9+]/g, '');
+                shareOptionsHTML += `
+                    <button onclick="shareWhatsAppDirect('${link}', '${selectionName}', '${cleanPhone}', '${clientName}')" class="share-btn" title="Отправить ${clientName}">
+                        💬 WhatsApp
+                        <div style="font-size: 0.75rem; opacity: 0.7; margin-top: 2px;">${clientName}</div>
+                    </button>
+                `;
+            } else {
+                // Generic WhatsApp share
+                shareOptionsHTML += `
+                    <button onclick="shareWhatsApp('${link}', '${selectionName}')" class="share-btn">
+                        💬 WhatsApp
+                    </button>
+                `;
+            }
+
+            // Email button - with or without email
+            if (clientEmail) {
+                // Direct email to client
+                shareOptionsHTML += `
+                    <button onclick="shareEmailDirect('${link}', '${selectionName}', '${clientEmail}', '${clientName}')" class="share-btn" title="Отправить ${clientName}">
+                        ✉️ Email
+                        <div style="font-size: 0.75rem; opacity: 0.7; margin-top: 2px;">${clientEmail}</div>
+                    </button>
+                `;
+            } else {
+                // Generic email share
+                shareOptionsHTML += `
+                    <button onclick="shareEmail('${link}', '${selectionName}')" class="share-btn">
+                        ✉️ Email
+                    </button>
+                `;
+            }
+
+            // Telegram and QR always generic
+            shareOptionsHTML += `
+                <button onclick="shareTelegram('${link}', '${selectionName}')" class="share-btn">
+                    ✈️ Telegram
+                </button>
+                <button onclick="showQR('${link}')" class="share-btn">
+                    📱 QR-код
+                </button>
+            `;
 
             modal.innerHTML = `
                 <div class="share-modal-content">
@@ -1536,8 +1607,13 @@
                     </div>
 
                     <div class="share-body">
+                        ${clientName ? `
+                            <p style="color: #666; margin-bottom: 10px;">
+                                <strong>Клиент:</strong> ${clientName}
+                            </p>
+                        ` : ''}
                         <p style="color: #666; margin-bottom: 20px;">
-                            Поделитесь ссылкой с клиентом. Регистрация не требуется!
+                            ${clientName ? 'Отправьте' : 'Поделитесь'} ссылкой с клиентом. Регистрация не требуется!
                         </p>
 
                         <div class="link-box">
@@ -1548,18 +1624,7 @@
                         </div>
 
                         <div class="share-options">
-                            <button onclick="shareWhatsApp('${link}', '${selectionName}')" class="share-btn">
-                                💬 WhatsApp
-                            </button>
-                            <button onclick="shareEmail('${link}', '${selectionName}')" class="share-btn">
-                                ✉️ Email
-                            </button>
-                            <button onclick="shareTelegram('${link}', '${selectionName}')" class="share-btn">
-                                ✈️ Telegram
-                            </button>
-                            <button onclick="showQR('${link}')" class="share-btn">
-                                📱 QR-код
-                            </button>
+                            ${shareOptionsHTML}
                         </div>
                     </div>
                 </div>
@@ -1578,10 +1643,21 @@
             window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, '_blank');
         }
 
+        function shareWhatsAppDirect(link, name, phone, clientName) {
+            const text = `Здравствуйте, ${clientName}!\n\nПодготовил для вас подборку недвижимости: ${name}\n\nПосмотреть: ${link}`;
+            window.open(`https://wa.me/${phone}?text=${encodeURIComponent(text)}`, '_blank');
+        }
+
         function shareEmail(link, name) {
             const subject = `Подборка недвижимости: ${name}`;
             const body = `Здравствуйте!\n\nПосмотрите подборку:\n${link}`;
             window.location.href = `mailto:?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
+        }
+
+        function shareEmailDirect(link, name, email, clientName) {
+            const subject = `Подборка недвижимости: ${name}`;
+            const body = `Здравствуйте, ${clientName}!\n\nПодготовил для вас подборку недвижимости на Кипре.\n\nПосмотреть подборку: ${link}\n\nЛюбые вопросы - обращайтесь!\n\nС уважением`;
+            window.location.href = `mailto:${email}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(body)}`;
         }
 
         function shareTelegram(link, name) {

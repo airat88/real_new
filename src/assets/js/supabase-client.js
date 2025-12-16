@@ -133,11 +133,25 @@ const SupabaseClient = {
     async getBrokerSelections() {
         if (!this.init()) return [];
 
-        const { data, error } = await this.client
+        // Try to fetch with client data join
+        let { data, error } = await this.client
             .from('selections')
-            .select('*')
+            .select('*, clients(id, name, email, phone)')
             .eq('broker_id', this.DEFAULT_BROKER_ID)
             .order('created_at', { ascending: false });
+
+        // If error (e.g., clients table doesn't exist), try without join
+        if (error) {
+            console.warn('Failed to fetch with clients join, trying without:', error.message);
+            const result = await this.client
+                .from('selections')
+                .select('*')
+                .eq('broker_id', this.DEFAULT_BROKER_ID)
+                .order('created_at', { ascending: false });
+            
+            data = result.data;
+            error = result.error;
+        }
 
         if (error) {
             console.error('Error fetching selections:', error);
