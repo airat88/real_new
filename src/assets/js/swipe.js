@@ -614,10 +614,10 @@ class SwipeApp {
                     <span>${property.location || 'Cyprus'}</span>
                 </div>
                 
-                ${property.url ? `
+                ${property.broker_phone || property.brokerPhone ? `
                 <div style="margin-top: 20px;">
-                    <a href="${property.url}" target="_blank" class="btn btn-primary" style="text-decoration: none; display: inline-block; padding: 12px 24px; border-radius: 8px; font-weight: 500;">
-                        🔗 View on Website
+                    <a href="tel:${property.broker_phone || property.brokerPhone}" class="btn btn-primary" style="text-decoration: none; display: inline-block; padding: 14px 28px; background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 12px; font-weight: 600; border: none; box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4); transition: all 0.3s; text-align: center; width: 100%; font-size: 1rem;">
+                        📞 Позвонить брокеру
                     </a>
                 </div>
                 ` : ''}

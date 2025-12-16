@@ -175,6 +175,50 @@
             }
         }
 
+        /* Мобильная адаптация для share modal */
+        @media (max-width: 480px) {
+            .share-modal-content {
+                width: 95%;
+                max-height: 85vh;
+            }
+
+            .share-options {
+                grid-template-columns: 1fr;
+            }
+
+            .link-box {
+                flex-direction: column;
+            }
+
+            .link-box button {
+                width: 100%;
+            }
+
+            .share-header h2 {
+                font-size: 1.25rem;
+            }
+
+            .share-body {
+                padding: 16px;
+            }
+
+            .share-header {
+                padding: 16px;
+            }
+        }
+
+        @media (max-width: 768px) and (min-width: 481px) {
+            .share-modal-content {
+                width: 90%;
+                max-height: 88vh;
+            }
+        }
+
+        /* Улучшенная прокрутка для iOS */
+        .share-modal-content {
+            -webkit-overflow-scrolling: touch;
+        }
+
         .selections-grid {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
@@ -1589,6 +1633,23 @@
                 `;
             }
 
+            // Viber button - with or without phone
+            if (clientPhone) {
+                const cleanPhone = clientPhone.replace(/[^0-9+]/g, '');
+                shareOptionsHTML += `
+                    <button onclick="shareViberDirect('${link}', '${selectionName}', '${cleanPhone}', '${clientName}')" class="share-btn" title="Отправить ${clientName}">
+                        📱 Viber
+                        <div style="font-size: 0.75rem; opacity: 0.7; margin-top: 2px;">${clientName}</div>
+                    </button>
+                `;
+            } else {
+                shareOptionsHTML += `
+                    <button onclick="shareViber('${link}', '${selectionName}')" class="share-btn">
+                        📱 Viber
+                    </button>
+                `;
+            }
+
             // Telegram and QR always generic
             shareOptionsHTML += `
                 <button onclick="shareTelegram('${link}', '${selectionName}')" class="share-btn">
@@ -1662,6 +1723,20 @@
 
         function shareTelegram(link, name) {
             window.open(`https://t.me/share/url?url=${encodeURIComponent(link)}&text=${encodeURIComponent(name)}`, '_blank');
+        }
+
+        function shareViber(link, name, phone = null) {
+            const text = encodeURIComponent(`Посмотрите подборку недвижимости: ${name}\n\n${link}`);
+            if (phone) {
+                window.open(`viber://chat?number=${encodeURIComponent(phone)}&text=${text}`, '_blank');
+            } else {
+                window.open(`viber://forward?text=${text}`, '_blank');
+            }
+        }
+
+        function shareViberDirect(link, name, phone, clientName) {
+            const text = encodeURIComponent(`Здравствуйте, ${clientName}!\n\nПодготовил для вас подборку недвижимости: ${name}\n\nПосмотреть: ${link}`);
+            window.open(`viber://chat?number=${encodeURIComponent(phone)}&text=${text}`, '_blank');
         }
 
         function showQR(link) {

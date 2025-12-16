@@ -787,6 +787,65 @@
     .swipe-actions {
         padding: var(--space-md) var(--space-lg) var(--space-xl);
     }
+
+    /* Улучшенная адаптация модального окна для маленьких экранов */
+    .details-modal__content {
+        max-height: 98vh;
+        width: 100%;
+        border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+    }
+
+    .details-modal__body {
+        padding: var(--space-sm);
+    }
+
+    .details-gallery__main {
+        max-height: 35vh;
+    }
+
+    .details-gallery__main img {
+        max-height: 35vh;
+        object-fit: cover;
+    }
+
+    .details-stats {
+        grid-template-columns: repeat(3, 1fr);
+        gap: var(--space-xs);
+    }
+
+    .details-stat__value {
+        font-size: 1.25rem;
+    }
+
+    .details-stat__label {
+        font-size: 0.75rem;
+    }
+}
+
+@media (max-width: 768px) and (min-width: 481px) {
+    /* Адаптация для средних мобильных устройств */
+    .details-modal__content {
+        max-height: 95vh;
+        border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
+        position: fixed;
+        bottom: 0;
+        left: 0;
+        right: 0;
+        width: 100%;
+    }
+
+    .details-modal__body {
+        padding: var(--space-md);
+    }
+
+    .details-gallery__main img {
+        max-height: 40vh;
+        object-fit: cover;
+    }
 }
 
 @media (min-width: 768px) {
