@@ -122,7 +122,10 @@
             const loadingScreen = document.getElementById('loadingScreen');
             const errorScreen = document.getElementById('errorScreen');
 
+            console.log('Initializing selection with token:', token);
+
             if (!token) {
+                console.error('No token provided in URL');
                 loadingScreen.style.display = 'none';
                 errorScreen.classList.add('error-screen--active');
                 return;
@@ -130,29 +133,55 @@
 
             try {
                 // Load CSV data
+                console.log('Loading property data...');
                 await DataSync.syncProperties();
                 const allProperties = DataSync.getProperties();
+                console.log('Loaded properties:', allProperties.length);
 
                 // Get selection from Supabase
+                console.log('Fetching selection from database...');
                 const selection = await SupabaseClient.getSelectionByToken(token);
+                console.log('Selection result:', selection);
 
-                if (!selection || !selection.property_ids || selection.property_ids.length === 0) {
-                    throw new Error('Selection not found or empty');
+                if (!selection) {
+                    throw new Error('Selection not found - getSelectionByToken returned null');
                 }
+
+                if (selection.expired) {
+                    throw new Error('Selection has expired');
+                }
+
+                if (!selection.property_ids) {
+                    throw new Error('Selection has no property_ids field');
+                }
+
+                if (!Array.isArray(selection.property_ids)) {
+                    throw new Error('property_ids is not an array: ' + typeof selection.property_ids);
+                }
+
+                if (selection.property_ids.length === 0) {
+                    throw new Error('Selection property_ids array is empty');
+                }
+
+                console.log('Selection property IDs:', selection.property_ids);
 
                 // Filter properties for this selection
                 const selectedProperties = allProperties.filter(p => 
                     selection.property_ids.includes(p.id)
                 );
 
+                console.log('Filtered properties:', selectedProperties.length);
+
                 if (selectedProperties.length === 0) {
-                    throw new Error('No properties found in this selection');
+                    throw new Error('No matching properties found. Property IDs in selection: ' + 
+                        selection.property_ids.join(', '));
                 }
 
                 // Hide loading screen
                 loadingScreen.style.display = 'none';
 
                 // Initialize SwipeApp with filtered properties
+                console.log('Initializing SwipeApp...');
                 const swipeApp = new SwipeApp('swipeContainer', {
                     properties: selectedProperties,
                     selectionId: selection.id,
@@ -160,10 +189,19 @@
                     selectionName: selection.name
                 });
 
+                console.log('SwipeApp initialized successfully');
+
             } catch (error) {
                 console.error('Error loading selection:', error);
+                console.error('Error stack:', error.stack);
                 loadingScreen.style.display = 'none';
                 errorScreen.classList.add('error-screen--active');
+                
+                // Show error details in console for debugging
+                console.error('Debug info:', {
+                    token: token,
+                    url: window.location.href
+                });
             }
         }
 

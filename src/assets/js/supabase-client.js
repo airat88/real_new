@@ -39,6 +39,7 @@ const SupabaseClient = {
         if (!this.init()) throw new Error('Supabase not initialized');
 
         const token = this.generateToken();
+        console.log('Creating selection with token:', token);
 
         const insertData = {
             broker_id: this.DEFAULT_BROKER_ID,
@@ -55,6 +56,8 @@ const SupabaseClient = {
             insertData.client_id = clientId;
         }
 
+        console.log('Insert data:', insertData);
+
         const { data, error } = await this.client
             .from('selections')
             .insert(insertData)
@@ -63,10 +66,13 @@ const SupabaseClient = {
 
         if (error) {
             console.error('Error creating selection:', error);
+            console.error('Error details:', error.message, error.details, error.hint);
             throw error;
         }
 
-        console.log('Selection created:', data);
+        console.log('Selection created successfully:', data);
+        console.log('Generated link:', this.buildSelectionLink(token));
+        
         return {
             ...data,
             link: this.buildSelectionLink(token)
@@ -75,21 +81,48 @@ const SupabaseClient = {
 
     // Get selection by token (for client swipe page)
     async getSelectionByToken(token) {
-        if (!this.init()) return null;
+        if (!this.init()) {
+            console.error('Supabase not initialized');
+            return null;
+        }
 
-        const { data, error } = await this.client
+        console.log('Fetching selection with token:', token);
+
+        // First try with brokers join
+        let { data, error } = await this.client
             .from('selections')
             .select('*, brokers(*)')
             .eq('token', token)
             .single();
+
+        // If error (e.g., brokers table doesn't exist), try without join
+        if (error) {
+            console.warn('Failed to fetch with brokers join, trying without:', error.message);
+            const result = await this.client
+                .from('selections')
+                .select('*')
+                .eq('token', token)
+                .single();
+            
+            data = result.data;
+            error = result.error;
+        }
 
         if (error) {
             console.error('Error fetching selection:', error);
             return null;
         }
 
-        // Check if expired
-        if (data && new Date(data.expires_at) < new Date()) {
+        if (!data) {
+            console.error('No selection found with token:', token);
+            return null;
+        }
+
+        console.log('Selection found:', data);
+
+        // Check if expired (only if expires_at field exists)
+        if (data.expires_at && new Date(data.expires_at) < new Date()) {
+            console.warn('Selection has expired');
             return { ...data, expired: true };
         }
 
