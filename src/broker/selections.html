@@ -100,6 +100,8 @@
             border-radius: 8px;
             font-family: 'Courier New', monospace;
             font-size: 0.9rem;
+            color: #1f2937;
+            background-color: #f9fafb;
         }
         
         .share-options {
@@ -1508,8 +1510,17 @@
         });
 
         function showShareModal(token) {
+            // Debug: log the token
+            console.log('showShareModal called with token:', token);
+            
             const link = SupabaseClient.buildSelectionLink(token);
+            console.log('Generated link:', link);
+            
             const selection = selections.find(s => s.token === token);
+            
+            // Fallback if selection not found
+            const selectionName = selection ? selection.name : 'Property Selection';
+            console.log('Selection found:', selection);
 
             const modal = document.createElement('div');
             modal.className = 'share-modal';
@@ -1537,13 +1548,13 @@
                         </div>
 
                         <div class="share-options">
-                            <button onclick="shareWhatsApp('${link}', '${selection.name}')" class="share-btn">
+                            <button onclick="shareWhatsApp('${link}', '${selectionName}')" class="share-btn">
                                 💬 WhatsApp
                             </button>
-                            <button onclick="shareEmail('${link}', '${selection.name}')" class="share-btn">
+                            <button onclick="shareEmail('${link}', '${selectionName}')" class="share-btn">
                                 ✉️ Email
                             </button>
-                            <button onclick="shareTelegram('${link}', '${selection.name}')" class="share-btn">
+                            <button onclick="shareTelegram('${link}', '${selectionName}')" class="share-btn">
                                 ✈️ Telegram
                             </button>
                             <button onclick="showQR('${link}')" class="share-btn">
