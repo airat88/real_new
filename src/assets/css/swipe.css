@@ -772,8 +772,17 @@
 
 /* Responsive */
 @media (max-width: 480px) {
+    /* КРИТИЧНО: Вертикальное расположение карточки и кнопок */
+    .swipe-container {
+        flex-direction: column;
+        justify-content: flex-start;
+        padding: var(--space-md) var(--space-sm);
+    }
+
     .cards-stack {
         max-width: 100%;
+        width: 100%;
+        flex-shrink: 0;
     }
 
     .property-card__price {
@@ -784,8 +793,24 @@
         font-size: 1.1rem;
     }
 
+    /* Кнопки действий под карточкой */
     .swipe-actions {
-        padding: var(--space-md) var(--space-lg) var(--space-xl);
+        padding: var(--space-lg) var(--space-lg) var(--space-xl);
+        width: 100%;
+        flex-shrink: 0;
+    }
+
+    .action-btn--dislike,
+    .action-btn--like {
+        width: 70px;
+        height: 70px;
+        font-size: 1.75rem;
+    }
+
+    .action-btn--info {
+        width: 60px;
+        height: 60px;
+        font-size: 1.5rem;
     }
 
     /* Улучшенная адаптация модального окна для маленьких экранов */
@@ -828,6 +853,23 @@
 
 @media (max-width: 768px) and (min-width: 481px) {
     /* Адаптация для средних мобильных устройств */
+    .swipe-container {
+        flex-direction: column;
+        justify-content: flex-start;
+    }
+
+    .cards-stack {
+        width: 100%;
+        max-width: 400px;
+        flex-shrink: 0;
+    }
+
+    .swipe-actions {
+        width: 100%;
+        padding: var(--space-lg) var(--space-xl) var(--space-2xl);
+        flex-shrink: 0;
+    }
+
     .details-modal__content {
         max-height: 95vh;
         border-radius: var(--radius-2xl) var(--radius-2xl) 0 0;
@@ -849,6 +891,11 @@
 }
 
 @media (min-width: 768px) {
+    /* Десктоп: горизонтальное расположение */
+    .swipe-container {
+        flex-direction: row;
+    }
+
     .cards-stack {
         max-width: 380px;
         aspect-ratio: 2/3;
