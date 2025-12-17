@@ -471,11 +471,16 @@
         }
 
         .property-reaction-item--liked {
-            border-left: 4px solid var(--success);
+            /* Border removed - reaction now shown under image */
         }
 
         .property-reaction-item--disliked {
-            border-left: 4px solid var(--danger);
+            /* Border removed - reaction now shown under image */
+        }
+
+        .property-reaction-item__image-wrapper {
+            position: relative;
+            flex-shrink: 0;
         }
 
         .property-reaction-item__image {
@@ -484,6 +489,31 @@
             object-fit: cover;
             border-radius: var(--radius);
             background: var(--gray-200);
+            display: block;
+        }
+
+        .property-reaction-item__reaction {
+            position: absolute;
+            bottom: -8px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
+            border: 2px solid var(--white);
+        }
+
+        .property-reaction-item--liked .property-reaction-item__reaction {
+            background: var(--success);
+        }
+
+        .property-reaction-item--disliked .property-reaction-item__reaction {
+            background: var(--danger);
         }
 
         .property-reaction-item__info {
@@ -1379,13 +1409,19 @@
             const title = reaction.property_title || prop.title || 'Unknown Property';
             const price = prop.price || (prop.cleanPrice ? `€${prop.cleanPrice.toLocaleString()}` : 'Price N/A');
             const location = prop.location || '';
+            
+            // Determine reaction icon
+            const reactionIcon = type === 'liked' ? '❤️' : '👎';
 
             return `
                 <div class="property-reaction-item property-reaction-item--${type}"
                      onclick="openPropertyModal('${reaction.property_id}')"
                      title="Click to view details">
-                    <img src="${photo}" class="property-reaction-item__image"
-                         onerror="this.src='https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'">
+                    <div class="property-reaction-item__image-wrapper">
+                        <img src="${photo}" class="property-reaction-item__image"
+                             onerror="this.src='https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'">
+                        <div class="property-reaction-item__reaction">${reactionIcon}</div>
+                    </div>
                     <div class="property-reaction-item__info">
                         <div class="property-reaction-item__title">${title}</div>
                         <div class="property-reaction-item__meta">${price} ${location ? '• ' + location : ''}</div>
