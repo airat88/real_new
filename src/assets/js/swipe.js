@@ -310,6 +310,18 @@ class SwipeApp {
 
             <div class="property-card__tap-hint">Tap for details</div>
 
+            <div class="property-card__actions">
+                <button class="card-action-btn card-action-btn--dislike" data-action="dislike" title="Not interested">
+                    ✕
+                </button>
+                <button class="card-action-btn card-action-btn--info" data-action="info" title="More details">
+                    ℹ️
+                </button>
+                <button class="card-action-btn card-action-btn--like" data-action="like" title="Like it!">
+                    ♥
+                </button>
+            </div>
+
             <div class="property-card__content">
                 <div class="property-card__price">
                     <div>${price}</div>
@@ -332,6 +344,8 @@ class SwipeApp {
 
     renderActions() {
         const actions = document.querySelector('.swipe-actions');
+        // Hide bottom actions since we now have them on the card
+        actions.style.display = 'none';
         actions.innerHTML = `
             <button class="action-btn action-btn--dislike" data-action="dislike" title="Not interested">
                 ✕
@@ -346,16 +360,19 @@ class SwipeApp {
     }
 
     bindEvents() {
-        // Action buttons
-        document.querySelector('.swipe-actions').addEventListener('click', (e) => {
-            const btn = e.target.closest('[data-action]');
-            if (!btn) return;
+        // Action buttons (bottom - keep for backward compatibility)
+        const bottomActions = document.querySelector('.swipe-actions');
+        if (bottomActions) {
+            bottomActions.addEventListener('click', (e) => {
+                const btn = e.target.closest('[data-action]');
+                if (!btn) return;
 
-            const action = btn.dataset.action;
-            if (action === 'like') this.swipe('like');
-            else if (action === 'dislike') this.swipe('dislike');
-            else if (action === 'info') this.showDetails();
-        });
+                const action = btn.dataset.action;
+                if (action === 'like') this.swipe('like');
+                else if (action === 'dislike') this.swipe('dislike');
+                else if (action === 'info') this.showDetails();
+            });
+        }
 
         // Card touch/mouse events
         this.bindCardEvents();
@@ -367,10 +384,21 @@ class SwipeApp {
             else if (e.key === ' ' || e.key === 'Enter') this.showDetails();
         });
 
-        // Card click handler - click anywhere opens info/details
+        // Card click handler
         document.querySelector('.cards-stack').addEventListener('click', (e) => {
             const card = e.target.closest('.property-card');
             if (!card || card.classList.contains('property-card--behind')) return;
+
+            // If clicking card action buttons - handle action
+            const actionBtn = e.target.closest('[data-action]');
+            if (actionBtn) {
+                e.stopPropagation(); // Prevent opening details
+                const action = actionBtn.dataset.action;
+                if (action === 'like') this.swipe('like');
+                else if (action === 'dislike') this.swipe('dislike');
+                else if (action === 'info') this.showDetails();
+                return;
+            }
 
             // If clicking the gallery dots - navigate photos
             if (e.target.classList.contains('gallery-dot')) {

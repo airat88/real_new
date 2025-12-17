@@ -158,6 +158,64 @@
     z-index: 5;
 }
 
+/* Card action buttons - positioned below photo */
+.property-card__actions {
+    position: absolute;
+    top: auto;
+    bottom: 220px; /* Adjust based on content height */
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-md);
+    z-index: 15;
+    padding: var(--space-md);
+}
+
+.card-action-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-full);
+    border: none;
+    cursor: pointer;
+    transition: all var(--transition);
+    box-shadow: var(--shadow-xl);
+    background: var(--white);
+    backdrop-filter: blur(10px);
+}
+
+.card-action-btn:hover {
+    transform: scale(1.15);
+}
+
+.card-action-btn:active {
+    transform: scale(0.9);
+}
+
+.card-action-btn--dislike {
+    width: 56px;
+    height: 56px;
+    color: var(--danger);
+    font-size: 1.5rem;
+}
+
+.card-action-btn--info {
+    width: 48px;
+    height: 48px;
+    color: var(--primary);
+    font-size: 1.25rem;
+}
+
+.card-action-btn--like {
+    width: 56px;
+    height: 56px;
+    background: var(--success);
+    color: var(--white);
+    font-size: 1.5rem;
+}
+
 .property-card__price {
     font-size: 2rem;
     font-weight: 700;
@@ -798,18 +856,25 @@
         padding: var(--space-lg) var(--space-lg) var(--space-xl);
         width: 100%;
         flex-shrink: 0;
+        display: none !important; /* Hide bottom buttons on mobile */
     }
 
-    .action-btn--dislike,
-    .action-btn--like {
-        width: 70px;
-        height: 70px;
+    /* Card action buttons on mobile */
+    .property-card__actions {
+        bottom: 180px; /* Adjust for mobile */
+        gap: var(--space-sm);
+    }
+
+    .card-action-btn--dislike,
+    .card-action-btn--like {
+        width: 60px;
+        height: 60px;
         font-size: 1.75rem;
     }
 
-    .action-btn--info {
-        width: 60px;
-        height: 60px;
+    .card-action-btn--info {
+        width: 50px;
+        height: 50px;
         font-size: 1.5rem;
     }
 
@@ -868,6 +933,12 @@
         width: 100%;
         padding: var(--space-lg) var(--space-xl) var(--space-2xl);
         flex-shrink: 0;
+        display: none !important; /* Hide bottom buttons */
+    }
+
+    /* Card action buttons for medium devices */
+    .property-card__actions {
+        bottom: 200px;
     }
 
     .details-modal__content {
