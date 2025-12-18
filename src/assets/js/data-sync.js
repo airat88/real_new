@@ -312,6 +312,9 @@ const DataSync = {
             description: getString('Description', 'description'),
             additionalInfo: getString('AdditionalInformation', 'AdditionalInfo', 'Notes'),
 
+            // Object code
+            object: getString('Object', 'ObjectCode', 'Code'),
+
             // Meta
             syncedAt: new Date().toISOString()
         };

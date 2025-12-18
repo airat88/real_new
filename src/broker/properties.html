@@ -834,6 +834,13 @@
                                 <input type="checkbox" id="hasSeaView"> Sea View
                             </label>
                         </div>
+                        <div class="filter-group">
+                            <label class="filter-group__label">Object Code</label>
+                            <input type="text" class="input" placeholder="e.g. KZ-8091, CA-1291..." id="objectCodeFilter">
+                            <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 4px; display: block;">
+                                Search by object code (comma separated for multiple)
+                            </small>
+                        </div>
                     </div>
                 </div>
 
@@ -1294,6 +1301,9 @@
             const hasParking = document.getElementById('hasParking').checked;
             const hasSeaView = document.getElementById('hasSeaView').checked;
 
+            // Object code filter
+            const objectCodeFilter = document.getElementById('objectCodeFilter').value.trim();
+
             // Delivery date filter
             const deliveryFilter = document.getElementById('deliveryFilter')?.value || '';
 
@@ -1400,6 +1410,16 @@
                 if (hasPool && !features.includes('pool')) return false;
                 if (hasParking && !features.includes('parking')) return false;
                 if (hasSeaView && !(features.includes('sea view') || features.includes('sea-view') || features.includes('seaview'))) return false;
+
+                // Object code filter
+                if (objectCodeFilter) {
+                    const objectCodes = objectCodeFilter.split(',').map(code => code.trim().toUpperCase()).filter(code => code);
+                    if (objectCodes.length > 0) {
+                        const propObject = (p.object || '').trim().toUpperCase();
+                        const matches = objectCodes.some(code => propObject.includes(code) || propObject === code);
+                        if (!matches) return false;
+                    }
+                }
 
                 return true;
             });
@@ -1536,6 +1556,7 @@
             document.getElementById('hasPool').checked = false;
             document.getElementById('hasParking').checked = false;
             document.getElementById('hasSeaView').checked = false;
+            document.getElementById('objectCodeFilter').value = '';
 
             // Clear multi-selects
             selectedLocations = [];
@@ -1576,6 +1597,7 @@
             if (document.getElementById('hasPool').checked) count++;
             if (document.getElementById('hasParking').checked) count++;
             if (document.getElementById('hasSeaView').checked) count++;
+            if (document.getElementById('objectCodeFilter').value.trim()) count++;
 
             const badge = document.getElementById('activeFiltersCount');
             if (count > 0) {
@@ -2132,6 +2154,7 @@
         document.getElementById('areaMax').addEventListener('input', onFilterChange);
         document.getElementById('priceSqmMin').addEventListener('input', onFilterChange);
         document.getElementById('priceSqmMax').addEventListener('input', onFilterChange);
+        document.getElementById('objectCodeFilter').addEventListener('input', onFilterChange);
 
         // Checkbox filters
         document.getElementById('hasVeranda').addEventListener('change', () => { updateActiveFiltersCount(); renderProperties(); });
