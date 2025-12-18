@@ -1265,6 +1265,7 @@
                         </div>
                         <div class="property-card-broker__body" onclick="toggleProperty('${p.id}')">
                             <div class="property-card-broker__price">${priceHTML} ${unitLabel}</div>
+                            ${p.projectTitle ? `<div class="property-card-broker__object" style="font-size: 0.85rem; color: var(--gray-600); margin-top: 4px; font-weight: 500;">${p.projectTitle}</div>` : ''}
                             <div class="property-card-broker__title">${p.id || 'Untitled'}</div>
                             ${p.title ? `<div class="property-card-broker__location" style="font-size: 0.75rem; color: var(--gray-500); margin-top: 4px;">${p.title}</div>` : ''}
                             <div class="property-card-broker__location">📍 ${p.location || 'Unknown'}${deliveryBadge ? ` ${deliveryBadge}` : ''}</div>

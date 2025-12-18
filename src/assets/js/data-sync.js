@@ -314,6 +314,7 @@ const DataSync = {
 
             // Object code
             object: getString('Object', 'ObjectCode', 'Code'),
+            projectTitle: projectTitle, // Full project name for display
 
             // Meta
             syncedAt: new Date().toISOString()

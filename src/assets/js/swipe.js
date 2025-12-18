@@ -326,6 +326,7 @@ class SwipeApp {
                 <div class="property-card__price">
                     <div>${price}</div>
                 </div>
+                ${property.projectTitle ? `<div class="property-card__object">${property.projectTitle}</div>` : ''}
                 <div class="property-card__title">${property.title || 'Property'}</div>
                 <div class="property-card__location">
                     <span>📍</span>
@@ -765,6 +766,7 @@ class SwipeApp {
 
         const screen = document.querySelector('.completion-screen');
         const brokerName = this.selectionData?.brokers?.name || 'your broker';
+        const brokerPhone = this.selectionData?.brokers?.phone || null;
 
         screen.innerHTML = `
             <div class="completion-icon">🎉</div>
@@ -792,12 +794,31 @@ class SwipeApp {
                     `).join('')}
                 </div>
             ` : ''}
-            <button class="btn btn-secondary btn-lg" onclick="window.close()" style="margin-bottom: var(--space-md);">
-                Close
-            </button>
+            
+            <div class="completion-actions">
+                ${brokerPhone ? `
+                    <a href="tel:${brokerPhone}" class="btn btn-primary btn-lg" style="text-decoration: none; display: inline-flex; align-items: center; gap: var(--space-sm);">
+                        📞 Call ${brokerName}
+                    </a>
+                ` : ''}
+                <button class="btn btn-secondary btn-lg" onclick="window.swipeAppInstance && window.swipeAppInstance.shareSelection()" style="display: inline-flex; align-items: center; gap: var(--space-sm);">
+                    📤 Share Selection
+                </button>
+                ${dislikes.length > 0 ? `
+                    <button class="btn btn-outline btn-lg" onclick="window.swipeAppInstance && window.swipeAppInstance.reviewDisliked()" style="display: inline-flex; align-items: center; gap: var(--space-sm);">
+                        🔄 Review Disliked (${dislikes.length})
+                    </button>
+                ` : ''}
+                <button class="btn btn-outline btn-lg" onclick="window.close()" style="margin-top: var(--space-md);">
+                    Close
+                </button>
+            </div>
         `;
 
         screen.classList.add('completion-screen--visible');
+
+        // Store instance globally for button callbacks
+        window.swipeAppInstance = this;
 
         console.log('Selection completed:', results);
     }
@@ -894,6 +915,83 @@ class SwipeApp {
                 }
             }
         }, { passive: true });
+    }
+
+    // Share selection method
+    shareSelection() {
+        const likes = this.reactions.filter(r => r.reaction === 'like');
+        const url = window.location.href;
+        const text = `Check out this property selection! I liked ${likes.length} properties.`;
+        
+        if (navigator.share) {
+            navigator.share({
+                title: this.selectionName,
+                text: text,
+                url: url
+            }).then(() => {
+                console.log('Shared successfully');
+            }).catch((error) => {
+                console.log('Error sharing:', error);
+                this.fallbackShare(url);
+            });
+        } else {
+            this.fallbackShare(url);
+        }
+    }
+
+    // Fallback share method
+    fallbackShare(url) {
+        const textArea = document.createElement('textarea');
+        textArea.value = url;
+        textArea.style.position = 'fixed';
+        textArea.style.left = '-999999px';
+        document.body.appendChild(textArea);
+        textArea.select();
+        
+        try {
+            document.execCommand('copy');
+            alert('Link copied to clipboard!');
+        } catch (err) {
+            alert('Link: ' + url);
+        }
+        
+        document.body.removeChild(textArea);
+    }
+
+    // Review disliked properties method
+    reviewDisliked() {
+        const dislikes = this.reactions.filter(r => r.reaction === 'dislike');
+        
+        if (dislikes.length === 0) {
+            return;
+        }
+
+        // Get disliked property IDs
+        const dislikedIds = dislikes.map(r => r.propertyId);
+        
+        // Filter properties to only show disliked ones
+        const dislikedProperties = this.properties.filter(p => dislikedIds.includes(p.id));
+        
+        if (dislikedProperties.length === 0) {
+            return;
+        }
+
+        // Reset state for review
+        this.properties = dislikedProperties;
+        this.currentIndex = 0;
+        this.currentPhotoIndex = 0;
+        
+        // Remove old reactions for these properties to allow re-rating
+        this.reactions = this.reactions.filter(r => !dislikedIds.includes(r.propertyId));
+        
+        // Hide completion screen
+        const screen = document.querySelector('.completion-screen');
+        screen.classList.remove('completion-screen--visible');
+        
+        // Re-render cards
+        this.renderCards();
+        
+        console.log(`Reviewing ${dislikedProperties.length} disliked properties`);
     }
 }
 
