@@ -164,17 +164,38 @@
                 }
 
                 console.log('Selection property IDs:', selection.property_ids);
+                console.log('Property IDs type:', typeof selection.property_ids, Array.isArray(selection.property_ids));
 
-                // Filter properties for this selection
-                const selectedProperties = allProperties.filter(p => 
-                    selection.property_ids.includes(p.id)
-                );
+                // Filter properties for this selection WITH TYPE CONVERSION
+                const propertyIdsStr = selection.property_ids.map(id => String(id));
+                const selectedProperties = allProperties.filter(p => {
+                    const matches = propertyIdsStr.includes(String(p.id));
+                    return matches;
+                });
 
+                console.log('Sample property IDs from data:', allProperties.slice(0, 3).map(p => ({id: p.id, type: typeof p.id})));
                 console.log('Filtered properties:', selectedProperties.length);
 
                 if (selectedProperties.length === 0) {
+                    console.error('⚠️ FILTERING PROBLEM IN swipe.html!');
+                    console.error('property_ids from selection:', selection.property_ids);
+                    console.error('Available property IDs:', allProperties.slice(0, 10).map(p => p.id));
                     throw new Error('No matching properties found. Property IDs in selection: ' + 
-                        selection.property_ids.join(', '));
+                        selection.property_ids.join(', ') + 
+                        '\nAvailable IDs: ' + allProperties.slice(0, 10).map(p => p.id).join(', '));
+                }
+
+                // Add broker_phone to properties if available
+                const brokerPhone = selection.broker_phone || 
+                                   (selection.brokers && selection.brokers.phone) || 
+                                   null;
+                
+                if (brokerPhone) {
+                    selectedProperties.forEach(p => {
+                        p.broker_phone = brokerPhone;
+                        p.brokerPhone = brokerPhone;
+                    });
+                    console.log('📞 Broker phone added to properties:', brokerPhone);
                 }
 
                 // Hide loading screen
@@ -186,7 +207,8 @@
                     properties: selectedProperties,
                     selectionId: selection.id,
                     selectionToken: token,
-                    selectionName: selection.name
+                    selectionName: selection.name,
+                    selectionData: selection  // Pass full selection data for broker info
                 });
 
                 console.log('SwipeApp initialized successfully');
