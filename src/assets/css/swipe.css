@@ -879,7 +879,7 @@
 
     /* Card action buttons on mobile */
     .property-card__actions {
-        bottom: 180px; /* Adjust for mobile */
+        bottom: 240px; /* Adjusted to avoid covering photo on mobile */
         gap: var(--space-sm);
     }
 
@@ -956,7 +956,7 @@
 
     /* Card action buttons for medium devices */
     .property-card__actions {
-        bottom: 200px;
+        bottom: 260px; /* Adjusted to avoid covering photo on tablets */
     }
 
     .details-modal__content {
