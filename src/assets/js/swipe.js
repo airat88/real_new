@@ -69,10 +69,11 @@ class SwipeApp {
                     : (typeof MOCK_PROPERTIES !== 'undefined' ? MOCK_PROPERTIES : []));
 
             // Filter by preview IDs
-            const ids = previewIds.split(',');
-            this.properties = allProperties.filter(p => ids.includes(p.id));
+            const ids = previewIds.split(',').map(id => String(id.trim()));
+            this.properties = allProperties.filter(p => ids.includes(String(p.id)));
 
-            console.log(`📦 Preview: ${this.properties.length} properties`);
+            console.log(`📦 Preview: ${this.properties.length} properties out of ${allProperties.length} total`);
+            console.log(`📦 Preview IDs:`, ids);
             return;
         }
 
@@ -114,7 +115,21 @@ class SwipeApp {
 
                 // Filter properties by IDs in selection
                 const propertyIds = selection.property_ids || [];
-                this.properties = allProperties.filter(p => propertyIds.includes(p.id));
+                console.log('📦 Selection property_ids:', propertyIds);
+                console.log('📦 Total properties available:', allProperties.length);
+                
+                // Ensure IDs are strings for comparison (Supabase might return different types)
+                const propertyIdsStr = propertyIds.map(id => String(id));
+                this.properties = allProperties.filter(p => {
+                    const matches = propertyIdsStr.includes(String(p.id));
+                    if (!matches && propertyIds.length > 0 && allProperties.length < 10) {
+                        // Debug: show mismatches for small datasets
+                        console.log(`Property ${p.id} (${typeof p.id}) not in selection:`, propertyIdsStr.slice(0, 5));
+                    }
+                    return matches;
+                });
+                
+                console.log('✅ Filtered to selection properties:', this.properties.length);
 
                 // Add broker_phone from selection to each property
                 if (selection.broker_phone) {
