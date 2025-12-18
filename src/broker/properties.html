@@ -640,6 +640,9 @@
                         <span class="sync-status__dot"></span>
                         <span id="syncText">Synced</span>
                     </div>
+                    <button class="btn btn-secondary" onclick="openBrokerSettingsModal()" title="Broker Settings">
+                        ⚙️ Settings
+                    </button>
                     <button class="btn btn-secondary" id="syncBtn" onclick="syncData()">
                         📁 Load from CSV
                     </button>
@@ -999,6 +1002,33 @@
             <div class="modal__footer" style="justify-content: center;">
                 <button class="btn btn-secondary" onclick="closeLinkModal()">Done</button>
                 <button class="btn btn-primary" onclick="previewSelectionFromLink()">Preview</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Broker Settings Modal -->
+    <div class="modal-overlay" id="brokerSettingsModal">
+        <div class="modal">
+            <div class="modal__header">
+                <h3 class="modal__title">⚙️ Broker Settings</h3>
+                <button class="modal__close" onclick="closeBrokerSettingsModal()">✕</button>
+            </div>
+            <div class="modal__body">
+                <div class="form-group">
+                    <label class="form-group__label">Your Name</label>
+                    <input type="text" class="input" id="brokerNameInput" placeholder="e.g. Maria Konstantinou">
+                </div>
+                <div class="form-group" style="margin-top: var(--space-md);">
+                    <label class="form-group__label">Your Phone Number</label>
+                    <input type="tel" class="input" id="brokerPhoneInput" placeholder="e.g. +357 99 123456">
+                    <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 4px; display: block;">
+                        This phone number will be shown to clients when viewing property details
+                    </small>
+                </div>
+            </div>
+            <div class="modal__footer">
+                <button class="btn btn-secondary" onclick="closeBrokerSettingsModal()">Cancel</button>
+                <button class="btn btn-primary" onclick="saveBrokerSettings()">Save Settings</button>
             </div>
         </div>
     </div>
@@ -1911,6 +1941,41 @@
             clearSelection();
         }
 
+        // Broker Settings Modal Functions
+        function openBrokerSettingsModal() {
+            // Load current settings
+            const brokerName = localStorage.getItem('broker_name') || '';
+            const brokerPhone = localStorage.getItem('broker_phone') || '';
+            
+            document.getElementById('brokerNameInput').value = brokerName;
+            document.getElementById('brokerPhoneInput').value = brokerPhone;
+            
+            document.getElementById('brokerSettingsModal').classList.add('modal-overlay--open');
+        }
+
+        function closeBrokerSettingsModal() {
+            document.getElementById('brokerSettingsModal').classList.remove('modal-overlay--open');
+        }
+
+        function saveBrokerSettings() {
+            const brokerName = document.getElementById('brokerNameInput').value.trim();
+            const brokerPhone = document.getElementById('brokerPhoneInput').value.trim();
+            
+            if (!brokerPhone) {
+                alert('Please enter your phone number');
+                return;
+            }
+            
+            // Save to localStorage
+            localStorage.setItem('broker_name', brokerName);
+            localStorage.setItem('broker_phone', brokerPhone);
+            
+            // Show success message
+            alert('Settings saved successfully!');
+            
+            closeBrokerSettingsModal();
+        }
+
         // Preview selection (broker preview mode - doesn't save reactions)
         function previewSelection() {
             if (selectedProperties.size === 0) {
@@ -1982,13 +2047,19 @@
                 ${property.title ? `<div class="property-detail__location" style="font-size: 0.875rem; color: var(--gray-600); margin-top: 8px; margin-bottom: 8px;">${property.title}</div>` : ''}
                 <div class="property-detail__location">📍 ${property.location || 'Unknown'} ${property.type ? `• ${property.type}` : ''}</div>
                 
-                ${property.url ? `
-                <div style="margin-top: 16px;">
-                    <a href="${property.url}" target="_blank" class="btn btn-primary" style="text-decoration: none; display: inline-block;">
-                        🔗 View on Website
-                    </a>
-                </div>
-                ` : ''}
+                ${(() => {
+                    // Get broker phone from localStorage or default
+                    const brokerPhone = localStorage.getItem('broker_phone') || '+357 99 123456';
+                    const brokerName = localStorage.getItem('broker_name') || 'Broker';
+                    
+                    return `
+                    <div style="margin-top: 16px;">
+                        <a href="tel:${brokerPhone}" class="btn btn-primary" style="text-decoration: none; display: inline-block; padding: 12px 24px;">
+                            📞 Contact Broker: ${brokerPhone}
+                        </a>
+                    </div>
+                    `;
+                })()}
                 
                 ${property.deliveryInfo && property.deliveryInfo.status !== 'unknown' ? `
                 <div style="margin-top: 12px; padding: 8px 12px; background: ${property.deliveryInfo.status === 'delivered' ? 'var(--success)' : 'var(--primary)'}20; border-radius: 8px; display: inline-block;">
@@ -2179,11 +2250,15 @@
         document.getElementById('clientModal').addEventListener('click', (e) => {
             if (e.target.id === 'clientModal') closeClientModal();
         });
+        document.getElementById('brokerSettingsModal').addEventListener('click', (e) => {
+            if (e.target.id === 'brokerSettingsModal') closeBrokerSettingsModal();
+        });
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
                 closeClientModal();
                 closePropertyModal();
                 closeLinkModal();
+                closeBrokerSettingsModal();
             }
         });
 
