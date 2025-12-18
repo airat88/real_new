@@ -839,10 +839,13 @@
                         </div>
                         <div class="filter-group">
                             <label class="filter-group__label">Object Code</label>
-                            <input type="text" class="input" placeholder="e.g. KZ-8091, CA-1291..." id="objectCodeFilter">
-                            <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 4px; display: block;">
-                                Search by object code (comma separated for multiple)
-                            </small>
+                            <div class="multi-select" id="objectMultiSelect">
+                                <div class="multi-select__trigger" onclick="toggleMultiSelect('object')">
+                                    <span class="multi-select__text" id="objectText">All object codes</span>
+                                    <span class="multi-select__arrow">▼</span>
+                                </div>
+                                <div class="multi-select__dropdown" id="objectDropdown"></div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -1309,6 +1312,7 @@
         let selectedTypes = [];
         let selectedStatuses = [];
         let selectedMainTypes = [];
+        let selectedObjects = [];
 
         // Get filtered properties
         function getFilteredProperties() {
@@ -1330,9 +1334,6 @@
             const hasPool = document.getElementById('hasPool').checked;
             const hasParking = document.getElementById('hasParking').checked;
             const hasSeaView = document.getElementById('hasSeaView').checked;
-
-            // Object code filter
-            const objectCodeFilter = document.getElementById('objectCodeFilter').value.trim();
 
             // Delivery date filter
             const deliveryFilter = document.getElementById('deliveryFilter')?.value || '';
@@ -1441,14 +1442,11 @@
                 if (hasParking && !features.includes('parking')) return false;
                 if (hasSeaView && !(features.includes('sea view') || features.includes('sea-view') || features.includes('seaview'))) return false;
 
-                // Object code filter
-                if (objectCodeFilter) {
-                    const objectCodes = objectCodeFilter.split(',').map(code => code.trim().toUpperCase()).filter(code => code);
-                    if (objectCodes.length > 0) {
-                        const propObject = (p.object || '').trim().toUpperCase();
-                        const matches = objectCodes.some(code => propObject.includes(code) || propObject === code);
-                        if (!matches) return false;
-                    }
+                // Object Code - multi-select
+                if (selectedObjects.length > 0) {
+                    const propObject = (p.object || '').trim().toUpperCase();
+                    const matches = selectedObjects.some(obj => propObject === obj.toUpperCase());
+                    if (!matches) return false;
                 }
 
                 return true;
@@ -1494,6 +1492,15 @@
                     <span>${mainType}</span>
                 </label>
             `).join('');
+
+            // Object Codes - multi-select
+            const objectDropdown = document.getElementById('objectDropdown');
+            objectDropdown.innerHTML = options.objects.map(obj => `
+                <label class="multi-select__option" data-value="${obj}">
+                    <input type="checkbox" value="${obj}" onchange="onMultiSelectChange('object')">
+                    <span>${obj}</span>
+                </label>
+            `).join('');
         }
 
         // Multi-select toggle
@@ -1531,6 +1538,9 @@
             } else if (type === 'mainType') {
                 selectedMainTypes = values;
                 updateMultiSelectText('mainType', values, 'All main types');
+            } else if (type === 'object') {
+                selectedObjects = values;
+                updateMultiSelectText('object', values, 'All object codes');
             }
 
             updateActiveFiltersCount();
@@ -1586,18 +1596,19 @@
             document.getElementById('hasPool').checked = false;
             document.getElementById('hasParking').checked = false;
             document.getElementById('hasSeaView').checked = false;
-            document.getElementById('objectCodeFilter').value = '';
 
             // Clear multi-selects
             selectedLocations = [];
             selectedTypes = [];
             selectedStatuses = [];
             selectedMainTypes = [];
+            selectedObjects = [];
             document.querySelectorAll('.multi-select__dropdown input[type="checkbox"]').forEach(cb => cb.checked = false);
             updateMultiSelectText('location', [], 'All locations');
             updateMultiSelectText('type', [], 'All types');
             updateMultiSelectText('status', [], 'All statuses');
             updateMultiSelectText('mainType', [], 'All main types');
+            updateMultiSelectText('object', [], 'All object codes');
 
             // Clear bedroom selection
             selectedBedrooms = '';
@@ -1627,7 +1638,7 @@
             if (document.getElementById('hasPool').checked) count++;
             if (document.getElementById('hasParking').checked) count++;
             if (document.getElementById('hasSeaView').checked) count++;
-            if (document.getElementById('objectCodeFilter').value.trim()) count++;
+            if (selectedObjects.length > 0) count++;
 
             const badge = document.getElementById('activeFiltersCount');
             if (count > 0) {
@@ -2225,7 +2236,6 @@
         document.getElementById('areaMax').addEventListener('input', onFilterChange);
         document.getElementById('priceSqmMin').addEventListener('input', onFilterChange);
         document.getElementById('priceSqmMax').addEventListener('input', onFilterChange);
-        document.getElementById('objectCodeFilter').addEventListener('input', onFilterChange);
 
         // Checkbox filters
         document.getElementById('hasVeranda').addEventListener('change', () => { updateActiveFiltersCount(); renderProperties(); });
