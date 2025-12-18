@@ -35,7 +35,7 @@ const SupabaseClient = {
     // ============================================
 
     // Create a new selection
-    async createSelection(name, propertyIds, description = '', clientId = null) {
+    async createSelection(name, propertyIds, description = '', clientId = null, brokerPhone = null) {
         if (!this.init()) throw new Error('Supabase not initialized');
 
         const token = this.generateToken();
@@ -54,6 +54,11 @@ const SupabaseClient = {
         // Add client_id if provided
         if (clientId) {
             insertData.client_id = clientId;
+        }
+
+        // Add broker_phone if provided
+        if (brokerPhone) {
+            insertData.broker_phone = brokerPhone;
         }
 
         console.log('Insert data:', insertData);
@@ -88,10 +93,10 @@ const SupabaseClient = {
 
         console.log('Fetching selection with token:', token);
 
-        // First try with brokers join
+        // First try with brokers join to get broker phone
         let { data, error } = await this.client
             .from('selections')
-            .select('*, brokers(*)')
+            .select('*, brokers(id, name, email, phone)')
             .eq('token', token)
             .single();
 
@@ -120,6 +125,12 @@ const SupabaseClient = {
 
         console.log('Selection found:', data);
 
+        // If broker_phone is not in selection but broker data exists, use broker's phone
+        if (!data.broker_phone && data.brokers && data.brokers.phone) {
+            data.broker_phone = data.brokers.phone;
+            console.log('📞 Using phone from broker profile:', data.broker_phone);
+        }
+
         // Check if expired (only if expires_at field exists)
         if (data.expires_at && new Date(data.expires_at) < new Date()) {
             console.warn('Selection has expired');
@@ -133,16 +144,16 @@ const SupabaseClient = {
     async getBrokerSelections() {
         if (!this.init()) return [];
 
-        // Try to fetch with client data join
+        // Try to fetch with client and broker data join
         let { data, error } = await this.client
             .from('selections')
-            .select('*, clients(id, name, email, phone)')
+            .select('*, clients(id, name, email, phone), brokers(id, name, phone)')
             .eq('broker_id', this.DEFAULT_BROKER_ID)
             .order('created_at', { ascending: false });
 
-        // If error (e.g., clients table doesn't exist), try without join
+        // If error (e.g., tables don't exist), try without joins
         if (error) {
-            console.warn('Failed to fetch with clients join, trying without:', error.message);
+            console.warn('Failed to fetch with joins, trying without:', error.message);
             const result = await this.client
                 .from('selections')
                 .select('*')
@@ -158,7 +169,45 @@ const SupabaseClient = {
             return [];
         }
 
+        // Add broker_phone from broker profile if not in selection
+        if (data && data.length > 0) {
+            data = data.map(selection => {
+                if (!selection.broker_phone && selection.brokers && selection.brokers.phone) {
+                    return {
+                        ...selection,
+                        broker_phone: selection.brokers.phone
+                    };
+                }
+                return selection;
+            });
+        }
+
         return data || [];
+    },
+
+    // Get broker phone from brokers table
+    async getBrokerPhone(brokerId = null) {
+        if (!this.init()) return null;
+
+        const id = brokerId || this.DEFAULT_BROKER_ID;
+
+        try {
+            const { data, error } = await this.client
+                .from('brokers')
+                .select('phone')
+                .eq('id', id)
+                .single();
+
+            if (error) {
+                console.warn('Could not fetch broker phone:', error.message);
+                return null;
+            }
+
+            return data?.phone || null;
+        } catch (e) {
+            console.warn('Brokers table not available:', e);
+            return null;
+        }
     },
 
     // Update selection status

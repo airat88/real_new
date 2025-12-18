@@ -116,6 +116,16 @@ class SwipeApp {
                 const propertyIds = selection.property_ids || [];
                 this.properties = allProperties.filter(p => propertyIds.includes(p.id));
 
+                // Add broker_phone from selection to each property
+                if (selection.broker_phone) {
+                    this.properties = this.properties.map(p => ({
+                        ...p,
+                        broker_phone: selection.broker_phone,
+                        brokerPhone: selection.broker_phone  // Support both naming conventions
+                    }));
+                    console.log('📞 Broker phone added to properties:', selection.broker_phone);
+                }
+
                 // Load existing reactions to skip already-reviewed properties
                 const existingReactions = await SupabaseClient.getSelectionReactions(selection.id);
                 const reviewedIds = new Set(existingReactions.map(r => r.property_id));

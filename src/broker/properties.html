@@ -1898,12 +1898,26 @@
                 // Get selected property IDs
                 const selectedIds = Array.from(selectedProperties);
 
+                // Try to get broker phone from Supabase brokers table first
+                let brokerPhone = await SupabaseClient.getBrokerPhone();
+                
+                // Fallback to localStorage if not found in database
+                if (!brokerPhone) {
+                    brokerPhone = localStorage.getItem('broker_phone') || null;
+                    if (brokerPhone) {
+                        console.log('📞 Using broker phone from localStorage:', brokerPhone);
+                    }
+                } else {
+                    console.log('📞 Using broker phone from database:', brokerPhone);
+                }
+
                 // Save to Supabase
                 const result = await SupabaseClient.createSelection(
                     selectionName,
                     selectedIds,
                     description || `${selectedIds.length} properties for ${clientName || 'client'}`,
-                    clientId
+                    clientId,
+                    brokerPhone  // Pass broker phone
                 );
 
                 // Also save to localStorage for offline access
