@@ -116,20 +116,36 @@ class SwipeApp {
                 // Filter properties by IDs in selection
                 const propertyIds = selection.property_ids || [];
                 console.log('📦 Selection property_ids:', propertyIds);
+                console.log('📦 Property IDs type:', typeof propertyIds, Array.isArray(propertyIds));
                 console.log('📦 Total properties available:', allProperties.length);
+                
+                // Debug: show first few property IDs
+                if (allProperties.length > 0) {
+                    console.log('📦 Sample property IDs from data:', allProperties.slice(0, 3).map(p => ({id: p.id, type: typeof p.id})));
+                }
                 
                 // Ensure IDs are strings for comparison (Supabase might return different types)
                 const propertyIdsStr = propertyIds.map(id => String(id));
                 this.properties = allProperties.filter(p => {
                     const matches = propertyIdsStr.includes(String(p.id));
-                    if (!matches && propertyIds.length > 0 && allProperties.length < 10) {
-                        // Debug: show mismatches for small datasets
-                        console.log(`Property ${p.id} (${typeof p.id}) not in selection:`, propertyIdsStr.slice(0, 5));
-                    }
                     return matches;
                 });
                 
                 console.log('✅ Filtered to selection properties:', this.properties.length);
+                
+                // CRITICAL: If no properties after filtering but propertyIds exist, something is wrong
+                if (this.properties.length === 0 && propertyIds.length > 0) {
+                    console.error('⚠️ FILTERING PROBLEM DETECTED!');
+                    console.error('propertyIds from selection:', propertyIds);
+                    console.error('Available property IDs:', allProperties.slice(0, 10).map(p => p.id));
+                    
+                    // Emergency fallback: show error
+                    this.showError(
+                        'Ошибка загрузки',
+                        'Не удалось загрузить объекты из подборки. Проверьте консоль (F12) для деталей.'
+                    );
+                    return;
+                }
 
                 // Add broker_phone from selection to each property
                 if (selection.broker_phone) {
@@ -275,6 +291,11 @@ class SwipeApp {
             ? '<span style="background: var(--warning); color: var(--dark); padding: 2px 8px; border-radius: 10px; font-size: 0.7rem; margin-left: 8px;">PREVIEW</span>'
             : '';
         header.innerHTML = `
+            <button class="swipe-header__back" onclick="window.close()">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M19 12H5M12 19l-7-7 7-7"/>
+                </svg>
+            </button>
             <div class="swipe-header__title">${this.selectionName}${previewBadge}</div>
             <div class="swipe-header__progress">
                 <span class="progress-text">1/${this.properties.length}</span>
@@ -790,28 +811,34 @@ class SwipeApp {
         }
 
         const screen = document.querySelector('.completion-screen');
-        const brokerName = this.selectionData?.brokers?.name || 'your broker';
-        const brokerPhone = this.selectionData?.brokers?.phone || null;
+        
+        // Get broker info from selection data or from first property
+        const brokerName = this.selectionData?.brokers?.name || 'брокера';
+        const brokerPhone = this.selectionData?.broker_phone || 
+                           this.selectionData?.brokers?.phone || 
+                           (this.properties[0]?.broker_phone) || 
+                           null;
 
         screen.innerHTML = `
             <div class="completion-icon">🎉</div>
-            <h2 class="completion-title">All Done!</h2>
+            <h2 class="completion-title">Готово!</h2>
             <p class="completion-text">
-                Thank you for reviewing the selection. ${brokerName} will contact you soon about the properties you liked.
+                Спасибо за просмотр подборки. ${brokerName.charAt(0).toUpperCase() + brokerName.slice(1)} свяжется с вами по поводу понравившихся объектов.
             </p>
             <div class="completion-stats">
                 <div class="completion-stat">
                     <div class="completion-stat__value completion-stat__value--like">${likes.length}</div>
-                    <div class="completion-stat__label">Liked</div>
+                    <div class="completion-stat__label">Понравилось</div>
                 </div>
                 <div class="completion-stat">
                     <div class="completion-stat__value completion-stat__value--dislike">${dislikes.length}</div>
-                    <div class="completion-stat__label">Passed</div>
+                    <div class="completion-stat__label">Пропущено</div>
                 </div>
             </div>
+            
             ${likes.length > 0 ? `
-                <div style="text-align: left; width: 100%; max-width: 300px; margin-bottom: var(--space-xl);">
-                    <p style="font-size: 0.875rem; opacity: 0.7; margin-bottom: var(--space-sm);">Properties you liked:</p>
+                <div style="text-align: left; width: 100%; max-width: 300px; margin-bottom: var(--space-lg);">
+                    <p style="font-size: 0.875rem; opacity: 0.7; margin-bottom: var(--space-sm);">Объекты которые понравились:</p>
                     ${likes.map(l => `
                         <div style="padding: var(--space-sm); background: rgba(255,255,255,0.1); border-radius: var(--radius); margin-bottom: var(--space-xs); font-size: 0.875rem;">
                             ${l.propertyTitle || l.propertyId}
@@ -822,20 +849,23 @@ class SwipeApp {
             
             <div class="completion-actions">
                 ${brokerPhone ? `
-                    <a href="tel:${brokerPhone}" class="btn btn-primary btn-lg" style="text-decoration: none; display: inline-flex; align-items: center; gap: var(--space-sm);">
-                        📞 Call ${brokerName}
+                    <a href="tel:${brokerPhone}" class="btn btn-primary btn-lg" style="text-decoration: none; display: inline-flex; align-items: center; gap: var(--space-sm); width: 100%; justify-content: center; max-width: 300px;">
+                        📞 Позвонить брокеру
                     </a>
                 ` : ''}
-                <button class="btn btn-secondary btn-lg" onclick="window.swipeAppInstance && window.swipeAppInstance.shareSelection()" style="display: inline-flex; align-items: center; gap: var(--space-sm);">
-                    📤 Share Selection
+                
+                <button class="btn btn-secondary btn-lg" onclick="window.swipeAppInstance && window.swipeAppInstance.shareSelection()" style="display: inline-flex; align-items: center; gap: var(--space-sm); width: 100%; justify-content: center; max-width: 300px;">
+                    📤 Поделиться подборкой
                 </button>
+                
                 ${dislikes.length > 0 ? `
-                    <button class="btn btn-outline btn-lg" onclick="window.swipeAppInstance && window.swipeAppInstance.reviewDisliked()" style="display: inline-flex; align-items: center; gap: var(--space-sm);">
-                        🔄 Review Disliked (${dislikes.length})
+                    <button class="btn btn-outline btn-lg" onclick="window.swipeAppInstance && window.swipeAppInstance.reviewDisliked()" style="display: inline-flex; align-items: center; gap: var(--space-sm); width: 100%; justify-content: center; max-width: 300px;">
+                        🔄 Просмотреть непонравившиеся (${dislikes.length})
                     </button>
                 ` : ''}
-                <button class="btn btn-outline btn-lg" onclick="window.close()" style="margin-top: var(--space-md);">
-                    Close
+                
+                <button class="btn btn-outline btn-sm" onclick="window.close()" style="margin-top: var(--space-md); opacity: 0.7;">
+                    Закрыть
                 </button>
             </div>
         `;
@@ -845,7 +875,7 @@ class SwipeApp {
         // Store instance globally for button callbacks
         window.swipeAppInstance = this;
 
-        console.log('Selection completed:', results);
+        console.log('✅ Selection completed:', results);
     }
 
     // Fullscreen Gallery Methods

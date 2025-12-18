@@ -191,7 +191,7 @@
 
             <div class="demo-info">
                 <strong>Demo Account:</strong><br>
-                Email: <code>broker@example.com</code><br>
+                Email: <code><a href="/cdn-cgi/l/email-protection" class="__cf_email__" data-cfemail="accedec3c7c9deecc9d4cdc1dcc0c982cfc3c1">[email&#160;protected]</a></code><br>
                 Password: <code>demo123</code>
             </div>
 
@@ -201,7 +201,7 @@
         </div>
     </div>
 
-    <script>
+    <script data-cfasync="false" src="/cdn-cgi/scripts/5c5dd728/cloudflare-static/email-decode.min.js"></script><script>
         // Demo accounts (no Supabase needed)
         const DEMO_ACCOUNTS = {
             'broker@example.com': 'demo123',
@@ -265,15 +265,4 @@
                     errorEl.style.display = 'block';
                     errorEl.classList.add('visible');
                     
-                    // Re-enable button
-                    btn.disabled = false;
-                    btn.textContent = 'Sign In';
-                }
-            }, 500);
-        }
-
-        // Initialize
-        checkAuth();
-    </script>
-</body>
-</html>
+                    // Re

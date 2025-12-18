@@ -18,12 +18,38 @@
     align-items: center;
     justify-content: space-between;
     color: var(--white);
+    gap: var(--space-md);
+}
+
+.swipe-header__back {
+    width: 2.5rem;
+    height: 2.5rem;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.1);
+    border: none;
+    border-radius: var(--radius-full);
+    color: var(--white);
+    cursor: pointer;
+    transition: all var(--transition);
+    flex-shrink: 0;
+}
+
+.swipe-header__back:hover {
+    background: rgba(255, 255, 255, 0.2);
+    transform: scale(1.05);
+}
+
+.swipe-header__back:active {
+    transform: scale(0.95);
 }
 
 .swipe-header__title {
     font-size: 1rem;
     font-weight: 500;
     opacity: 0.9;
+    flex: 1;
 }
 
 .swipe-header__progress {
