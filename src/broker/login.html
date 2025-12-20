@@ -235,14 +235,25 @@
         </div>
     </div>
 
+    <!-- Supabase JS Library -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <!-- Supabase Client -->
     <script src="../assets/js/supabase-client.js"></script>
 
     <script>
+        // Initialize Supabase client
+        const supabaseUrl = 'https://ymizsgrtfkezzsichfwy.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltaXpzZ3J0ZmtlenpzaWNoZnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3MzQ5NjIsImV4cCI6MjA4MTMxMDk2Mn0.2XJd1cc_IODicg7ElBGmcVp9Z5RrNccEWm2flV_nrqs';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        
+        // Also expose as window variable for compatibility
+        window.supabaseClient = supabaseClient;
+        
         // Check if already logged in
         async function checkAuth() {
             try {
-                const { data: { session } } = await window.supabaseClient.auth.getSession();
+                const { data: { session } } = await supabaseClient.auth.getSession();
                 if (session) {
                     console.log('✅ Already logged in, redirecting...');
                     window.location.href = 'dashboard.html';
@@ -274,7 +285,7 @@
 
             try {
                 // Attempt login with Supabase
-                const { data, error } = await window.supabaseClient.auth.signInWithPassword({
+                const { data, error } = await supabaseClient.auth.signInWithPassword({
                     email: email,
                     password: password
                 });
@@ -330,12 +341,12 @@
         // Check for Supabase connection
         async function checkSupabaseConnection() {
             try {
-                if (!window.supabaseClient) {
+                if (!supabaseClient) {
                     throw new Error('Supabase client not initialized');
                 }
 
                 // Test connection by checking auth state
-                const { data, error } = await window.supabaseClient.auth.getSession();
+                const { data, error } = await supabaseClient.auth.getSession();
                 
                 if (error && error.message.includes('fetch')) {
                     throw new Error('Cannot connect to Supabase');
@@ -373,7 +384,7 @@
         document.querySelector('.demo-info').addEventListener('dblclick', fillDemoCredentials);
 
         // Handle auth state changes
-        window.supabaseClient?.auth.onAuthStateChange((event, session) => {
+        supabaseClient?.auth.onAuthStateChange((event, session) => {
             console.log('Auth state changed:', event, session?.user?.email);
             
             if (event === 'SIGNED_IN') {
