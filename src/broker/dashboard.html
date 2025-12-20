@@ -249,16 +249,35 @@
 
         // Check authentication
         async function checkAuth() {
+            console.log('🔍 Checking authentication...');
+            
             // Check localStorage session (demo accounts)
             const session = localStorage.getItem('broker_session');
             
             if (!session) {
-                window.location.href = 'login.html';
+                console.log('❌ No session found in localStorage');
+                // Give a small delay to allow session to be saved from login page
+                setTimeout(() => {
+                    const retrySession = localStorage.getItem('broker_session');
+                    if (!retrySession) {
+                        console.log('❌ Still no session after retry, redirecting to login');
+                        window.location.href = 'login.html';
+                    } else {
+                        console.log('✅ Session found on retry, continuing...');
+                        initializeDashboard(retrySession);
+                    }
+                }, 500);
                 return;
             }
 
+            initializeDashboard(session);
+        }
+
+        // Initialize dashboard with session
+        function initializeDashboard(session) {
             try {
                 const sessionData = JSON.parse(session);
+                console.log('✅ Session found:', sessionData.email);
                 
                 // Update user info in sidebar
                 const userName = sessionData.email.split('@')[0];
@@ -266,18 +285,18 @@
                 if (userNameEl) {
                     userNameEl.textContent = userName.charAt(0).toUpperCase() + userName.slice(1);
                 }
+                
+                // Initialize Supabase for data operations (not auth)
+                SupabaseClient.init();
+
+                // Load dashboard data
+                loadDashboardData();
             } catch (e) {
                 console.error('Invalid session data:', e);
                 localStorage.removeItem('broker_session');
                 window.location.href = 'login.html';
                 return;
             }
-
-            // Initialize Supabase for data operations (not auth)
-            SupabaseClient.init();
-
-            // Load dashboard data
-            loadDashboardData();
         }
 
         // Logout function
