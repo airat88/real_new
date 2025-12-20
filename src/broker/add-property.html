@@ -624,7 +624,7 @@
                     main_type: formData.get('mainType'),
                     object_id: generateObjectId(),
                     created_at: new Date().toISOString(),
-                    broker_id: localStorage.getItem('userId') || 'demo-broker'
+                    broker_id: (await window.supabaseClient.auth.getUser()).data.user?.id || null
                 };
 
                 // Сохранение в Supabase
@@ -704,14 +704,15 @@
         }
 
         // Инициализация при загрузке
-        window.addEventListener('load', function() {
-            initMap();
-            
+        window.addEventListener('load', async function() {
             // Проверка авторизации
-            const userId = localStorage.getItem('userId');
-            if (!userId) {
+            const { data: { user } } = await window.supabaseClient.auth.getUser();
+            if (!user) {
                 window.location.href = 'login.html';
+                return;
             }
+            
+            initMap();
         });
 
         // Автозаполнение цены за м²
