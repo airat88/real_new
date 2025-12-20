@@ -119,30 +119,89 @@ class SwipeApp {
                 console.log('📦 Property IDs type:', typeof propertyIds, Array.isArray(propertyIds));
                 console.log('📦 Total properties available:', allProperties.length);
                 
+                // CRITICAL FIX: Ensure property_ids is an array
+                if (!Array.isArray(propertyIds)) {
+                    console.error('⚠️ property_ids is not an array!', typeof propertyIds);
+                    this.showError(
+                        'Ошибка подборки',
+                        'Неверный формат данных подборки. Пожалуйста, создайте новую подборку.'
+                    );
+                    return;
+                }
+                
+                // CRITICAL FIX: If property_ids is empty, show error
+                if (propertyIds.length === 0) {
+                    console.error('⚠️ property_ids is empty!');
+                    this.showError(
+                        'Пустая подборка',
+                        'В этой подборке нет объектов. Пожалуйста, создайте новую подборку с объектами.'
+                    );
+                    return;
+                }
+                
                 // Debug: show first few property IDs
                 if (allProperties.length > 0) {
                     console.log('📦 Sample property IDs from data:', allProperties.slice(0, 3).map(p => ({id: p.id, type: typeof p.id})));
                 }
                 
-                // Ensure IDs are strings for comparison (Supabase might return different types)
-                const propertyIdsStr = propertyIds.map(id => String(id));
+                // IMPROVED: More robust ID matching with multiple strategies
+                console.log('🔍 Starting property filtering...');
+                
+                // Strategy 1: Convert both to strings and compare (most reliable)
+                const propertyIdsStr = propertyIds.map(id => String(id).trim().toLowerCase());
                 this.properties = allProperties.filter(p => {
-                    const matches = propertyIdsStr.includes(String(p.id));
-                    return matches;
+                    const pId = String(p.id).trim().toLowerCase();
+                    return propertyIdsStr.includes(pId);
                 });
                 
                 console.log('✅ Filtered to selection properties:', this.properties.length);
+                console.log('📊 Expected:', propertyIds.length, 'Got:', this.properties.length);
                 
-                // CRITICAL: If no properties after filtering but propertyIds exist, something is wrong
+                // CRITICAL: If filtering failed, try alternative strategies
                 if (this.properties.length === 0 && propertyIds.length > 0) {
-                    console.error('⚠️ FILTERING PROBLEM DETECTED!');
-                    console.error('propertyIds from selection:', propertyIds);
-                    console.error('Available property IDs:', allProperties.slice(0, 10).map(p => p.id));
+                    console.warn('⚠️ Strategy 1 failed, trying Strategy 2...');
                     
-                    // Emergency fallback: show error
+                    // Strategy 2: Try without toLowerCase (case-sensitive)
+                    const propertyIdsStr2 = propertyIds.map(id => String(id).trim());
+                    this.properties = allProperties.filter(p => {
+                        const pId = String(p.id).trim();
+                        return propertyIdsStr2.includes(pId);
+                    });
+                    
+                    console.log('Strategy 2 result:', this.properties.length);
+                }
+                
+                // CRITICAL: If still no results, try direct comparison
+                if (this.properties.length === 0 && propertyIds.length > 0) {
+                    console.warn('⚠️ Strategy 2 failed, trying Strategy 3...');
+                    
+                    // Strategy 3: Direct comparison without string conversion
+                    this.properties = allProperties.filter(p => propertyIds.includes(p.id));
+                    console.log('Strategy 3 result:', this.properties.length);
+                }
+                
+                // CRITICAL: If no properties after all strategies, show detailed error
+                if (this.properties.length === 0 && propertyIds.length > 0) {
+                    console.error('⚠️ FILTERING PROBLEM DETECTED - All strategies failed!');
+                    console.error('propertyIds from selection:', propertyIds);
+                    console.error('propertyIds types:', propertyIds.map(id => typeof id));
+                    console.error('Available property IDs (first 10):', allProperties.slice(0, 10).map(p => ({
+                        id: p.id,
+                        type: typeof p.id,
+                        title: p.title
+                    })));
+                    
+                    // Show detailed error with debugging info
                     this.showError(
-                        'Ошибка загрузки',
-                        'Не удалось загрузить объекты из подборки. Проверьте консоль (F12) для деталей.'
+                        'Ошибка фильтрации объектов',
+                        `Не удалось найти объекты из подборки.<br><br>
+                        <b>Отладочная информация:</b><br>
+                        • ID в подборке: ${propertyIds.slice(0, 3).join(', ')}${propertyIds.length > 3 ? '...' : ''}<br>
+                        • Всего ID в подборке: ${propertyIds.length}<br>
+                        • Всего доступных объектов: ${allProperties.length}<br>
+                        <br>
+                        Откройте консоль (F12) для подробностей.<br>
+                        Возможно, база данных не синхронизирована с CSV.`
                     );
                     return;
                 }

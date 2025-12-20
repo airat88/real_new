@@ -1910,6 +1910,20 @@
             try {
                 // Get selected property IDs
                 const selectedIds = Array.from(selectedProperties);
+                
+                console.log('📋 Creating selection with IDs:', selectedIds);
+                console.log('📋 ID types:', selectedIds.map(id => typeof id));
+                console.log('📋 Total selected:', selectedIds.length);
+                
+                // CRITICAL: Ensure IDs are in correct format
+                // Convert to the same format as used in CSV/DataSync
+                const propertyIdsFormatted = selectedIds.map(id => {
+                    // If ID is a string that looks like a number, keep it as string
+                    // This ensures consistency with how IDs are stored in the system
+                    return String(id).trim();
+                });
+                
+                console.log('📋 Formatted IDs:', propertyIdsFormatted);
 
                 // Try to get broker phone from Supabase brokers table first
                 let brokerPhone = await SupabaseClient.getBrokerPhone();
@@ -1927,8 +1941,8 @@
                 // Save to Supabase
                 const result = await SupabaseClient.createSelection(
                     selectionName,
-                    selectedIds,
-                    description || `${selectedIds.length} properties for ${clientName || 'client'}`,
+                    propertyIdsFormatted,  // Use formatted IDs
+                    description || `${propertyIdsFormatted.length} properties for ${clientName || 'client'}`,
                     clientId,
                     brokerPhone  // Pass broker phone
                 );
@@ -1937,6 +1951,11 @@
                 const selectedProps = allProperties.filter(p => selectedProperties.has(p.id));
                 localStorage.setItem('current_selection', JSON.stringify(selectedProps));
                 localStorage.setItem('current_selection_id', result.id);
+                
+                console.log('✅ Selection created in database');
+                console.log('   Selection ID:', result.id);
+                console.log('   Property IDs saved:', result.property_ids);
+                console.log('   Link:', result.link);
 
                 // Store for PDF export
                 lastCreatedSelection = {
