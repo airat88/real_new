@@ -106,7 +106,7 @@
     <div id="swipeContainer"></div>
 
     <!-- Scripts -->
-    <!-- ВАЖНО: Supabase CDN должен загружаться ПЕРВЫМ -->
+    <!-- IMPORTANT: Supabase CDN must load FIRST -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <script src="../assets/js/data-sync.js"></script>
@@ -172,14 +172,14 @@
                     i < 5 ? {index: i, id: id, type: typeof id} : null
                 ).filter(Boolean));
 
-                // ✅ УЛУЧШЕННАЯ ФИЛЬТРАЦИЯ с детальным логированием
+                // IMPROVED FILTERING with detailed logging
                 console.log('=== FILTERING PROCESS ===');
                 
-                // Convert IDs to strings for comparison
-                const propertyIdsStr = selection.property_ids.map(id => String(id).trim());
-                console.log('Converted IDs to strings:', propertyIdsStr.slice(0, 5), '...');
+                // Convert selection IDs to strings for comparison
+                const selectionIdStrings = selection.property_ids.map(id => String(id).trim());
+                console.log('Converted selection IDs to strings:', selectionIdStrings.slice(0, 5), '...');
                 
-                // Show sample of available property IDs
+                // Show sample of available property IDs from CSV
                 console.log('Sample available property IDs:', 
                     allProperties.slice(0, 5).map(p => ({
                         id: p.id, 
@@ -188,22 +188,23 @@
                     }))
                 );
                 
-                // Filter with detailed logging
-                const selectedProperties = allProperties.filter(p => {
-                    const pIdStr = String(p.id).trim();
-                    const matches = propertyIdsStr.includes(pIdStr);
-                    return matches;
+                // Filter properties that match the selection IDs
+                // FIXED: Renamed from 'selectedProperties' to 'filteredProperties' for clarity
+                const filteredProperties = allProperties.filter(property => {
+                    const propertyIdString = String(property.id).trim();
+                    const isMatch = selectionIdStrings.includes(propertyIdString);
+                    return isMatch;
                 });
 
                 console.log('=== FILTERING RESULTS ===');
                 console.log('Total properties available:', allProperties.length);
-                console.log('IDs to filter by:', propertyIdsStr.length);
-                console.log('Properties after filtering:', selectedProperties.length);
+                console.log('IDs to filter by:', selectionIdStrings.length);
+                console.log('Properties after filtering:', filteredProperties.length);
                 console.log('Match percentage:', 
-                    ((selectedProperties.length / propertyIdsStr.length) * 100).toFixed(1) + '%'
+                    ((filteredProperties.length / selectionIdStrings.length) * 100).toFixed(1) + '%'
                 );
 
-                if (selectedProperties.length === 0) {
+                if (filteredProperties.length === 0) {
                     console.error('❌ FILTERING FAILED - NO MATCHES FOUND');
                     console.error('Property IDs from selection:', selection.property_ids);
                     console.error('Sample available property IDs:', 
@@ -212,22 +213,22 @@
                     
                     throw new Error(
                         `No matching properties found!\n\n` +
-                        `Expected ${propertyIdsStr.length} properties but found 0.\n\n` +
-                        `Selection IDs: ${propertyIdsStr.slice(0, 5).join(', ')}...\n` +
+                        `Expected ${selectionIdStrings.length} properties but found 0.\n\n` +
+                        `Selection IDs: ${selectionIdStrings.slice(0, 5).join(', ')}...\n` +
                         `Available IDs: ${allProperties.slice(0, 5).map(p => p.id).join(', ')}...`
                     );
                 }
 
-                // ✅ ПРОВЕРКА: убедимся, что количество совпадает
-                if (selectedProperties.length !== propertyIdsStr.length) {
+                // Verify that filtered count matches expected count
+                if (filteredProperties.length !== selectionIdStrings.length) {
                     console.warn('⚠️ WARNING: Filtered count does not match expected count!');
-                    console.warn('   Expected:', propertyIdsStr.length);
-                    console.warn('   Found:', selectedProperties.length);
-                    console.warn('   Missing:', propertyIdsStr.length - selectedProperties.length);
+                    console.warn('   Expected:', selectionIdStrings.length);
+                    console.warn('   Found:', filteredProperties.length);
+                    console.warn('   Missing:', selectionIdStrings.length - filteredProperties.length);
                     
                     // Find which IDs are missing
-                    const foundIds = new Set(selectedProperties.map(p => String(p.id).trim()));
-                    const missingIds = propertyIdsStr.filter(id => !foundIds.has(id));
+                    const foundIdSet = new Set(filteredProperties.map(p => String(p.id).trim()));
+                    const missingIds = selectionIdStrings.filter(id => !foundIdSet.has(id));
                     if (missingIds.length > 0) {
                         console.warn('   Missing IDs:', missingIds.slice(0, 10));
                     }
@@ -235,15 +236,15 @@
                     console.log('✅ Perfect match: All expected properties found!');
                 }
 
-                // Add broker_phone to properties if available
+                // Add broker phone to properties if available
                 const brokerPhone = selection.broker_phone || 
                                    (selection.brokers && selection.brokers.phone) || 
                                    null;
                 
                 if (brokerPhone) {
-                    selectedProperties.forEach(p => {
-                        p.broker_phone = brokerPhone;
-                        p.brokerPhone = brokerPhone;
+                    filteredProperties.forEach(property => {
+                        property.broker_phone = brokerPhone;
+                        property.brokerPhone = brokerPhone;
                     });
                     console.log('📞 Broker phone added to properties:', brokerPhone);
                 }
@@ -252,28 +253,31 @@
                 loadingScreen.style.display = 'none';
 
                 // Initialize SwipeApp with filtered properties
-                console.log('Initializing SwipeApp...');
+                console.log('=== INITIALIZING SWIPE APP ===');
+                console.log('Properties to display:', filteredProperties.length);
                 const swipeApp = new SwipeApp('swipeContainer', {
-                    properties: selectedProperties,
+                    properties: filteredProperties,
                     selectionId: selection.id,
                     selectionToken: token,
                     selectionName: selection.name,
                     selectionData: selection  // Pass full selection data for broker info
                 });
 
-                console.log('SwipeApp initialized successfully');
+                console.log('✅ SwipeApp initialized successfully');
+                console.log('=== INITIALIZATION COMPLETE ===');
 
             } catch (error) {
-                console.error('Error loading selection:', error);
+                console.error('❌ Error loading selection:', error);
+                console.error('Error message:', error.message);
                 console.error('Error stack:', error.stack);
                 loadingScreen.style.display = 'none';
                 errorScreen.classList.add('error-screen--active');
                 
                 // Show error details in console for debugging
-                console.error('Debug info:', {
-                    token: token,
-                    url: window.location.href
-                });
+                console.error('=== DEBUG INFO ===');
+                console.error('Token:', token);
+                console.error('URL:', window.location.href);
+                console.error('Timestamp:', new Date().toISOString());
             }
         }
 
