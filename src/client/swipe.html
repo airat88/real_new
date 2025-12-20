@@ -163,26 +163,76 @@
                     throw new Error('Selection property_ids array is empty');
                 }
 
-                console.log('Selection property IDs:', selection.property_ids);
-                console.log('Property IDs type:', typeof selection.property_ids, Array.isArray(selection.property_ids));
+                console.log('=== SELECTION DETAILS ===');
+                console.log('Selection ID:', selection.id);
+                console.log('Selection name:', selection.name);
+                console.log('Property IDs from database:', selection.property_ids);
+                console.log('Property IDs count:', selection.property_ids.length);
+                console.log('Property IDs type check:', selection.property_ids.map((id, i) => 
+                    i < 5 ? {index: i, id: id, type: typeof id} : null
+                ).filter(Boolean));
 
-                // Filter properties for this selection WITH TYPE CONVERSION
-                const propertyIdsStr = selection.property_ids.map(id => String(id));
+                // ✅ УЛУЧШЕННАЯ ФИЛЬТРАЦИЯ с детальным логированием
+                console.log('=== FILTERING PROCESS ===');
+                
+                // Convert IDs to strings for comparison
+                const propertyIdsStr = selection.property_ids.map(id => String(id).trim());
+                console.log('Converted IDs to strings:', propertyIdsStr.slice(0, 5), '...');
+                
+                // Show sample of available property IDs
+                console.log('Sample available property IDs:', 
+                    allProperties.slice(0, 5).map(p => ({
+                        id: p.id, 
+                        type: typeof p.id,
+                        title: p.title ? p.title.substring(0, 30) : 'No title'
+                    }))
+                );
+                
+                // Filter with detailed logging
                 const selectedProperties = allProperties.filter(p => {
-                    const matches = propertyIdsStr.includes(String(p.id));
+                    const pIdStr = String(p.id).trim();
+                    const matches = propertyIdsStr.includes(pIdStr);
                     return matches;
                 });
 
-                console.log('Sample property IDs from data:', allProperties.slice(0, 3).map(p => ({id: p.id, type: typeof p.id})));
-                console.log('Filtered properties:', selectedProperties.length);
+                console.log('=== FILTERING RESULTS ===');
+                console.log('Total properties available:', allProperties.length);
+                console.log('IDs to filter by:', propertyIdsStr.length);
+                console.log('Properties after filtering:', selectedProperties.length);
+                console.log('Match percentage:', 
+                    ((selectedProperties.length / propertyIdsStr.length) * 100).toFixed(1) + '%'
+                );
 
                 if (selectedProperties.length === 0) {
-                    console.error('⚠️ FILTERING PROBLEM IN swipe.html!');
-                    console.error('property_ids from selection:', selection.property_ids);
-                    console.error('Available property IDs:', allProperties.slice(0, 10).map(p => p.id));
-                    throw new Error('No matching properties found. Property IDs in selection: ' + 
-                        selection.property_ids.join(', ') + 
-                        '\nAvailable IDs: ' + allProperties.slice(0, 10).map(p => p.id).join(', '));
+                    console.error('❌ FILTERING FAILED - NO MATCHES FOUND');
+                    console.error('Property IDs from selection:', selection.property_ids);
+                    console.error('Sample available property IDs:', 
+                        allProperties.slice(0, 10).map(p => p.id)
+                    );
+                    
+                    throw new Error(
+                        `No matching properties found!\n\n` +
+                        `Expected ${propertyIdsStr.length} properties but found 0.\n\n` +
+                        `Selection IDs: ${propertyIdsStr.slice(0, 5).join(', ')}...\n` +
+                        `Available IDs: ${allProperties.slice(0, 5).map(p => p.id).join(', ')}...`
+                    );
+                }
+
+                // ✅ ПРОВЕРКА: убедимся, что количество совпадает
+                if (selectedProperties.length !== propertyIdsStr.length) {
+                    console.warn('⚠️ WARNING: Filtered count does not match expected count!');
+                    console.warn('   Expected:', propertyIdsStr.length);
+                    console.warn('   Found:', selectedProperties.length);
+                    console.warn('   Missing:', propertyIdsStr.length - selectedProperties.length);
+                    
+                    // Find which IDs are missing
+                    const foundIds = new Set(selectedProperties.map(p => String(p.id).trim()));
+                    const missingIds = propertyIdsStr.filter(id => !foundIds.has(id));
+                    if (missingIds.length > 0) {
+                        console.warn('   Missing IDs:', missingIds.slice(0, 10));
+                    }
+                } else {
+                    console.log('✅ Perfect match: All expected properties found!');
                 }
 
                 // Add broker_phone to properties if available

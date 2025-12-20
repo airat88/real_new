@@ -1911,19 +1911,39 @@
                 // Get selected property IDs
                 const selectedIds = Array.from(selectedProperties);
                 
-                console.log('📋 Creating selection with IDs:', selectedIds);
-                console.log('📋 ID types:', selectedIds.map(id => typeof id));
-                console.log('📋 Total selected:', selectedIds.length);
+                console.log('📋 Creating selection');
+                console.log('   Selected count from Set:', selectedProperties.size);
+                console.log('   Selected IDs:', selectedIds);
+                console.log('   ID types:', selectedIds.map(id => typeof id));
                 
-                // CRITICAL: Ensure IDs are in correct format
-                // Convert to the same format as used in CSV/DataSync
-                const propertyIdsFormatted = selectedIds.map(id => {
-                    // If ID is a string that looks like a number, keep it as string
-                    // This ensures consistency with how IDs are stored in the system
-                    return String(id).trim();
-                });
+                // ✅ ИСПРАВЛЕНИЕ: Убедимся в уникальности и правильном формате
+                // Фильтруем пустые значения и приводим к строке
+                const propertyIdsFormatted = Array.from(new Set(
+                    selectedIds
+                        .filter(id => id !== null && id !== undefined && id !== '')
+                        .map(id => String(id).trim())
+                ));
                 
-                console.log('📋 Formatted IDs:', propertyIdsFormatted);
+                console.log('   Formatted IDs:', propertyIdsFormatted);
+                console.log('   Total unique IDs:', propertyIdsFormatted.length);
+                
+                // ✅ ПРОВЕРКА 1: Убедимся что ID не пустые
+                if (propertyIdsFormatted.length === 0) {
+                    alert('No valid property IDs selected. Please try again.');
+                    btn.disabled = false;
+                    btn.textContent = 'Create Selection';
+                    return;
+                }
+                
+                // ✅ ПРОВЕРКА 2: Предупреждение о расхождении количества
+                if (propertyIdsFormatted.length !== selectedProperties.size) {
+                    console.warn('⚠️ Warning: ID count mismatch!');
+                    console.warn('   Original selected:', selectedProperties.size);
+                    console.warn('   After formatting:', propertyIdsFormatted.length);
+                }
+                
+                // ✅ ПРОВЕРКА 3: Вывести первые несколько ID для отладки
+                console.log('   Sample formatted IDs:', propertyIdsFormatted.slice(0, 5));
 
                 // Try to get broker phone from Supabase brokers table first
                 let brokerPhone = await SupabaseClient.getBrokerPhone();
@@ -1955,7 +1975,16 @@
                 console.log('✅ Selection created in database');
                 console.log('   Selection ID:', result.id);
                 console.log('   Property IDs saved:', result.property_ids);
+                console.log('   Total properties:', result.total_properties);
+                console.log('   Expected count:', propertyIdsFormatted.length);
                 console.log('   Link:', result.link);
+                
+                // ✅ ПРОВЕРКА: Verify the saved IDs match what we sent
+                if (result.property_ids && result.property_ids.length !== propertyIdsFormatted.length) {
+                    console.error('❌ ERROR: Saved IDs count does not match!');
+                    console.error('   Sent:', propertyIdsFormatted.length);
+                    console.error('   Saved:', result.property_ids.length);
+                }
 
                 // Store for PDF export
                 lastCreatedSelection = {
