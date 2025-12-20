@@ -296,6 +296,16 @@
                 console.log('✅ Login successful:', data.user.email);
                 console.log('User ID:', data.user.id);
 
+                // Save session to localStorage for dashboard
+                const sessionData = {
+                    user_id: data.user.id,
+                    email: data.user.email,
+                    access_token: data.session.access_token,
+                    logged_in_at: new Date().toISOString()
+                };
+                localStorage.setItem('broker_session', JSON.stringify(sessionData));
+                console.log('💾 Session saved to localStorage');
+
                 // Show success message
                 successEl.textContent = '✓ Login successful! Redirecting...';
                 successEl.classList.add('visible');

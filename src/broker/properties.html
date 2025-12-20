@@ -1052,6 +1052,12 @@
     <script src="../assets/js/supabase-client.js"></script>
     <script src="../assets/js/pdf-export.js"></script>
     <script>
+        // Initialize global Supabase client
+        const supabaseUrl = 'https://ymizsgrtfkezzsichfwy.supabase.co';
+        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltaXpzZ3J0ZmtlenpzaWNoZnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3MzQ5NjIsImV4cCI6MjA4MTMxMDk2Mn0.2XJd1cc_IODicg7ElBGmcVp9Z5RrNccEWm2flV_nrqs';
+        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
+        window.supabaseClient = supabaseClient;
+        
         // Register Service Worker
         if ('serviceWorker' in navigator) {
             navigator.serviceWorker.register('../sw.js')
@@ -1084,18 +1090,18 @@
 
         // Logout function
         async function logout() {
+            // Sign out from Supabase first
+            try {
+                await supabaseClient.auth.signOut();
+                console.log('✅ Signed out from Supabase');
+            } catch (e) {
+                console.log('⚠️ Supabase signout error:', e);
+            }
+            
             // Clear localStorage session
             localStorage.removeItem('broker_session');
             
-            // Also sign out from Supabase if needed
-            if (SupabaseClient.client) {
-                try {
-                    await SupabaseClient.client.auth.signOut();
-                } catch (e) {
-                    console.log('Supabase signout skipped:', e);
-                }
-            }
-            
+            // Redirect to login
             window.location.href = 'login.html';
         }
 
