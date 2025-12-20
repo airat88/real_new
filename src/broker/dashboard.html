@@ -251,33 +251,28 @@
         async function checkAuth() {
             console.log('🔍 Checking authentication...');
             
+            // Prevent redirect loops - check if we're already redirecting
+            if (sessionStorage.getItem('redirecting') === 'true') {
+                console.log('⏳ Already redirecting, skipping check');
+                return;
+            }
+            
             // Check localStorage session (demo accounts)
             const session = localStorage.getItem('broker_session');
             
             if (!session) {
-                console.log('❌ No session found in localStorage');
-                // Give a small delay to allow session to be saved from login page
-                setTimeout(() => {
-                    const retrySession = localStorage.getItem('broker_session');
-                    if (!retrySession) {
-                        console.log('❌ Still no session after retry, redirecting to login');
-                        window.location.href = 'login.html';
-                    } else {
-                        console.log('✅ Session found on retry, continuing...');
-                        initializeDashboard(retrySession);
-                    }
-                }, 500);
+                console.log('❌ No session found, redirecting to login');
+                sessionStorage.setItem('redirecting', 'true');
+                window.location.href = 'login.html?from=dashboard';
                 return;
             }
 
-            initializeDashboard(session);
-        }
-
-        // Initialize dashboard with session
-        function initializeDashboard(session) {
             try {
                 const sessionData = JSON.parse(session);
                 console.log('✅ Session found:', sessionData.email);
+                
+                // Clear redirect flag - we're successfully loaded
+                sessionStorage.removeItem('redirecting');
                 
                 // Update user info in sidebar
                 const userName = sessionData.email.split('@')[0];
@@ -292,16 +287,22 @@
                 // Load dashboard data
                 loadDashboardData();
             } catch (e) {
-                console.error('Invalid session data:', e);
+                console.error('❌ Invalid session data:', e);
                 localStorage.removeItem('broker_session');
-                window.location.href = 'login.html';
+                sessionStorage.setItem('redirecting', 'true');
+                window.location.href = 'login.html?from=dashboard';
                 return;
             }
         }
 
         // Logout function
         async function logout() {
-            // Sign out from Supabase first
+            console.log('🚪 Logging out...');
+            
+            // Clear localStorage session first
+            localStorage.removeItem('broker_session');
+            
+            // Sign out from Supabase
             try {
                 await supabaseClient.auth.signOut();
                 console.log('✅ Signed out from Supabase');
@@ -309,11 +310,8 @@
                 console.log('⚠️ Supabase signout error:', e);
             }
             
-            // Clear localStorage session
-            localStorage.removeItem('broker_session');
-            
-            // Redirect to login
-            window.location.href = 'login.html';
+            // Redirect to login with parameter to prevent auto-redirect back
+            window.location.href = 'login.html?from=dashboard';
         }
 
         // Load dashboard data

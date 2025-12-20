@@ -287,6 +287,7 @@
 
             // Set login flag to prevent redirect loops
             isLoggingIn = true;
+            sessionStorage.setItem('redirecting', 'true');
 
             // Hide previous messages
             errorEl.classList.remove('visible');
@@ -323,14 +324,16 @@
                 successEl.textContent = '✓ Login successful! Redirecting...';
                 successEl.classList.add('visible');
 
-                // Redirect immediately (no delay needed)
+                // Redirect immediately - sessionStorage flag will prevent loops
+                console.log('🔄 Redirecting to dashboard...');
                 window.location.href = 'dashboard.html';
 
             } catch (error) {
                 console.error('❌ Login failed:', error);
                 
-                // Reset login flag on error
+                // Reset flags on error
                 isLoggingIn = false;
+                sessionStorage.removeItem('redirecting');
 
                 // Show appropriate error message
                 let errorMessage = 'Invalid email or password.';
@@ -398,10 +401,45 @@
         // Event listeners
         document.getElementById('loginForm').addEventListener('submit', handleLogin);
 
-        // Check auth on page load
+        // IMPORTANT: Do NOT check auth on page load - this causes infinite redirect loops
+        // Only check Supabase connection
         window.addEventListener('load', async () => {
             await checkSupabaseConnection();
-            await checkAuth();
+            
+            // Check URL parameters
+            const urlParams = new URLSearchParams(window.location.search);
+            const fromDashboard = urlParams.get('from') === 'dashboard';
+            
+            if (fromDashboard) {
+                // User was redirected from dashboard (logout or no session)
+                console.log('📝 Came from dashboard, staying on login page');
+                sessionStorage.removeItem('redirecting');
+            } else {
+                // User came directly to login page - check if already logged in
+                const redirecting = sessionStorage.getItem('redirecting');
+                
+                if (redirecting === 'true') {
+                    console.log('⏳ Already in redirect process, skipping auto-redirect');
+                    return;
+                }
+                
+                try {
+                    const { data: { session } } = await supabaseClient.auth.getSession();
+                    const localSession = localStorage.getItem('broker_session');
+                    
+                    if (session && localSession) {
+                        console.log('✅ Already logged in, redirecting to dashboard...');
+                        sessionStorage.setItem('redirecting', 'true');
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        // No active session - clear redirect flag
+                        sessionStorage.removeItem('redirecting');
+                    }
+                } catch (error) {
+                    console.log('No active session');
+                    sessionStorage.removeItem('redirecting');
+                }
+            }
         });
 
         // Optional: Double-click demo info to auto-fill (convenience feature)
