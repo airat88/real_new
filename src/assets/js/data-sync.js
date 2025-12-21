@@ -206,14 +206,30 @@ const DataSync = {
             };
         };
 
-        // Extract project code from ProjectTitle (e.g., "A100" from "A100 - ARARAT...")
+        // Extract project title
         const projectTitle = getString('ProjectTitle', 'Title', 'Name', 'Property');
-        const projectCodeMatch = projectTitle.match(/^([A-Z]+\d+)/);
-        const projectCode = projectCodeMatch ? projectCodeMatch[1] : 'PROP';
         
-        // Generate ID: ProjectCode_ApartmentNo (e.g., A100_601)
+        // Get Object code (primary identifier) - e.g., "KZ-8091"
+        const objectCode = getString('Object', 'ObjectCode', 'Code');
+        
+        // Get apartment number
         const apartmentNo = getString('ApartmentNo', 'Unit', 'UnitNo', 'Apartment');
-        const stableId = apartmentNo ? `${projectCode}_${apartmentNo}` : `prop_${this.hashCode(projectTitle + index)}`;
+        
+        // Generate ID using Object code as primary identifier
+        // Priority: Object_ApartmentNo > Object > ProjectCode_ApartmentNo > hash
+        let stableId;
+        if (objectCode && apartmentNo) {
+            // Best case: Object + ApartmentNo (e.g., "KZ-8091_601")
+            stableId = `${objectCode}_${apartmentNo}`;
+        } else if (objectCode) {
+            // Object only (rare case)
+            stableId = objectCode;
+        } else {
+            // Fallback to old logic: ProjectCode_ApartmentNo
+            const projectCodeMatch = projectTitle.match(/^([A-Z]+\d+)/);
+            const projectCode = projectCodeMatch ? projectCodeMatch[1] : 'PROP';
+            stableId = apartmentNo ? `${projectCode}_${apartmentNo}` : `prop_${this.hashCode(projectTitle + index)}`;
+        }
 
         // Parse values
         const title = projectTitle;
@@ -266,7 +282,6 @@ const DataSync = {
             status: statusString,
             location: getString('Location', 'City', 'Address', 'location'),
             district: getString('District', 'district'),
-            apartmentNo: apartmentNo,
 
             // Coordinates (NEW!)
             latitude: !isNaN(latitude) ? latitude : null,
@@ -312,8 +327,8 @@ const DataSync = {
             description: getString('Description', 'description'),
             additionalInfo: getString('AdditionalInformation', 'AdditionalInfo', 'Notes'),
 
-            // Object code
-            object: getString('Object', 'ObjectCode', 'Code'),
+            // Object code (used as primary ID component)
+            object: objectCode,
             projectTitle: projectTitle, // Full project name for display
 
             // Meta
