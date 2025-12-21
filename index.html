@@ -1,11 +1,205 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
-    <meta http-equiv="refresh" content="0; url=src/index.html">
-    <title>Redirecting...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cyprus Real Estate</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 50%, #4338ca 100%);
+            padding: 20px;
+        }
+        
+        .container {
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+        }
+        
+        .logo {
+            font-size: 5rem;
+            margin-bottom: 24px;
+            animation: float 3s ease-in-out infinite;
+        }
+        
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
+        }
+        
+        .title {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: white;
+            margin-bottom: 12px;
+        }
+        
+        .subtitle {
+            font-size: 1.125rem;
+            color: rgba(255, 255, 255, 0.7);
+            margin-bottom: 48px;
+        }
+        
+        .role-cards {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+        
+        .role-card {
+            background: white;
+            border-radius: 24px;
+            padding: 32px 24px;
+            text-decoration: none;
+            color: inherit;
+            transition: all 0.3s ease;
+            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.2);
+        }
+        
+        .role-card:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+        
+        .role-icon {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2.5rem;
+            margin: 0 auto 20px;
+        }
+        
+        .role-card--client .role-icon {
+            background: linear-gradient(135deg, #10b981, #059669);
+        }
+        
+        .role-card--broker .role-icon {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6);
+        }
+        
+        .role-title {
+            font-size: 1.25rem;
+            font-weight: 700;
+            color: #1e1b4b;
+            margin-bottom: 8px;
+        }
+        
+        .role-description {
+            font-size: 0.875rem;
+            color: #6b7280;
+            line-height: 1.5;
+        }
+        
+        .role-arrow {
+            margin-top: 16px;
+            font-size: 1.5rem;
+            color: #6366f1;
+            opacity: 0;
+            transform: translateX(-10px);
+            transition: all 0.3s ease;
+        }
+        
+        .role-card:hover .role-arrow {
+            opacity: 1;
+            transform: translateX(0);
+        }
+        
+        .footer {
+            margin-top: 48px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.875rem;
+        }
+        
+        .footer a {
+            color: rgba(255, 255, 255, 0.7);
+            text-decoration: none;
+        }
+        
+        .footer a:hover {
+            color: white;
+        }
+        
+        /* Mobile */
+        @media (max-width: 600px) {
+            .logo {
+                font-size: 4rem;
+            }
+            
+            .title {
+                font-size: 1.75rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+                margin-bottom: 32px;
+            }
+            
+            .role-cards {
+                grid-template-columns: 1fr;
+            }
+            
+            .role-card {
+                padding: 24px 20px;
+            }
+            
+            .role-icon {
+                width: 64px;
+                height: 64px;
+                font-size: 2rem;
+            }
+        }
+    </style>
 </head>
 <body>
-    <p>Redirecting to <a href="src/index.html">main page</a>...</p>
+    <div class="container">
+        <div class="logo">🏠</div>
+        <h1 class="title">Cyprus Real Estate</h1>
+        <p class="subtitle">Платформа для подбора недвижимости на Кипре</p>
+        
+        <div class="role-cards">
+            <a href="client/login.html" class="role-card role-card--client">
+                <div class="role-icon">👤</div>
+                <h2 class="role-title">Я клиент</h2>
+                <p class="role-description">
+                    Просмотр подборок от брокера, избранное, история просмотров
+                </p>
+                <div class="role-arrow">→</div>
+            </a>
+            
+            <a href="broker/login.html" class="role-card role-card--broker">
+                <div class="role-icon">💼</div>
+                <h2 class="role-title">Я брокер</h2>
+                <p class="role-description">
+                    Создание подборок, управление клиентами, аналитика
+                </p>
+                <div class="role-arrow">→</div>
+            </a>
+        </div>
+        
+        <div class="footer">
+            <p>© 2025 Cyprus Real Estate</p>
+        </div>
+    </div>
 </body>
 </html>

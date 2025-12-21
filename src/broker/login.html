@@ -193,8 +193,8 @@
         <div class="login-card">
             <div class="login-header">
                 <div class="login-logo">🏠</div>
-                <h1 class="login-title">Broker Login</h1>
-                <p class="login-subtitle">Sign in to manage your property selections</p>
+                <h1 class="login-title">Вход для брокеров</h1>
+                <p class="login-subtitle">Управление подборками недвижимости</p>
             </div>
 
             <div class="login-error" id="errorMessage"></div>
@@ -207,30 +207,25 @@
                 </div>
 
                 <div class="form-group">
-                    <label class="form-label">Password</label>
+                    <label class="form-label">Пароль</label>
                     <input type="password" class="input" id="password" placeholder="••••••••" required>
                 </div>
 
                 <button type="submit" class="btn btn-primary login-btn" id="loginBtn">
-                    Sign In
+                    Войти
                 </button>
             </form>
 
-            <div class="divider">Demo Account</div>
+            <div class="divider">Демо вход</div>
 
             <div class="demo-info">
-                <strong>Test Login:</strong><br>
+                <strong>Тестовый аккаунт:</strong><br>
                 Email: <code>broker@test.com</code><br>
                 Password: <code>test123456</code>
-                <br><br>
-                <small style="color: #6b7280;">
-                    ⚠️ Make sure you created this user in Supabase first!<br>
-                    See <strong>TEST_ACCOUNT_GUIDE.md</strong> for setup instructions.
-                </small>
             </div>
 
             <div class="login-footer">
-                <a href="../index.html">← Back to Home</a>
+                <a href="../index.html">← На главную</a>
             </div>
         </div>
     </div>
@@ -295,7 +290,7 @@
 
             // Disable button
             btn.disabled = true;
-            btn.textContent = 'Signing in...';
+            btn.textContent = 'Вход...';
 
             try {
                 // Attempt login with Supabase
@@ -321,7 +316,7 @@
                 console.log('💾 Session saved to localStorage');
 
                 // Show success message
-                successEl.textContent = '✓ Login successful! Redirecting...';
+                successEl.textContent = '✓ Вход выполнен! Перенаправление...';
                 successEl.classList.add('visible');
 
                 // Redirect immediately - sessionStorage flag will prevent loops
@@ -336,16 +331,16 @@
                 sessionStorage.removeItem('redirecting');
 
                 // Show appropriate error message
-                let errorMessage = 'Invalid email or password.';
+                let errorMessage = 'Неверный email или пароль.';
 
                 if (error.message.includes('Invalid login credentials')) {
-                    errorMessage = '❌ Invalid email or password. Please try again.';
+                    errorMessage = '❌ Неверный email или пароль. Попробуйте ещё раз.';
                 } else if (error.message.includes('Email not confirmed')) {
-                    errorMessage = '⚠️ Please confirm your email before logging in.';
+                    errorMessage = '⚠️ Подтвердите email перед входом.';
                 } else if (error.message.includes('Too many requests')) {
-                    errorMessage = '⏳ Too many login attempts. Please wait a moment.';
+                    errorMessage = '⏳ Слишком много попыток. Подождите немного.';
                 } else if (error.message.includes('fetch')) {
-                    errorMessage = '🌐 Connection error. Please check Supabase configuration.';
+                    errorMessage = '🌐 Ошибка соединения. Проверьте интернет.';
                 } else {
                     errorMessage = `❌ ${error.message}`;
                 }
@@ -355,7 +350,7 @@
 
                 // Re-enable button
                 btn.disabled = false;
-                btn.textContent = 'Sign In';
+                btn.textContent = 'Войти';
             }
         }
 
@@ -386,11 +381,8 @@
                 
                 const errorEl = document.getElementById('errorMessage');
                 errorEl.innerHTML = `
-                    <strong>⚠️ Supabase Configuration Error</strong><br>
-                    Please check that:<br>
-                    • <code>supabase-client.js</code> is configured with correct URL and API key<br>
-                    • Supabase project is active<br>
-                    • Network connection is working
+                    <strong>⚠️ Ошибка подключения к Supabase</strong><br>
+                    Проверьте настройки подключения
                 `;
                 errorEl.classList.add('visible');
                 
