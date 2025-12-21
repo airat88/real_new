@@ -1113,6 +1113,17 @@
         let displayedCount = 0;
         const ITEMS_PER_PAGE = 50;
 
+        /**
+         * ✅ FIX: Normalize property ID for consistent comparison
+         * Ensures all IDs are compared as strings, preventing type mismatch issues
+         * @param {string|number} id - Property ID
+         * @returns {string} - Normalized ID as trimmed string
+         */
+        function normalizeId(id) {
+            if (id === null || id === undefined) return '';
+            return String(id).trim();
+        }
+
         // Initialize
         async function init() {
             // Auto-load from CSV if not already loaded
@@ -1255,10 +1266,10 @@
                 }
 
                 return `
-                    <div class="property-card-broker ${selectedProperties.has(p.id) ? 'selected' : ''}"
+                    <div class="property-card-broker ${selectedProperties.has(normalizeId(p.id)) ? 'selected' : ''}"
                          data-id="${p.id}" data-photos="${photosJson}" data-photo-index="0">
                         <div class="property-card-broker__checkbox" onclick="toggleProperty('${p.id}')">
-                            ${selectedProperties.has(p.id) ? '✓' : ''}
+                            ${selectedProperties.has(normalizeId(p.id)) ? '✓' : ''}
                         </div>
                         <div class="property-card-broker__actions">
                             <button class="property-card-broker__btn" onclick="openPropertyModal('${p.id}')" title="View details">
@@ -1332,15 +1343,41 @@
         function getFilteredProperties() {
             const search = document.getElementById('searchInput').value.toLowerCase();
 
-            // Price range
-            const priceMin = parseInt(document.getElementById('priceMin').value) || 0;
-            const priceMax = parseInt(document.getElementById('priceMax').value) || Infinity;
+            // ✅ FIX: Price range with validation and auto-correction
+            let priceMin = parseInt(document.getElementById('priceMin').value) || 0;
+            let priceMax = parseInt(document.getElementById('priceMax').value) || Infinity;
+            
+            // Auto-correct if min > max
+            if (priceMin > priceMax && priceMax !== Infinity) {
+                console.warn('⚠️ Price range auto-corrected: min > max');
+                [priceMin, priceMax] = [priceMax, priceMin];
+                // Update UI
+                document.getElementById('priceMin').value = priceMin;
+                document.getElementById('priceMax').value = priceMax;
+            }
 
-            // Advanced filters
-            const areaMin = parseInt(document.getElementById('areaMin').value) || 0;
-            const areaMax = parseInt(document.getElementById('areaMax').value) || Infinity;
-            const priceSqmMin = parseInt(document.getElementById('priceSqmMin').value) || 0;
-            const priceSqmMax = parseInt(document.getElementById('priceSqmMax').value) || Infinity;
+            // ✅ FIX: Advanced filters with validation
+            let areaMin = parseInt(document.getElementById('areaMin').value) || 0;
+            let areaMax = parseInt(document.getElementById('areaMax').value) || Infinity;
+            
+            // Auto-correct if min > max
+            if (areaMin > areaMax && areaMax !== Infinity) {
+                console.warn('⚠️ Area range auto-corrected: min > max');
+                [areaMin, areaMax] = [areaMax, areaMin];
+                document.getElementById('areaMin').value = areaMin;
+                document.getElementById('areaMax').value = areaMax;
+            }
+            
+            let priceSqmMin = parseInt(document.getElementById('priceSqmMin').value) || 0;
+            let priceSqmMax = parseInt(document.getElementById('priceSqmMax').value) || Infinity;
+            
+            // Auto-correct if min > max
+            if (priceSqmMin > priceSqmMax && priceSqmMax !== Infinity) {
+                console.warn('⚠️ Price/sqm range auto-corrected: min > max');
+                [priceSqmMin, priceSqmMax] = [priceSqmMax, priceSqmMin];
+                document.getElementById('priceSqmMin').value = priceSqmMin;
+                document.getElementById('priceSqmMax').value = priceSqmMax;
+            }
 
             // Checkbox filters
             const hasVeranda = document.getElementById('hasVeranda').checked;
@@ -1381,10 +1418,12 @@
                 }
 
                 // Main Type - multi-select (прямое сравнение с полем mainType из CSV)
+                // ✅ FIX: Main Type - multi-select with case-insensitive comparison
                 if (selectedMainTypes.length > 0) {
-                    const propMainType = p.mainType || '';
-                    // Сравниваем напрямую - точное совпадение с выбранными значениями
-                    const matches = selectedMainTypes.includes(propMainType);
+                    const propMainType = (p.mainType || '').toLowerCase().trim();
+                    const matches = selectedMainTypes.some(t => 
+                        t.toLowerCase().trim() === propMainType
+                    );
                     if (!matches) return false;
                 }
 
@@ -1767,10 +1806,12 @@
 
         // Toggle property selection
         function toggleProperty(id) {
-            if (selectedProperties.has(id)) {
-                selectedProperties.delete(id);
+            // ✅ FIX: Normalize ID to ensure consistent type comparison
+            const normalized = normalizeId(id);
+            if (selectedProperties.has(normalized)) {
+                selectedProperties.delete(normalized);
             } else {
-                selectedProperties.add(id);
+                selectedProperties.add(normalized);
             }
             updateSelectionUI();
         }
@@ -1783,7 +1824,7 @@
 
             // Update cards
             document.querySelectorAll('.property-card-broker').forEach(card => {
-                const id = card.dataset.id;
+                const id = normalizeId(card.dataset.id);  // ✅ FIX: Normalize ID
                 const isSelected = selectedProperties.has(id);
                 card.classList.toggle('selected', isSelected);
                 card.querySelector('.property-card-broker__checkbox').textContent = isSelected ? '✓' : '';

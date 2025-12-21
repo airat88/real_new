@@ -68,9 +68,18 @@ class SwipeApp {
                     ? PropertyData.getAll()
                     : (typeof MOCK_PROPERTIES !== 'undefined' ? MOCK_PROPERTIES : []));
 
-            // Filter by preview IDs
+            // Filter by preview IDs with order preservation
             const ids = previewIds.split(',').map(id => String(id.trim()));
-            this.properties = allProperties.filter(p => ids.includes(String(p.id)));
+            
+            // Create Map for fast lookup
+            const allPropertiesMap = new Map(
+                allProperties.map(p => [String(p.id), p])
+            );
+            
+            // Preserve order from URL params
+            this.properties = ids
+                .map(id => allPropertiesMap.get(id))
+                .filter(p => p !== undefined);
 
             console.log(`📦 Preview: ${this.properties.length} properties out of ${allProperties.length} total`);
             console.log(`📦 Preview IDs:`, ids);
@@ -144,39 +153,57 @@ class SwipeApp {
                     console.log('📦 Sample property IDs from data:', allProperties.slice(0, 3).map(p => ({id: p.id, type: typeof p.id})));
                 }
                 
-                // IMPROVED: More robust ID matching with multiple strategies
-                console.log('🔍 Starting property filtering...');
+                // ✅ FIXED: Preserve order from property_ids while filtering
+                console.log('🔍 Starting property filtering with order preservation...');
                 
-                // Strategy 1: Convert both to strings and compare (most reliable)
-                const propertyIdsStr = propertyIds.map(id => String(id).trim().toLowerCase());
-                this.properties = allProperties.filter(p => {
-                    const pId = String(p.id).trim().toLowerCase();
-                    return propertyIdsStr.includes(pId);
-                });
+                // Strategy 1: Create Map for fast lookup + preserve order
+                const allPropertiesMap = new Map(
+                    allProperties.map(p => [String(p.id).trim().toLowerCase(), p])
+                );
                 
-                console.log('✅ Filtered to selection properties:', this.properties.length);
+                // Filter with order from property_ids
+                this.properties = propertyIds
+                    .map(id => {
+                        const normalizedId = String(id).trim().toLowerCase();
+                        const property = allPropertiesMap.get(normalizedId);
+                        if (!property) {
+                            console.warn(`⚠️ Property not found: ${id}`);
+                        }
+                        return property;
+                    })
+                    .filter(p => p !== undefined);
+                
+                console.log('✅ Filtered to selection properties (Strategy 1):', this.properties.length);
                 console.log('📊 Expected:', propertyIds.length, 'Got:', this.properties.length);
+                console.log('✅ Order preserved from broker selection');
                 
-                // CRITICAL: If filtering failed, try alternative strategies
+                // Strategy 2: If Strategy 1 failed, try without toLowerCase
                 if (this.properties.length === 0 && propertyIds.length > 0) {
-                    console.warn('⚠️ Strategy 1 failed, trying Strategy 2...');
+                    console.warn('⚠️ Strategy 1 failed, trying Strategy 2 (case-sensitive)...');
                     
-                    // Strategy 2: Try without toLowerCase (case-sensitive)
-                    const propertyIdsStr2 = propertyIds.map(id => String(id).trim());
-                    this.properties = allProperties.filter(p => {
-                        const pId = String(p.id).trim();
-                        return propertyIdsStr2.includes(pId);
-                    });
+                    const allPropertiesMap2 = new Map(
+                        allProperties.map(p => [String(p.id).trim(), p])
+                    );
+                    
+                    this.properties = propertyIds
+                        .map(id => allPropertiesMap2.get(String(id).trim()))
+                        .filter(p => p !== undefined);
                     
                     console.log('Strategy 2 result:', this.properties.length);
                 }
                 
-                // CRITICAL: If still no results, try direct comparison
+                // Strategy 3: If still failed, try direct comparison
                 if (this.properties.length === 0 && propertyIds.length > 0) {
-                    console.warn('⚠️ Strategy 2 failed, trying Strategy 3...');
+                    console.warn('⚠️ Strategy 2 failed, trying Strategy 3 (direct)...');
                     
-                    // Strategy 3: Direct comparison without string conversion
-                    this.properties = allProperties.filter(p => propertyIds.includes(p.id));
+                    const allPropertiesMap3 = new Map(
+                        allProperties.map(p => [p.id, p])
+                    );
+                    
+                    this.properties = propertyIds
+                        .map(id => allPropertiesMap3.get(id))
+                        .filter(p => p !== undefined);
+                    
                     console.log('Strategy 3 result:', this.properties.length);
                 }
                 
@@ -959,7 +986,7 @@ class SwipeApp {
         // Render thumbnails
         thumbsContainer.innerHTML = photos.map((photo, idx) => `
             <img src="${photo}" class="fullscreen-gallery__thumb ${idx === this.galleryIndex ? 'active' : ''}"
-                 onclick="SwipeAppGlobal.galleryGoTo(${idx})"
+                 onclick="SwipeApp.galleryGoTo(${idx})"
                  onerror="this.style.display='none'">
         `).join('');
 
@@ -1109,16 +1136,19 @@ class SwipeApp {
     }
 }
 
+// Global reference for onclick handlers
+let SwipeAppInstance;
+
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    window.swipeAppInstance = new SwipeApp();
+    SwipeAppInstance = new SwipeApp();
 });
 
 // Global functions for HTML onclick handlers
 const SwipeAppGlobal = {
-    closeFullscreenGallery: () => window.swipeAppInstance?.closeFullscreenGallery(),
-    galleryNav: (dir) => window.swipeAppInstance?.galleryNav(dir),
-    galleryGoTo: (idx) => window.swipeAppInstance?.galleryGoTo(idx)
+    closeFullscreenGallery: () => SwipeAppInstance?.closeFullscreenGallery(),
+    galleryNav: (dir) => SwipeAppInstance?.galleryNav(dir),
+    galleryGoTo: (idx) => SwipeAppInstance?.galleryGoTo(idx)
 };
 
 // Expose to window for onclick handlers
