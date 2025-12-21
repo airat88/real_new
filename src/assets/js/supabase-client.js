@@ -35,7 +35,7 @@ const SupabaseClient = {
     // ============================================
 
     // Create a new selection
-    async createSelection(name, propertyIds, description = '', clientId = null, brokerPhone = null) {
+    async createSelection(name, propertyIds, description = '', clientId = null, brokerContacts = null) {
         if (!this.init()) throw new Error('Supabase not initialized');
 
         const token = this.generateToken();
@@ -56,32 +56,81 @@ const SupabaseClient = {
             insertData.client_id = clientId;
         }
 
-        // Add broker_phone if provided
-        if (brokerPhone) {
-            insertData.broker_phone = brokerPhone;
+        // Add broker contacts if provided
+        // broker_phone already exists in table
+        if (brokerContacts) {
+            if (brokerContacts.phone) insertData.broker_phone = brokerContacts.phone;
+            
+            // These columns need to be added via SQL migration first
+            // They will be ignored if columns don't exist yet
+            if (brokerContacts.name) insertData.broker_name = brokerContacts.name;
+            if (brokerContacts.email) insertData.broker_email = brokerContacts.email;
+            if (brokerContacts.whatsapp) insertData.broker_whatsapp = brokerContacts.whatsapp;
+            if (brokerContacts.telegram) insertData.broker_telegram = brokerContacts.telegram;
+            if (brokerContacts.viber) insertData.broker_viber = brokerContacts.viber;
         }
 
         console.log('Insert data:', insertData);
 
-        const { data, error } = await this.client
-            .from('selections')
-            .insert(insertData)
-            .select()
-            .single();
+        try {
+            const { data, error } = await this.client
+                .from('selections')
+                .insert(insertData)
+                .select()
+                .single();
 
-        if (error) {
-            console.error('Error creating selection:', error);
-            console.error('Error details:', error.message, error.details, error.hint);
-            throw error;
+            if (error) {
+                // If error is about missing columns, try without new contact fields
+                if (error.message && error.message.includes('column')) {
+                    console.warn('Some broker contact columns may not exist yet. Trying with basic fields...');
+                    
+                    const basicData = {
+                        broker_id: this.DEFAULT_BROKER_ID,
+                        name: name,
+                        description: description,
+                        token: token,
+                        property_ids: propertyIds,
+                        total_properties: propertyIds.length,
+                        status: 'pending'
+                    };
+                    
+                    if (clientId) basicData.client_id = clientId;
+                    if (brokerContacts?.phone) basicData.broker_phone = brokerContacts.phone;
+                    
+                    const retryResult = await this.client
+                        .from('selections')
+                        .insert(basicData)
+                        .select()
+                        .single();
+                    
+                    if (retryResult.error) {
+                        console.error('Error creating selection (retry):', retryResult.error);
+                        throw retryResult.error;
+                    }
+                    
+                    console.log('Selection created (basic mode):', retryResult.data);
+                    return {
+                        ...retryResult.data,
+                        link: this.buildSelectionLink(token)
+                    };
+                }
+                
+                console.error('Error creating selection:', error);
+                console.error('Error details:', error.message, error.details, error.hint);
+                throw error;
+            }
+
+            console.log('Selection created successfully:', data);
+            console.log('Generated link:', this.buildSelectionLink(token));
+            
+            return {
+                ...data,
+                link: this.buildSelectionLink(token)
+            };
+        } catch (err) {
+            console.error('Failed to create selection:', err);
+            throw err;
         }
-
-        console.log('Selection created successfully:', data);
-        console.log('Generated link:', this.buildSelectionLink(token));
-        
-        return {
-            ...data,
-            link: this.buildSelectionLink(token)
-        };
     },
 
     // Get selection by token (for client swipe page)

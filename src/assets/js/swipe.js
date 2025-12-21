@@ -898,18 +898,43 @@ class SwipeApp {
 
         const screen = document.querySelector('.completion-screen');
         
-        // Get broker info from selection data or from first property
-        const brokerName = this.selectionData?.brokers?.name || 'брокера';
+        // Get broker info from selection data
+        const brokerName = this.selectionData?.brokers?.name || 
+                          this.selectionData?.broker_name || 
+                          'Брокер';
         const brokerPhone = this.selectionData?.broker_phone || 
                            this.selectionData?.brokers?.phone || 
-                           (this.properties[0]?.broker_phone) || 
                            null;
+        const brokerEmail = this.selectionData?.broker_email || 
+                           this.selectionData?.brokers?.email || 
+                           null;
+        const brokerWhatsApp = this.selectionData?.broker_whatsapp || 
+                              brokerPhone; // Default to phone if whatsapp not set
+        const brokerTelegram = this.selectionData?.broker_telegram || null;
+        const brokerViber = this.selectionData?.broker_viber || brokerPhone;
+
+        // Store broker info for modal
+        this.brokerContacts = {
+            name: brokerName,
+            phone: brokerPhone,
+            email: brokerEmail,
+            whatsapp: brokerWhatsApp,
+            telegram: brokerTelegram,
+            viber: brokerViber
+        };
+
+        // Generate liked properties message for messengers
+        const likedPropertiesText = likes.length > 0 
+            ? `Мне понравились объекты: ${likes.map(l => l.propertyId || l.propertyTitle).join(', ')}`
+            : 'Здравствуйте! Я просмотрел подборку недвижимости.';
+
+        this.messageText = encodeURIComponent(likedPropertiesText);
 
         screen.innerHTML = `
             <div class="completion-icon">🎉</div>
             <h2 class="completion-title">Готово!</h2>
             <p class="completion-text">
-                Спасибо за просмотр подборки. ${brokerName.charAt(0).toUpperCase() + brokerName.slice(1)} свяжется с вами по поводу понравившихся объектов.
+                Вы просмотрели всю подборку!
             </p>
             <div class="completion-stats">
                 <div class="completion-stat">
@@ -924,36 +949,227 @@ class SwipeApp {
             
             ${likes.length > 0 ? `
                 <div style="text-align: left; width: 100%; max-width: 300px; margin-bottom: var(--space-lg);">
-                    <p style="font-size: 0.875rem; opacity: 0.7; margin-bottom: var(--space-sm);">Объекты которые понравились:</p>
+                    <p style="font-size: 0.875rem; opacity: 0.7; margin-bottom: var(--space-sm);">Понравившиеся объекты:</p>
                     ${likes.map(l => `
                         <div style="padding: var(--space-sm); background: rgba(255,255,255,0.1); border-radius: var(--radius); margin-bottom: var(--space-xs); font-size: 0.875rem;">
-                            ${l.propertyTitle || l.propertyId}
+                            ❤️ ${l.propertyId || l.propertyTitle}
                         </div>
                     `).join('')}
                 </div>
             ` : ''}
             
-            <div class="completion-actions">
+            <div class="completion-actions" style="display: flex; flex-direction: column; gap: var(--space-md); width: 100%; max-width: 300px;">
+                
+                <!-- 1. Позвонить брокеру -->
                 ${brokerPhone ? `
-                    <a href="tel:${brokerPhone}" class="btn btn-primary btn-lg" style="text-decoration: none; display: inline-flex; align-items: center; gap: var(--space-sm); width: 100%; justify-content: center; max-width: 300px;">
-                        📞 Позвонить брокеру
+                    <a href="tel:${brokerPhone}" class="btn btn-primary btn-lg completion-btn" style="text-decoration: none;">
+                        <span class="completion-btn__icon">📞</span>
+                        <span class="completion-btn__text">
+                            <span class="completion-btn__title">Позвонить брокеру</span>
+                            <span class="completion-btn__subtitle">${this.formatPhone(brokerPhone)}</span>
+                        </span>
                     </a>
                 ` : ''}
                 
-                <button class="btn btn-secondary btn-lg" onclick="window.swipeAppInstance && window.swipeAppInstance.shareSelection()" style="display: inline-flex; align-items: center; gap: var(--space-sm); width: 100%; justify-content: center; max-width: 300px;">
-                    📤 Поделиться подборкой
+                <!-- 2. Написать брокеру -->
+                <button class="btn btn-secondary btn-lg completion-btn" onclick="window.swipeAppInstance && window.swipeAppInstance.showContactModal()">
+                    <span class="completion-btn__icon">💬</span>
+                    <span class="completion-btn__text">
+                        <span class="completion-btn__title">Написать брокеру</span>
+                        <span class="completion-btn__subtitle">WhatsApp, Telegram, Email</span>
+                    </span>
                 </button>
                 
+                <!-- 3. Пока не подошли -->
                 ${dislikes.length > 0 ? `
-                    <button class="btn btn-outline btn-lg" onclick="window.swipeAppInstance && window.swipeAppInstance.reviewDisliked()" style="display: inline-flex; align-items: center; gap: var(--space-sm); width: 100%; justify-content: center; max-width: 300px;">
-                        🔄 Просмотреть непонравившиеся (${dislikes.length})
+                    <button class="btn btn-outline btn-lg completion-btn" onclick="window.swipeAppInstance && window.swipeAppInstance.reviewDisliked()">
+                        <span class="completion-btn__icon">🔄</span>
+                        <span class="completion-btn__text">
+                            <span class="completion-btn__title">Пока не подошли</span>
+                            <span class="completion-btn__subtitle">Посмотреть ещё раз (${dislikes.length})</span>
+                        </span>
                     </button>
                 ` : ''}
-                
-                <button class="btn btn-outline btn-sm" onclick="window.close()" style="margin-top: var(--space-md); opacity: 0.7;">
-                    Закрыть
-                </button>
             </div>
+            
+            <!-- Contact Modal -->
+            <div id="contactModal" class="contact-modal">
+                <div class="contact-modal__content">
+                    <div class="contact-modal__header">
+                        <h3>Написать брокеру</h3>
+                        <button class="contact-modal__close" onclick="window.swipeAppInstance && window.swipeAppInstance.hideContactModal()">✕</button>
+                    </div>
+                    <div class="contact-modal__body">
+                        <p style="margin-bottom: var(--space-md); opacity: 0.8; font-size: 0.875rem;">Выберите удобный способ связи:</p>
+                        
+                        ${brokerWhatsApp ? `
+                            <a href="https://wa.me/${this.cleanPhone(brokerWhatsApp)}?text=${this.messageText}" 
+                               target="_blank" class="contact-option contact-option--whatsapp">
+                                <span class="contact-option__icon">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                        <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                                    </svg>
+                                </span>
+                                <span class="contact-option__text">WhatsApp</span>
+                            </a>
+                        ` : ''}
+                        
+                        ${brokerTelegram ? `
+                            <a href="https://t.me/${brokerTelegram.replace('@', '')}?text=${this.messageText}" 
+                               target="_blank" class="contact-option contact-option--telegram">
+                                <span class="contact-option__icon">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                        <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                                    </svg>
+                                </span>
+                                <span class="contact-option__text">Telegram</span>
+                            </a>
+                        ` : ''}
+                        
+                        ${brokerViber ? `
+                            <a href="viber://chat?number=${this.cleanPhone(brokerViber)}" 
+                               target="_blank" class="contact-option contact-option--viber">
+                                <span class="contact-option__icon">
+                                    <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                                        <path d="M11.4 0C9.473.028 5.333.344 3.02 2.467 1.302 4.187.614 6.77.535 9.97c-.08 3.203-.166 9.212 5.64 10.878h.004l-.003 2.46s-.037.996.62 1.198c.792.245 1.258-.51 2.016-1.327.418-.449.992-1.107 1.426-1.612 3.937.332 6.962-.426 7.307-.538.8-.26 5.32-.84 6.053-6.853.757-6.2-.36-10.112-2.363-11.874C19.08.95 15.95.027 11.4 0zm.33 1.9c3.996.027 6.783.705 8.404 2.205 1.766 1.553 2.479 4.818 1.868 9.86-.607 4.96-4.063 5.56-4.705 5.768-.282.09-2.912.747-6.218.535 0 0-2.463 2.97-3.232 3.74-.12.12-.262.168-.356.144-.132-.033-.168-.187-.165-.412l.02-4.058c-4.79-1.393-4.51-6.27-4.447-8.99.064-2.72.607-4.899 2.022-6.297 1.796-1.754 5.467-2.5 6.81-2.495zM12.4 4.9c-.14 0-.254.113-.254.253 0 .14.114.252.254.252.702.007 1.46.18 1.935.39.378.168.678.39.886.64.21.253.34.527.405.824.076.35.11.638.11 1.466-.008.142.104.26.247.268h.006c.136 0 .25-.106.257-.244.002-.85-.034-1.21-.13-1.652-.09-.41-.265-.78-.55-1.123-.286-.342-.662-.617-1.125-.823-.576-.257-1.41-.444-2.208-.452l.167.2zm-1.22.903c-.584 0-1.208.166-1.584.498l-.003.003c-.396.332-.678.71-.83 1.203-.152.49-.162.992-.162 1.498 0 .19-.032.383.02.573.1.368.5.644.748.646.37.003.563-.304.578-.63.01-.21-.02-.413-.013-.624.01-.266-.004-.502.05-.716.05-.206.146-.35.326-.49.168-.133.503-.262.87-.262.19 0 .403.064.59.11.178.045.34.09.494.166.314.156.508.378.65.667.103.21.064.48.078.732.004.07.007.14.012.21a.263.263 0 0 0 .507.09l.003-.01c.093-.337.085-.69.033-1.012-.052-.32-.155-.632-.36-.936-.218-.324-.54-.582-.95-.774-.253-.12-.574-.224-.877-.286-.303-.063-.614-.103-.907-.106h-.02l-.253-.15zm5.03.994c-.14 0-.254.113-.254.253s.114.253.254.253c.64.02.927.263 1.043.857.058.29.053.682.052 1.123-.002.142.11.258.253.26h.003c.14 0 .254-.112.256-.252.002-.44.008-.87-.066-1.243-.148-.753-.64-1.19-1.542-1.25zm-5.038.51c-.324 0-.706.097-.99.3-.28.203-.488.497-.564.92-.037.2-.034.42-.017.63l.012.155c.025.285.1.643.16.893.123.497.3.993.593 1.428.43.64 1.058 1.2 1.844 1.596.39.196.858.37 1.318.447.248.042.492.055.72.02.34-.053.633-.192.885-.442.26-.256.368-.565.327-.944-.034-.312-.21-.49-.44-.625-.132-.076-.273-.147-.414-.22l-.446-.23c-.197-.094-.39-.21-.603-.268-.317-.085-.647.09-.848.324l-.254.303c-.12.145-.28.117-.28.117s-.693-.19-1.248-.61c-.314-.24-.535-.496-.758-.842 0 0-.072-.148.062-.28l.264-.29c.17-.188.28-.48.222-.775-.044-.22-.142-.418-.24-.618l-.242-.478c-.086-.167-.174-.333-.284-.48-.152-.206-.38-.32-.628-.32l-.107-.01zm4.327.396c-.14 0-.254.113-.254.253s.113.253.253.253c.31 0 .494.073.614.182.12.11.2.27.234.52.04.248.038.552.036.89-.002.142.11.258.252.26h.003c.14 0 .254-.112.256-.252.003-.34.005-.668-.045-.98-.05-.31-.166-.596-.402-.815-.236-.22-.575-.31-.946-.31z"/>
+                                    </svg>
+                                </span>
+                                <span class="contact-option__text">Viber</span>
+                            </a>
+                        ` : ''}
+                        
+                        ${brokerEmail ? `
+                            <a href="mailto:${brokerEmail}?subject=Подборка недвижимости&body=${this.messageText}" 
+                               class="contact-option contact-option--email">
+                                <span class="contact-option__icon">📧</span>
+                                <span class="contact-option__text">Email</span>
+                            </a>
+                        ` : ''}
+                        
+                        ${!brokerWhatsApp && !brokerTelegram && !brokerViber && !brokerEmail ? `
+                            <p style="text-align: center; opacity: 0.6;">Контакты брокера не указаны</p>
+                        ` : ''}
+                    </div>
+                </div>
+            </div>
+            
+            <style>
+                .completion-btn {
+                    display: flex !important;
+                    align-items: center;
+                    gap: var(--space-md);
+                    padding: var(--space-md) var(--space-lg) !important;
+                    text-align: left;
+                    width: 100%;
+                }
+                .completion-btn__icon {
+                    font-size: 1.5rem;
+                    flex-shrink: 0;
+                }
+                .completion-btn__text {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 2px;
+                }
+                .completion-btn__title {
+                    font-weight: 600;
+                    font-size: 1rem;
+                }
+                .completion-btn__subtitle {
+                    font-size: 0.75rem;
+                    opacity: 0.7;
+                }
+                
+                .contact-modal {
+                    display: none;
+                    position: fixed;
+                    inset: 0;
+                    background: rgba(0, 0, 0, 0.7);
+                    z-index: 1000;
+                    align-items: center;
+                    justify-content: center;
+                    padding: var(--space-md);
+                }
+                .contact-modal--open {
+                    display: flex;
+                }
+                .contact-modal__content {
+                    background: var(--bg-primary);
+                    border-radius: var(--radius-lg);
+                    max-width: 320px;
+                    width: 100%;
+                    overflow: hidden;
+                    box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+                }
+                .contact-modal__header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    padding: var(--space-md) var(--space-lg);
+                    border-bottom: 1px solid var(--border-color);
+                }
+                .contact-modal__header h3 {
+                    margin: 0;
+                    font-size: 1.1rem;
+                }
+                .contact-modal__close {
+                    background: none;
+                    border: none;
+                    font-size: 1.25rem;
+                    cursor: pointer;
+                    opacity: 0.6;
+                    padding: var(--space-xs);
+                }
+                .contact-modal__close:hover {
+                    opacity: 1;
+                }
+                .contact-modal__body {
+                    padding: var(--space-lg);
+                }
+                
+                .contact-option {
+                    display: flex;
+                    align-items: center;
+                    gap: var(--space-md);
+                    padding: var(--space-md);
+                    border-radius: var(--radius);
+                    margin-bottom: var(--space-sm);
+                    text-decoration: none;
+                    color: white;
+                    font-weight: 500;
+                    transition: transform 0.2s, opacity 0.2s;
+                }
+                .contact-option:hover {
+                    transform: scale(1.02);
+                    opacity: 0.9;
+                }
+                .contact-option__icon {
+                    width: 40px;
+                    height: 40px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                    background: rgba(255,255,255,0.2);
+                    border-radius: 50%;
+                    font-size: 1.25rem;
+                }
+                .contact-option__icon svg {
+                    width: 24px;
+                    height: 24px;
+                }
+                .contact-option--whatsapp {
+                    background: linear-gradient(135deg, #25D366, #128C7E);
+                }
+                .contact-option--telegram {
+                    background: linear-gradient(135deg, #2AABEE, #229ED9);
+                }
+                .contact-option--viber {
+                    background: linear-gradient(135deg, #7360F2, #59267C);
+                }
+                .contact-option--email {
+                    background: linear-gradient(135deg, #EA4335, #C5221F);
+                }
+            </style>
         `;
 
         screen.classList.add('completion-screen--visible');
@@ -962,6 +1178,40 @@ class SwipeApp {
         window.swipeAppInstance = this;
 
         console.log('✅ Selection completed:', results);
+    }
+
+    // Format phone for display
+    formatPhone(phone) {
+        if (!phone) return '';
+        // Remove all non-digits except +
+        const cleaned = phone.replace(/[^\d+]/g, '');
+        // Format: +357 99 123456
+        if (cleaned.startsWith('+357')) {
+            return cleaned.replace(/(\+357)(\d{2})(\d+)/, '$1 $2 $3');
+        }
+        return cleaned;
+    }
+
+    // Clean phone for links (remove everything except digits)
+    cleanPhone(phone) {
+        if (!phone) return '';
+        return phone.replace(/[^\d]/g, '');
+    }
+
+    // Show contact modal
+    showContactModal() {
+        const modal = document.getElementById('contactModal');
+        if (modal) {
+            modal.classList.add('contact-modal--open');
+        }
+    }
+
+    // Hide contact modal
+    hideContactModal() {
+        const modal = document.getElementById('contactModal');
+        if (modal) {
+            modal.classList.remove('contact-modal--open');
+        }
     }
 
     // Fullscreen Gallery Methods

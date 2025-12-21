@@ -1018,27 +1018,56 @@
 
     <!-- Broker Settings Modal -->
     <div class="modal-overlay" id="brokerSettingsModal">
-        <div class="modal">
+        <div class="modal" style="max-width: 500px;">
             <div class="modal__header">
-                <h3 class="modal__title">⚙️ Broker Settings</h3>
+                <h3 class="modal__title">⚙️ Мои контакты</h3>
                 <button class="modal__close" onclick="closeBrokerSettingsModal()">✕</button>
             </div>
             <div class="modal__body">
+                <p style="color: var(--gray-500); font-size: 0.875rem; margin-bottom: var(--space-lg);">
+                    Эти контакты будут показаны клиентам для связи с вами
+                </p>
+                
                 <div class="form-group">
-                    <label class="form-group__label">Your Name</label>
-                    <input type="text" class="input" id="brokerNameInput" placeholder="e.g. Maria Konstantinou">
+                    <label class="form-group__label">👤 Ваше имя</label>
+                    <input type="text" class="input" id="brokerNameInput" placeholder="Например: Мария Константину">
                 </div>
+                
                 <div class="form-group" style="margin-top: var(--space-md);">
-                    <label class="form-group__label">Your Phone Number</label>
-                    <input type="tel" class="input" id="brokerPhoneInput" placeholder="e.g. +357 99 123456">
+                    <label class="form-group__label">📞 Телефон</label>
+                    <input type="tel" class="input" id="brokerPhoneInput" placeholder="+357 99 123456">
                     <small style="color: var(--gray-500); font-size: 0.75rem; margin-top: 4px; display: block;">
-                        This phone number will be shown to clients when viewing property details
+                        Для звонков и WhatsApp/Viber (если не указаны отдельно)
                     </small>
+                </div>
+                
+                <div class="form-group" style="margin-top: var(--space-md);">
+                    <label class="form-group__label">📧 Email</label>
+                    <input type="email" class="input" id="brokerEmailInput" placeholder="your@email.com">
+                </div>
+                
+                <div style="margin-top: var(--space-lg); padding-top: var(--space-md); border-top: 1px solid var(--gray-200);">
+                    <p style="font-weight: 500; margin-bottom: var(--space-md);">Мессенджеры (опционально)</p>
+                    
+                    <div class="form-group">
+                        <label class="form-group__label" style="color: #25D366;">💬 WhatsApp</label>
+                        <input type="tel" class="input" id="brokerWhatsAppInput" placeholder="Номер или оставьте пустым (возьмётся из телефона)">
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: var(--space-md);">
+                        <label class="form-group__label" style="color: #229ED9;">✈️ Telegram</label>
+                        <input type="text" class="input" id="brokerTelegramInput" placeholder="@username или номер телефона">
+                    </div>
+                    
+                    <div class="form-group" style="margin-top: var(--space-md);">
+                        <label class="form-group__label" style="color: #7360F2;">📱 Viber</label>
+                        <input type="tel" class="input" id="brokerViberInput" placeholder="Номер или оставьте пустым (возьмётся из телефона)">
+                    </div>
                 </div>
             </div>
             <div class="modal__footer">
-                <button class="btn btn-secondary" onclick="closeBrokerSettingsModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="saveBrokerSettings()">Save Settings</button>
+                <button class="btn btn-secondary" onclick="closeBrokerSettingsModal()">Отмена</button>
+                <button class="btn btn-primary" onclick="saveBrokerSettings()">💾 Сохранить</button>
             </div>
         </div>
     </div>
@@ -1999,13 +2028,25 @@
                     console.log('📞 Using broker phone from database:', brokerPhone);
                 }
 
+                // Gather all broker contacts from localStorage
+                const brokerContacts = {
+                    name: localStorage.getItem('broker_name') || null,
+                    phone: brokerPhone,
+                    email: localStorage.getItem('broker_email') || null,
+                    whatsapp: localStorage.getItem('broker_whatsapp') || brokerPhone, // fallback to phone
+                    telegram: localStorage.getItem('broker_telegram') || null,
+                    viber: localStorage.getItem('broker_viber') || brokerPhone // fallback to phone
+                };
+                
+                console.log('📱 Broker contacts:', brokerContacts);
+
                 // Save to Supabase
                 const result = await SupabaseClient.createSelection(
                     selectionName,
                     propertyIdsFormatted,  // Use formatted IDs
                     description || `${propertyIdsFormatted.length} properties for ${clientName || 'client'}`,
                     clientId,
-                    brokerPhone  // Pass broker phone
+                    brokerContacts  // Pass all broker contacts
                 );
 
                 // Also save to localStorage for offline access
@@ -2071,12 +2112,13 @@
 
         // Broker Settings Modal Functions
         function openBrokerSettingsModal() {
-            // Load current settings
-            const brokerName = localStorage.getItem('broker_name') || '';
-            const brokerPhone = localStorage.getItem('broker_phone') || '';
-            
-            document.getElementById('brokerNameInput').value = brokerName;
-            document.getElementById('brokerPhoneInput').value = brokerPhone;
+            // Load current settings from localStorage
+            document.getElementById('brokerNameInput').value = localStorage.getItem('broker_name') || '';
+            document.getElementById('brokerPhoneInput').value = localStorage.getItem('broker_phone') || '';
+            document.getElementById('brokerEmailInput').value = localStorage.getItem('broker_email') || '';
+            document.getElementById('brokerWhatsAppInput').value = localStorage.getItem('broker_whatsapp') || '';
+            document.getElementById('brokerTelegramInput').value = localStorage.getItem('broker_telegram') || '';
+            document.getElementById('brokerViberInput').value = localStorage.getItem('broker_viber') || '';
             
             document.getElementById('brokerSettingsModal').classList.add('modal-overlay--open');
         }
@@ -2088,15 +2130,25 @@
         function saveBrokerSettings() {
             const brokerName = document.getElementById('brokerNameInput').value.trim();
             const brokerPhone = document.getElementById('brokerPhoneInput').value.trim();
+            const brokerEmail = document.getElementById('brokerEmailInput').value.trim();
+            const brokerWhatsApp = document.getElementById('brokerWhatsAppInput').value.trim();
+            const brokerTelegram = document.getElementById('brokerTelegramInput').value.trim();
+            const brokerViber = document.getElementById('brokerViberInput').value.trim();
             
-            if (!brokerPhone) {
-                alert('Please enter your phone number');
+            if (!brokerPhone && !brokerEmail) {
+                alert('Укажите хотя бы телефон или email');
                 return;
             }
             
             // Save to localStorage
             localStorage.setItem('broker_name', brokerName);
             localStorage.setItem('broker_phone', brokerPhone);
+            localStorage.setItem('broker_email', brokerEmail);
+            localStorage.setItem('broker_whatsapp', brokerWhatsApp);
+            localStorage.setItem('broker_telegram', brokerTelegram);
+            localStorage.setItem('broker_viber', brokerViber);
+            
+            console.log('✅ Broker settings saved:', { brokerName, brokerPhone, brokerEmail, brokerTelegram });
             
             // Show success message
             alert('Settings saved successfully!');
