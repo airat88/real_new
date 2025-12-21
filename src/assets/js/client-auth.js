@@ -157,25 +157,42 @@ const ClientAuth = {
     // ПОДБОРКИ КЛИЕНТА
     // ============================================
 
-    // Получить все подборки клиента
+    // Получить все подборки клиента (ищем по email через client_id)
     async getClientSelections() {
         if (!SupabaseClient.init()) {
             throw new Error('Supabase not initialized');
         }
 
         const clientInfo = this.getClientInfo();
-        if (!clientInfo?.id) {
+        if (!clientInfo?.email) {
             return { success: false, error: 'Not authenticated' };
         }
 
         try {
+            // Сначала найдём все client_id с таким email
+            const { data: clients, error: clientsError } = await SupabaseClient.client
+                .from('clients')
+                .select('id')
+                .eq('email', clientInfo.email);
+
+            if (clientsError) {
+                console.error('Error fetching clients:', clientsError);
+                return { success: false, error: clientsError.message };
+            }
+
+            if (!clients || clients.length === 0) {
+                return { success: true, selections: [] };
+            }
+
+            // Получаем массив всех client_id с этим email
+            const clientIds = clients.map(c => c.id);
+            console.log('Found client IDs for email:', clientIds);
+
+            // Теперь ищем подборки по всем этим client_id
             const { data, error } = await SupabaseClient.client
                 .from('selections')
-                .select(`
-                    *,
-                    brokers (name, phone, email)
-                `)
-                .eq('client_id', clientInfo.id)
+                .select('*')
+                .in('client_id', clientIds)
                 .order('created_at', { ascending: false });
 
             if (error) {
@@ -183,6 +200,7 @@ const ClientAuth = {
                 return { success: false, error: error.message };
             }
 
+            console.log('Found selections:', data?.length || 0);
             return { success: true, selections: data || [] };
         } catch (error) {
             console.error('Failed to fetch selections:', error);
