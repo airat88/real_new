@@ -481,6 +481,7 @@
         .property-reaction-item__image-wrapper {
             position: relative;
             flex-shrink: 0;
+            margin-bottom: 12px; /* Добавляем отступ снизу для бейджа */
         }
 
         .property-reaction-item__image {
@@ -494,7 +495,7 @@
 
         .property-reaction-item__reaction {
             position: absolute;
-            bottom: -8px;
+            bottom: -10px; /* Немного увеличили отступ для четкого позиционирования под фото */
             left: 50%;
             transform: translateX(-50%);
             width: 32px;
@@ -506,6 +507,7 @@
             font-size: 1.2rem;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
             border: 2px solid var(--white);
+            z-index: 10; /* Гарантируем, что бейдж поверх всего */
         }
 
         .property-reaction-item--liked .property-reaction-item__reaction {
@@ -1311,7 +1313,12 @@
 
             try {
                 // Get reactions for this selection
-                const reactions = await SupabaseClient.getSelectionReactions(id);
+                const allReactions = await SupabaseClient.getSelectionReactions(id);
+                
+                // ВАЖНО: Фильтруем реакции только для тех объектов, которые были в подборке
+                const selectedPropertyIds = selection.property_ids || [];
+                const reactions = allReactions.filter(r => selectedPropertyIds.includes(r.property_id));
+                
                 const properties = DataSync.getProperties();
 
                 // Build property lookup
@@ -1388,7 +1395,6 @@
                 document.getElementById('detailModalContent').innerHTML = content;
 
                 // Store data for PDF export
-                const selectedPropertyIds = selection.property_ids || [];
                 const selectedProperties = properties.filter(p => selectedPropertyIds.includes(p.id));
 
                 currentDetailSelection = {
