@@ -959,7 +959,7 @@ class SwipeApp {
         // Render thumbnails
         thumbsContainer.innerHTML = photos.map((photo, idx) => `
             <img src="${photo}" class="fullscreen-gallery__thumb ${idx === this.galleryIndex ? 'active' : ''}"
-                 onclick="SwipeApp.galleryGoTo(${idx})"
+                 onclick="SwipeAppGlobal.galleryGoTo(${idx})"
                  onerror="this.style.display='none'">
         `).join('');
 
@@ -1109,19 +1109,16 @@ class SwipeApp {
     }
 }
 
-// Global reference for onclick handlers
-let SwipeAppInstance;
-
 // Initialize when DOM is ready
 document.addEventListener('DOMContentLoaded', () => {
-    SwipeAppInstance = new SwipeApp();
+    window.swipeAppInstance = new SwipeApp();
 });
 
 // Global functions for HTML onclick handlers
 const SwipeAppGlobal = {
-    closeFullscreenGallery: () => SwipeAppInstance?.closeFullscreenGallery(),
-    galleryNav: (dir) => SwipeAppInstance?.galleryNav(dir),
-    galleryGoTo: (idx) => SwipeAppInstance?.galleryGoTo(idx)
+    closeFullscreenGallery: () => window.swipeAppInstance?.closeFullscreenGallery(),
+    galleryNav: (dir) => window.swipeAppInstance?.galleryNav(dir),
+    galleryGoTo: (idx) => window.swipeAppInstance?.galleryGoTo(idx)
 };
 
 // Expose to window for onclick handlers

@@ -15,7 +15,7 @@ class PropertyManager {
      */
     async loadProperties() {
         try {
-            const { data, error } = await window.supabaseClient
+            const { data, error } = await window.SupabaseClient.client
                 .from('properties')
                 .select('*')
                 .eq('broker_id', this.userId)
@@ -36,7 +36,7 @@ class PropertyManager {
      */
     async getProperty(id) {
         try {
-            const { data, error } = await window.supabaseClient
+            const { data, error } = await window.SupabaseClient.client
                 .from('properties')
                 .select('*')
                 .eq('id', id)
@@ -55,7 +55,7 @@ class PropertyManager {
      */
     async deleteProperty(id) {
         try {
-            const { error } = await window.supabaseClient
+            const { error } = await window.SupabaseClient.client
                 .from('properties')
                 .delete()
                 .eq('id', id)
@@ -77,7 +77,7 @@ class PropertyManager {
      */
     async updateProperty(id, updates) {
         try {
-            const { data, error } = await window.supabaseClient
+            const { data, error } = await window.SupabaseClient.client
                 .from('properties')
                 .update(updates)
                 .eq('id', id)

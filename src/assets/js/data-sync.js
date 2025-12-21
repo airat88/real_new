@@ -464,9 +464,17 @@ const DataSync = {
         console.log('🔄 Loading properties from CSV...');
 
         try {
-            // Try different paths
+            // Try different paths (including absolute paths)
             let response;
-            const paths = [this.config.CSV_PATH, this.config.CSV_PATH_ROOT, '/base.csv', '/src/base.csv'];
+            const origin = window.location.origin;
+            const paths = [
+                this.config.CSV_PATH, 
+                this.config.CSV_PATH_ROOT, 
+                '/base.csv', 
+                '/src/base.csv',
+                `${origin}/base.csv`,
+                `${origin}/src/base.csv`
+            ];
 
             for (const path of paths) {
                 try {
