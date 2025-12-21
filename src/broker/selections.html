@@ -481,7 +481,6 @@
         .property-reaction-item__image-wrapper {
             position: relative;
             flex-shrink: 0;
-            margin-bottom: 12px; /* Добавляем отступ снизу для бейджа */
         }
 
         .property-reaction-item__image {
@@ -494,28 +493,30 @@
         }
 
         .property-reaction-item__reaction {
-            position: absolute;
-            bottom: -10px; /* Немного увеличили отступ для четкого позиционирования под фото */
-            left: 50%;
-            transform: translateX(-50%);
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
+            /* Стиль как в Tinder - бейдж внизу карточки */
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.2rem;
-            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-            border: 2px solid var(--white);
-            z-index: 10; /* Гарантируем, что бейдж поверх всего */
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            margin-left: auto;
+            white-space: nowrap;
+            flex-shrink: 0;
         }
 
         .property-reaction-item--liked .property-reaction-item__reaction {
-            background: var(--success);
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(16, 185, 129, 0.3);
         }
 
         .property-reaction-item--disliked .property-reaction-item__reaction {
-            background: var(--danger);
+            background: linear-gradient(135deg, #ef4444 0%, #dc2626 100%);
+            color: white;
+            box-shadow: 0 2px 8px rgba(239, 68, 68, 0.3);
         }
 
         .property-reaction-item__info {
@@ -1423,8 +1424,9 @@
             const price = prop.price || (prop.cleanPrice ? `€${prop.cleanPrice.toLocaleString()}` : 'Price N/A');
             const location = prop.location || '';
             
-            // Determine reaction icon
+            // Determine reaction icon and text
             const reactionIcon = type === 'liked' ? '❤️' : '👎';
+            const reactionText = type === 'liked' ? 'Liked' : 'Passed';
 
             return `
                 <div class="property-reaction-item property-reaction-item--${type}"
@@ -1433,14 +1435,15 @@
                     <div class="property-reaction-item__image-wrapper">
                         <img src="${photo}" class="property-reaction-item__image"
                              onerror="this.src='https://images.unsplash.com/photo-1560448204-e02f11c3d0e2?w=800'">
-                        <div class="property-reaction-item__reaction">${reactionIcon}</div>
                     </div>
                     <div class="property-reaction-item__info">
                         ${projectTitle ? `<div class="property-reaction-item__project" style="font-size: 0.75rem; color: var(--gray-500); margin-bottom: 2px;">${projectTitle}</div>` : ''}
                         <div class="property-reaction-item__title">${title}</div>
                         <div class="property-reaction-item__meta">${price} ${location ? '• ' + location : ''}</div>
                     </div>
-                    <span class="property-reaction-item__link">View Details →</span>
+                    <div class="property-reaction-item__reaction">
+                        ${reactionIcon} ${reactionText}
+                    </div>
                 </div>
             `;
         }
