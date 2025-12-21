@@ -160,23 +160,58 @@ const PDFExport = {
         // Skip placeholder images
         if (url.includes('unsplash.com')) return null;
 
-        // Convert Google Drive URLs
+        // Convert Google Drive URLs to direct thumbnail URL
         let imageUrl = url;
+        let fileId = null;
+        
         if (url.includes('drive.google.com')) {
-            let fileId = null;
             if (url.includes('/d/')) {
                 fileId = url.split('/d/')[1]?.split('/')[0];
             } else if (url.includes('id=')) {
                 fileId = url.split('id=')[1]?.split('&')[0];
             }
             if (fileId) {
-                imageUrl = `https://drive.google.com/thumbnail?id=${fileId}&sz=w400`;
+                // Check if Google Apps Script proxy is configured
+                if (typeof DataSync !== 'undefined' && 
+                    DataSync.config?.USE_APPS_SCRIPT_PROXY && 
+                    DataSync.config?.GOOGLE_APPS_SCRIPT_URL) {
+                    imageUrl = `${DataSync.config.GOOGLE_APPS_SCRIPT_URL}?id=${fileId}`;
+                    console.log('📸 Using Apps Script proxy for PDF:', fileId);
+                } else {
+                    // Try lh3.googleusercontent.com format (better CORS support)
+                    imageUrl = `https://lh3.googleusercontent.com/d/${fileId}=w400`;
+                }
             }
         }
 
+        // Method 1: Try fetch with blob (works for some sources)
+        try {
+            const controller = new AbortController();
+            const timeoutId = setTimeout(() => controller.abort(), timeout);
+            
+            const response = await fetch(imageUrl, { 
+                signal: controller.signal,
+                mode: 'cors'
+            });
+            clearTimeout(timeoutId);
+            
+            if (response.ok) {
+                const blob = await response.blob();
+                return new Promise((resolve) => {
+                    const reader = new FileReader();
+                    reader.onloadend = () => resolve(reader.result);
+                    reader.onerror = () => resolve(null);
+                    reader.readAsDataURL(blob);
+                });
+            }
+        } catch (e) {
+            console.log('Fetch method failed, trying canvas method:', e.message);
+        }
+
+        // Method 2: Try canvas method (original approach)
         return new Promise((resolve) => {
             const img = new Image();
-            //img.crossOrigin = 'anonymous';
+            img.crossOrigin = 'anonymous';
 
             const timeoutId = setTimeout(() => {
                 console.log('Image timeout:', imageUrl);
@@ -258,76 +293,80 @@ const PDFExport = {
         return canvas.toDataURL('image/png');
     },
 
-    // Generate static map image using OpenStreetMap
+    // Generate static map image - simple canvas-based map with marker
     async generateStaticMap(lat, lng, zoom = 15, width = 400, height = 200) {
         if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
             return null;
         }
 
         try {
-            // Use OpenStreetMap tiles to create a static map
-            const tileSize = 256;
-            const scale = Math.pow(2, zoom);
-            
-            // Calculate tile coordinates
-            const tileX = Math.floor((lng + 180) / 360 * scale);
-            const tileY = Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * scale);
-            
-            // Create canvas
+            // Create canvas for simple map visualization
             const canvas = document.createElement('canvas');
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext('2d');
             
-            // Fill background
-            ctx.fillStyle = '#e5e7eb';
+            // Create gradient background (water/land like appearance)
+            const gradient = ctx.createLinearGradient(0, 0, width, height);
+            gradient.addColorStop(0, '#e8f4f8');
+            gradient.addColorStop(0.5, '#dbeafe');
+            gradient.addColorStop(1, '#e0e7ff');
+            ctx.fillStyle = gradient;
             ctx.fillRect(0, 0, width, height);
             
-            // Load and draw tile
-            const tileUrl = `https://tile.openstreetmap.org/${zoom}/${tileX}/${tileY}.png`;
-            const tileImg = await this.loadImageAsBase64(tileUrl, 3000);
-            
-            if (tileImg) {
-                const img = new Image();
-                await new Promise((resolve) => {
-                    img.onload = () => {
-                        // Calculate position to center the marker
-                        const pixelX = ((lng + 180) / 360 * scale * tileSize) % tileSize;
-                        const pixelY = ((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * scale * tileSize) % tileSize;
-                        
-                        const offsetX = width / 2 - pixelX;
-                        const offsetY = height / 2 - pixelY;
-                        
-                        ctx.drawImage(img, offsetX, offsetY);
-                        resolve();
-                    };
-                    img.src = tileImg;
-                });
+            // Add some texture/grid lines to simulate map
+            ctx.strokeStyle = '#cbd5e1';
+            ctx.lineWidth = 0.5;
+            for (let x = 0; x < width; x += 40) {
+                ctx.beginPath();
+                ctx.moveTo(x, 0);
+                ctx.lineTo(x, height);
+                ctx.stroke();
+            }
+            for (let y = 0; y < height; y += 40) {
+                ctx.beginPath();
+                ctx.moveTo(0, y);
+                ctx.lineTo(width, y);
+                ctx.stroke();
             }
             
             // Draw marker at center
             const centerX = width / 2;
             const centerY = height / 2;
             
-            // Marker pin (red circle with white border)
+            // Shadow
             ctx.beginPath();
-            ctx.arc(centerX, centerY, 12, 0, 2 * Math.PI);
+            ctx.ellipse(centerX, centerY + 18, 10, 4, 0, 0, 2 * Math.PI);
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
+            ctx.fill();
+            
+            // Marker pin shape
+            ctx.beginPath();
+            ctx.moveTo(centerX, centerY + 15);
+            ctx.bezierCurveTo(centerX - 15, centerY, centerX - 15, centerY - 20, centerX, centerY - 25);
+            ctx.bezierCurveTo(centerX + 15, centerY - 20, centerX + 15, centerY, centerX, centerY + 15);
             ctx.fillStyle = '#ef4444';
             ctx.fill();
-            ctx.strokeStyle = '#ffffff';
-            ctx.lineWidth = 3;
+            ctx.strokeStyle = '#b91c1c';
+            ctx.lineWidth = 2;
             ctx.stroke();
             
-            // Inner dot
+            // Inner circle
             ctx.beginPath();
-            ctx.arc(centerX, centerY, 5, 0, 2 * Math.PI);
+            ctx.arc(centerX, centerY - 10, 6, 0, 2 * Math.PI);
             ctx.fillStyle = '#ffffff';
             ctx.fill();
             
             // Add border to map
-            ctx.strokeStyle = '#d1d5db';
+            ctx.strokeStyle = '#94a3b8';
             ctx.lineWidth = 2;
-            ctx.strokeRect(0, 0, width, height);
+            ctx.strokeRect(1, 1, width - 2, height - 2);
+            
+            // Add coordinate text at bottom
+            ctx.fillStyle = '#64748b';
+            ctx.font = '10px Arial';
+            ctx.textAlign = 'center';
+            ctx.fillText(`${lat.toFixed(5)}, ${lng.toFixed(5)}`, centerX, height - 8);
             
             return canvas.toDataURL('image/png');
             
