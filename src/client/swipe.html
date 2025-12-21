@@ -105,6 +105,9 @@
     <!-- Swipe Container (will be populated by SwipeApp) -->
     <div id="swipeContainer"></div>
 
+    <!-- Completion Screen -->
+    <div class="completion-screen"></div>
+
     <!-- Scripts -->
     <!-- IMPORTANT: Supabase CDN must load FIRST -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -188,14 +191,11 @@
                     }))
                 );
                 
-                // Create a Set for faster lookup and exact matching
-                const selectionIdSet = new Set(selectionIdStrings);
-                
                 // Filter properties that match the selection IDs
-                // FIXED: Use Set.has() for exact matching instead of includes() which was causing partial matches
+                // FIXED: Renamed from 'selectedProperties' to 'filteredProperties' for clarity
                 const filteredProperties = allProperties.filter(property => {
                     const propertyIdString = String(property.id).trim();
-                    const isMatch = selectionIdSet.has(propertyIdString);
+                    const isMatch = selectionIdStrings.includes(propertyIdString);
                     return isMatch;
                 });
 

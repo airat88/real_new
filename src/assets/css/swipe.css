@@ -573,14 +573,17 @@
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     padding: var(--space-xl);
+    padding-top: var(--space-2xl);
     text-align: center;
     color: var(--white);
     z-index: 50;
     opacity: 0;
     visibility: hidden;
     transition: all var(--transition-slow);
+    overflow-y: auto;
+    -webkit-overflow-scrolling: touch;
 }
 
 .completion-screen--visible {
