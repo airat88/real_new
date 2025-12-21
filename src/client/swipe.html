@@ -188,11 +188,14 @@
                     }))
                 );
                 
+                // Create a Set for faster lookup and exact matching
+                const selectionIdSet = new Set(selectionIdStrings);
+                
                 // Filter properties that match the selection IDs
-                // FIXED: Renamed from 'selectedProperties' to 'filteredProperties' for clarity
+                // FIXED: Use Set.has() for exact matching instead of includes() which was causing partial matches
                 const filteredProperties = allProperties.filter(property => {
                     const propertyIdString = String(property.id).trim();
-                    const isMatch = selectionIdStrings.includes(propertyIdString);
+                    const isMatch = selectionIdSet.has(propertyIdString);
                     return isMatch;
                 });
 
