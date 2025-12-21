@@ -249,69 +249,6 @@
                     console.log('📞 Broker phone added to properties:', brokerPhone);
                 }
 
-                // ⚠️ CRITICAL CHECK: Ensure filteredProperties is valid
-                console.log('=== PRE-INITIALIZATION VALIDATION ===');
-                console.log('Expected properties count:', selection.property_ids.length);
-                console.log('Filtered properties count:', filteredProperties.length);
-                console.log('Total available properties:', allProperties.length);
-                
-                // Check 1: filteredProperties should not be empty
-                if (filteredProperties.length === 0) {
-                    throw new Error(
-                        `❌ ФИЛЬТРАЦИЯ НЕ СРАБОТАЛА!\n\n` +
-                        `Ожидалось объектов: ${selection.property_ids.length}\n` +
-                        `Найдено после фильтрации: 0\n\n` +
-                        `Причина: ID из подборки не совпадают с ID в базе данных.\n` +
-                        `Решение: Пересоздайте подборку заново.`
-                    );
-                }
-                
-                // Check 2: filteredProperties should not be ALL properties (critical bug check)
-                if (filteredProperties.length === allProperties.length && allProperties.length > selection.property_ids.length) {
-                    console.error('🚨 КРИТИЧЕСКАЯ ОШИБКА: Фильтрация не применилась!');
-                    console.error('   Показываются ВСЕ объекты из базы данных вместо выбранных брокером!');
-                    throw new Error(
-                        `🚨 КРИТИЧЕСКАЯ ОШИБКА!\n\n` +
-                        `Система пытается показать ВСЕ объекты (${allProperties.length}) вместо выбранных (${selection.property_ids.length}).\n\n` +
-                        `Это недопустимо. Клиент должен видеть только выбранные брокером объекты.\n\n` +
-                        `Решение: Обратитесь к разработчику.`
-                    );
-                }
-                
-                // Check 3: Warn if count doesn't match expected
-                if (filteredProperties.length !== selection.property_ids.length) {
-                    console.warn('⚠️ ВНИМАНИЕ: Количество объектов не совпадает!');
-                    console.warn(`   Ожидалось: ${selection.property_ids.length}`);
-                    console.warn(`   Получено: ${filteredProperties.length}`);
-                    console.warn(`   Отсутствует: ${selection.property_ids.length - filteredProperties.length} объектов`);
-                    
-                    // Find missing IDs
-                    const foundIdSet = new Set(filteredProperties.map(p => String(p.id).trim()));
-                    const selectionIdStrings = selection.property_ids.map(id => String(id).trim());
-                    const missingIds = selectionIdStrings.filter(id => !foundIdSet.has(id));
-                    
-                    if (missingIds.length > 0) {
-                        console.warn('   Отсутствующие ID:', missingIds.slice(0, 10));
-                    }
-                    
-                    // Show warning but continue (some properties might be deleted from CSV)
-                    console.warn('⚠️ Продолжаем с доступными объектами...');
-                }
-                
-                // Check 4: Final sanity check - ensure we're not showing too many properties
-                const maxAllowedRatio = 1.2; // Allow 20% more for flexibility
-                if (filteredProperties.length > selection.property_ids.length * maxAllowedRatio) {
-                    throw new Error(
-                        `🚨 ОШИБКА ВАЛИДАЦИИ!\n\n` +
-                        `Показывается слишком много объектов: ${filteredProperties.length}\n` +
-                        `Максимум разрешено: ${Math.floor(selection.property_ids.length * maxAllowedRatio)}\n\n` +
-                        `Это указывает на ошибку в логике фильтрации.`
-                    );
-                }
-                
-                console.log('✅ Pre-initialization checks passed');
-                console.log('✅ Safe to initialize SwipeApp with', filteredProperties.length, 'properties');
-                
                 // Hide loading screen
                 loadingScreen.style.display = 'none';
 
