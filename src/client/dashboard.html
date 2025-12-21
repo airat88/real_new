@@ -1,0 +1,938 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Личный кабинет | Cyprus Real Estate</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+    
+    <link rel="stylesheet" href="../assets/css/common.css">
+    
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, #1e1b4b 0%, #312e81 100%);
+            color: white;
+            padding: 16px 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header-logo {
+            font-size: 1.5rem;
+        }
+        
+        .header-title {
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .user-name {
+            font-size: 0.875rem;
+            opacity: 0.9;
+        }
+        
+        .btn-logout {
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            color: white;
+            padding: 8px 16px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+        
+        .btn-logout:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        /* Main */
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px 20px;
+        }
+        
+        /* Welcome Section */
+        .welcome-section {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .welcome-title {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: #1e1b4b;
+            margin-bottom: 8px;
+        }
+        
+        .welcome-subtitle {
+            color: #6b7280;
+        }
+        
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 16px;
+            padding: 20px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .stat-icon {
+            font-size: 2rem;
+            margin-bottom: 12px;
+        }
+        
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e1b4b;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            overflow-x: auto;
+            padding-bottom: 4px;
+        }
+        
+        .tab {
+            padding: 12px 24px;
+            background: white;
+            border: none;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            color: #6b7280;
+            cursor: pointer;
+            transition: all 0.3s;
+            white-space: nowrap;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .tab--active {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+        }
+        
+        .tab:hover:not(.tab--active) {
+            background: #f3f4f6;
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content--active {
+            display: block;
+        }
+        
+        /* Section Title */
+        .section-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #1e1b4b;
+            margin-bottom: 16px;
+        }
+        
+        /* Selections Grid */
+        .selections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 16px;
+        }
+        
+        .selection-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .selection-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .selection-header {
+            padding: 20px;
+            border-bottom: 1px solid #f3f4f6;
+        }
+        
+        .selection-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e1b4b;
+            margin-bottom: 8px;
+        }
+        
+        .selection-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .selection-body {
+            padding: 20px;
+        }
+        
+        .selection-stats {
+            display: flex;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+        
+        .selection-stat {
+            text-align: center;
+            flex: 1;
+        }
+        
+        .selection-stat__value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .selection-stat__value--total {
+            color: #6366f1;
+        }
+        
+        .selection-stat__value--liked {
+            color: #10b981;
+        }
+        
+        .selection-stat__value--passed {
+            color: #ef4444;
+        }
+        
+        .selection-stat__label {
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        .selection-progress {
+            margin-bottom: 16px;
+        }
+        
+        .progress-bar {
+            height: 8px;
+            background: #e5e7eb;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: linear-gradient(90deg, #6366f1, #8b5cf6);
+            border-radius: 4px;
+            transition: width 0.5s;
+        }
+        
+        .progress-label {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-top: 4px;
+        }
+        
+        .selection-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn {
+            padding: 10px 20px;
+            border-radius: 10px;
+            font-size: 0.875rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: none;
+            text-decoration: none;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+        
+        .btn-secondary {
+            background: #f3f4f6;
+            color: #374151;
+        }
+        
+        .btn-secondary:hover {
+            background: #e5e7eb;
+        }
+        
+        /* Status Badge */
+        .status-badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.75rem;
+            font-weight: 600;
+        }
+        
+        .status-badge--pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .status-badge--active {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+        
+        .status-badge--completed {
+            background: #d1fae5;
+            color: #059669;
+        }
+        
+        /* Favorites Grid */
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        
+        .property-card {
+            background: white;
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .property-card:hover {
+            transform: translateY(-4px);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+        }
+        
+        .property-image {
+            height: 180px;
+            background: #f3f4f6;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 3rem;
+            color: #9ca3af;
+            position: relative;
+        }
+        
+        .property-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .btn-remove-favorite {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            width: 36px;
+            height: 36px;
+            background: white;
+            border: none;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1rem;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+        }
+        
+        .btn-remove-favorite:hover {
+            background: #fee2e2;
+            transform: scale(1.1);
+        }
+        
+        .property-info {
+            padding: 16px;
+        }
+        
+        .property-id {
+            font-size: 0.75rem;
+            color: #6b7280;
+            margin-bottom: 4px;
+        }
+        
+        .property-title {
+            font-weight: 600;
+            color: #1e1b4b;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .property-details {
+            display: flex;
+            gap: 12px;
+            font-size: 0.75rem;
+            color: #6b7280;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #6b7280;
+        }
+        
+        .empty-state__icon {
+            font-size: 4rem;
+            margin-bottom: 16px;
+            opacity: 0.5;
+        }
+        
+        .empty-state__title {
+            font-size: 1.25rem;
+            font-weight: 600;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .empty-state__text {
+            margin-bottom: 24px;
+        }
+        
+        /* Profile Section */
+        .profile-card {
+            background: white;
+            border-radius: 16px;
+            padding: 24px;
+            max-width: 500px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        .profile-avatar {
+            width: 80px;
+            height: 80px;
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+            color: white;
+            margin-bottom: 20px;
+        }
+        
+        .form-group {
+            margin-bottom: 20px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #374151;
+            margin-bottom: 8px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 16px;
+            border: 2px solid #e5e7eb;
+            border-radius: 10px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #6366f1;
+        }
+        
+        .form-input:disabled {
+            background: #f9fafb;
+            color: #6b7280;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #6b7280;
+        }
+        
+        .spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid #e5e7eb;
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 16px;
+        }
+        
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1e1b4b;
+            color: white;
+            padding: 12px 24px;
+            border-radius: 12px;
+            font-size: 0.875rem;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        
+        .toast--visible {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        /* Mobile */
+        @media (max-width: 640px) {
+            .header-title {
+                display: none;
+            }
+            
+            .user-name {
+                display: none;
+            }
+            
+            .welcome-title {
+                font-size: 1.25rem;
+            }
+            
+            .tabs {
+                margin: 0 -20px 24px;
+                padding: 0 20px 4px;
+            }
+            
+            .selections-grid,
+            .favorites-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <span class="header-logo">🏠</span>
+                <span class="header-title">Cyprus Real Estate</span>
+            </div>
+            <div class="header-right">
+                <span class="user-name" id="userName">Загрузка...</span>
+                <button class="btn-logout" onclick="handleLogout()">Выйти</button>
+            </div>
+        </div>
+    </header>
+    
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Welcome Section -->
+        <section class="welcome-section">
+            <h1 class="welcome-title">Добро пожаловать, <span id="welcomeName">Гость</span>!</h1>
+            <p class="welcome-subtitle">Здесь вы можете просматривать свои подборки и избранные объекты</p>
+        </section>
+        
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-icon">📋</div>
+                <div class="stat-value" id="statSelections">0</div>
+                <div class="stat-label">Подборок</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">❤️</div>
+                <div class="stat-value" id="statFavorites">0</div>
+                <div class="stat-label">В избранном</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-icon">👀</div>
+                <div class="stat-value" id="statViewed">0</div>
+                <div class="stat-label">Просмотрено</div>
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab tab--active" data-tab="selections">📋 Мои подборки</button>
+            <button class="tab" data-tab="favorites">❤️ Избранное</button>
+            <button class="tab" data-tab="profile">👤 Профиль</button>
+        </div>
+        
+        <!-- Tab: Selections -->
+        <div class="tab-content tab-content--active" id="selectionsTab">
+            <div class="loading" id="selectionsLoading">
+                <div class="spinner"></div>
+                <p>Загрузка подборок...</p>
+            </div>
+            <div class="selections-grid" id="selectionsGrid" style="display: none;"></div>
+            <div class="empty-state" id="selectionsEmpty" style="display: none;">
+                <div class="empty-state__icon">📋</div>
+                <div class="empty-state__title">Подборок пока нет</div>
+                <p class="empty-state__text">Когда брокер создаст для вас подборку, она появится здесь</p>
+            </div>
+        </div>
+        
+        <!-- Tab: Favorites -->
+        <div class="tab-content" id="favoritesTab">
+            <div class="loading" id="favoritesLoading">
+                <div class="spinner"></div>
+                <p>Загрузка избранного...</p>
+            </div>
+            <div class="favorites-grid" id="favoritesGrid" style="display: none;"></div>
+            <div class="empty-state" id="favoritesEmpty" style="display: none;">
+                <div class="empty-state__icon">❤️</div>
+                <div class="empty-state__title">Избранное пусто</div>
+                <p class="empty-state__text">Отмечайте понравившиеся объекты сердечком, чтобы сохранить их здесь</p>
+            </div>
+        </div>
+        
+        <!-- Tab: Profile -->
+        <div class="tab-content" id="profileTab">
+            <div class="profile-card">
+                <div class="profile-avatar" id="profileAvatar">👤</div>
+                
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label class="form-label">Имя</label>
+                        <input type="text" class="form-input" id="profileName" placeholder="Ваше имя">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="profileEmail" disabled>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Телефон</label>
+                        <input type="tel" class="form-input" id="profilePhone" placeholder="+357 99 123456">
+                    </div>
+                    
+                    <button type="submit" class="btn btn-primary">💾 Сохранить</button>
+                </form>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+    
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/data-sync.js"></script>
+    <script src="../assets/js/supabase-client.js"></script>
+    <script src="../assets/js/client-auth.js"></script>
+    
+    <script>
+        let clientInfo = null;
+        let allProperties = [];
+        
+        // Initialize
+        document.addEventListener('DOMContentLoaded', async () => {
+            // Check authentication
+            const authResult = await ClientAuth.requireAuth();
+            if (!authResult) return;
+            
+            clientInfo = ClientAuth.getClientInfo();
+            
+            // Update UI with client info
+            document.getElementById('userName').textContent = clientInfo.name;
+            document.getElementById('welcomeName').textContent = clientInfo.name.split(' ')[0];
+            document.getElementById('profileAvatar').textContent = clientInfo.name.charAt(0).toUpperCase();
+            
+            // Fill profile form
+            document.getElementById('profileName').value = clientInfo.name || '';
+            document.getElementById('profileEmail').value = clientInfo.email || '';
+            document.getElementById('profilePhone').value = clientInfo.phone || '';
+            
+            // Load data
+            await loadProperties();
+            loadSelections();
+            loadFavorites();
+        });
+        
+        // Load properties from CSV
+        async function loadProperties() {
+            try {
+                await DataSync.syncProperties();
+                allProperties = DataSync.getProperties();
+                console.log('Loaded properties:', allProperties.length);
+            } catch (error) {
+                console.error('Failed to load properties:', error);
+            }
+        }
+        
+        // Load selections
+        async function loadSelections() {
+            const result = await ClientAuth.getClientSelections();
+            
+            document.getElementById('selectionsLoading').style.display = 'none';
+            
+            if (result.success && result.selections.length > 0) {
+                document.getElementById('selectionsGrid').style.display = 'grid';
+                renderSelections(result.selections);
+                document.getElementById('statSelections').textContent = result.selections.length;
+                
+                // Calculate viewed count
+                const viewed = result.selections.reduce((sum, s) => sum + (s.viewed_count || 0), 0);
+                document.getElementById('statViewed').textContent = viewed;
+            } else {
+                document.getElementById('selectionsEmpty').style.display = 'block';
+            }
+        }
+        
+        // Render selections
+        function renderSelections(selections) {
+            const grid = document.getElementById('selectionsGrid');
+            
+            grid.innerHTML = selections.map(selection => {
+                const total = selection.total_properties || 0;
+                const liked = selection.liked_count || 0;
+                const disliked = selection.disliked_count || 0;
+                const viewed = liked + disliked;
+                const progress = total > 0 ? Math.round((viewed / total) * 100) : 0;
+                
+                const statusClass = selection.status === 'completed' ? 'completed' : 
+                                   selection.status === 'active' ? 'active' : 'pending';
+                const statusText = selection.status === 'completed' ? 'Завершена' :
+                                  selection.status === 'active' ? 'Активна' : 'Ожидает';
+                
+                const date = new Date(selection.created_at).toLocaleDateString('ru-RU', {
+                    day: 'numeric',
+                    month: 'short',
+                    year: 'numeric'
+                });
+                
+                const brokerName = selection.brokers?.name || selection.broker_name || 'Брокер';
+                
+                return `
+                    <div class="selection-card">
+                        <div class="selection-header">
+                            <div class="selection-name">${selection.name}</div>
+                            <div class="selection-meta">
+                                <span>📅 ${date}</span>
+                                <span>👤 ${brokerName}</span>
+                                <span class="status-badge status-badge--${statusClass}">${statusText}</span>
+                            </div>
+                        </div>
+                        <div class="selection-body">
+                            <div class="selection-stats">
+                                <div class="selection-stat">
+                                    <div class="selection-stat__value selection-stat__value--total">${total}</div>
+                                    <div class="selection-stat__label">Объектов</div>
+                                </div>
+                                <div class="selection-stat">
+                                    <div class="selection-stat__value selection-stat__value--liked">${liked}</div>
+                                    <div class="selection-stat__label">Понравилось</div>
+                                </div>
+                                <div class="selection-stat">
+                                    <div class="selection-stat__value selection-stat__value--passed">${disliked}</div>
+                                    <div class="selection-stat__label">Пропущено</div>
+                                </div>
+                            </div>
+                            <div class="selection-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${progress}%"></div>
+                                </div>
+                                <div class="progress-label">Просмотрено ${progress}%</div>
+                            </div>
+                            <div class="selection-actions">
+                                <a href="swipe.html?t=${selection.token}" class="btn btn-primary" style="flex: 1;">
+                                    ${selection.status === 'completed' ? '👀 Посмотреть' : '▶️ Продолжить'}
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Load favorites
+        async function loadFavorites() {
+            const result = await ClientAuth.getFavorites();
+            
+            document.getElementById('favoritesLoading').style.display = 'none';
+            
+            if (result.success && result.favorites.length > 0) {
+                document.getElementById('favoritesGrid').style.display = 'grid';
+                renderFavorites(result.favorites);
+                document.getElementById('statFavorites').textContent = result.favorites.length;
+            } else {
+                document.getElementById('favoritesEmpty').style.display = 'block';
+            }
+        }
+        
+        // Render favorites
+        function renderFavorites(favorites) {
+            const grid = document.getElementById('favoritesGrid');
+            
+            grid.innerHTML = favorites.map(fav => {
+                const property = allProperties.find(p => p.id === fav.property_id);
+                
+                if (!property) {
+                    return `
+                        <div class="property-card">
+                            <div class="property-image">🏠</div>
+                            <div class="property-info">
+                                <div class="property-id">${fav.property_id}</div>
+                                <div class="property-title">Объект не найден</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                const imageUrl = property.photos?.[0] || null;
+                const hasImage = imageUrl && !imageUrl.includes('unsplash');
+                
+                return `
+                    <div class="property-card">
+                        <div class="property-image">
+                            ${hasImage ? `<img src="${imageUrl}" alt="${property.title}" onerror="this.parentElement.innerHTML='🏠'">` : '🏠'}
+                            <button class="btn-remove-favorite" onclick="removeFavorite('${property.id}')" title="Удалить из избранного">
+                                ❌
+                            </button>
+                        </div>
+                        <div class="property-info">
+                            <div class="property-id">${property.id}</div>
+                            <div class="property-title">${property.title || 'Без названия'}</div>
+                            <div class="property-details">
+                                <span>📍 ${property.location || 'Кипр'}</span>
+                                <span>🛏 ${property.bedrooms || 0}</span>
+                                <span>📐 ${property.area || '-'} м²</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+        
+        // Remove from favorites
+        async function removeFavorite(propertyId) {
+            const result = await ClientAuth.removeFromFavorites(propertyId);
+            if (result.success) {
+                showToast('Удалено из избранного');
+                loadFavorites();
+            }
+        }
+        
+        // Tab switching
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('tab--active'));
+                tab.classList.add('tab--active');
+                
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('tab-content--active'));
+                document.getElementById(tab.dataset.tab + 'Tab').classList.add('tab-content--active');
+            });
+        });
+        
+        // Profile form
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('profileName').value.trim();
+            const phone = document.getElementById('profilePhone').value.trim();
+            
+            const result = await ClientAuth.updateProfile({ name, phone });
+            
+            if (result.success) {
+                showToast('Профиль сохранён');
+                document.getElementById('userName').textContent = name;
+                document.getElementById('welcomeName').textContent = name.split(' ')[0];
+                document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+            } else {
+                showToast('Ошибка сохранения');
+            }
+        });
+        
+        // Logout
+        async function handleLogout() {
+            await ClientAuth.logout();
+            window.location.href = 'login.html';
+        }
+        
+        // Toast
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('toast--visible');
+            
+            setTimeout(() => {
+                toast.classList.remove('toast--visible');
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
