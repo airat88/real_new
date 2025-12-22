@@ -700,6 +700,16 @@
                             </div>
                         </div>
                         <div class="filter-group">
+                            <label class="filter-group__label">District</label>
+                            <div class="multi-select" id="districtMultiSelect">
+                                <div class="multi-select__trigger" onclick="toggleMultiSelect('district')">
+                                    <span class="multi-select__text" id="districtText">All districts</span>
+                                    <span class="multi-select__arrow">▼</span>
+                                </div>
+                                <div class="multi-select__dropdown" id="districtDropdown"></div>
+                            </div>
+                        </div>
+                        <div class="filter-group">
                             <label class="filter-group__label">Type</label>
                             <div class="multi-select" id="typeMultiSelect">
                                 <div class="multi-select__trigger" onclick="toggleMultiSelect('type')">
@@ -1363,6 +1373,7 @@
         // Current filter states
         let selectedBedrooms = '';
         let selectedLocations = [];
+        let selectedDistricts = [];
         let selectedTypes = [];
         let selectedStatuses = [];
         let selectedMainTypes = [];
@@ -1429,6 +1440,13 @@
                 if (selectedLocations.length > 0) {
                     const propLocation = (p.location || '').toLowerCase();
                     const matches = selectedLocations.some(loc => propLocation.includes(loc.toLowerCase()));
+                    if (!matches) return false;
+                }
+
+                // District - multi-select
+                if (selectedDistricts.length > 0) {
+                    const propDistrict = (p.district || '').toLowerCase();
+                    const matches = selectedDistricts.some(d => propDistrict.includes(d.toLowerCase()));
                     if (!matches) return false;
                 }
 
@@ -1548,6 +1566,17 @@
                 </label>
             `).join('');
 
+            // Districts - multi-select
+            const districtDropdown = document.getElementById('districtDropdown');
+            if (districtDropdown && options.districts) {
+                districtDropdown.innerHTML = options.districts.map(district => `
+                    <label class="multi-select__option" data-value="${district}">
+                        <input type="checkbox" value="${district}" onchange="onMultiSelectChange('district')">
+                        <span>${district}</span>
+                    </label>
+                `).join('');
+            }
+
             // Types - multi-select
             const typeDropdown = document.getElementById('typeDropdown');
             typeDropdown.innerHTML = options.types.map(type => `
@@ -1611,6 +1640,9 @@
             if (type === 'location') {
                 selectedLocations = values;
                 updateMultiSelectText('location', values, 'All locations');
+            } else if (type === 'district') {
+                selectedDistricts = values;
+                updateMultiSelectText('district', values, 'All districts');
             } else if (type === 'type') {
                 selectedTypes = values;
                 updateMultiSelectText('type', values, 'All types');
@@ -1681,12 +1713,14 @@
 
             // Clear multi-selects
             selectedLocations = [];
+            selectedDistricts = [];
             selectedTypes = [];
             selectedStatuses = [];
             selectedMainTypes = [];
             selectedObjects = [];
             document.querySelectorAll('.multi-select__dropdown input[type="checkbox"]').forEach(cb => cb.checked = false);
             updateMultiSelectText('location', [], 'All locations');
+            updateMultiSelectText('district', [], 'All districts');
             updateMultiSelectText('type', [], 'All types');
             updateMultiSelectText('status', [], 'All statuses');
             updateMultiSelectText('mainType', [], 'All main types');
@@ -1708,6 +1742,7 @@
 
             if (document.getElementById('searchInput').value) count++;
             if (selectedLocations.length > 0) count++;
+            if (selectedDistricts.length > 0) count++;
             if (selectedTypes.length > 0) count++;
             if (selectedStatuses.length > 0) count++;
             if (selectedMainTypes.length > 0) count++;

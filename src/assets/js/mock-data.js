@@ -153,6 +153,7 @@ const PropertyData = {
 
         return {
             locations: [...new Set(properties.map(p => p.location).filter(Boolean))].sort(),
+            districts: [...new Set(properties.map(p => p.district).filter(Boolean))].sort(),
             types: [...new Set(properties.map(p => p.type).filter(Boolean))].sort(),
             statuses: [...new Set(properties.map(p => p.status).filter(Boolean))].sort(),
             mainTypes: [...new Set(properties.map(p => p.mainType).filter(Boolean))].sort(),
