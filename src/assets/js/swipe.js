@@ -1396,13 +1396,15 @@ class SwipeApp {
 
     // Share selection
     async shareSelection() {
-        const selectionUrl = window.location.href;
+        // Generate clean selection URL (without reactions)
+        const baseUrl = window.location.origin + window.location.pathname;
+        const token = this.selectionData?.token || new URLSearchParams(window.location.search).get('t');
+        const selectionUrl = token ? `${baseUrl}?t=${token}` : window.location.href.split('?')[0];
+        
         const selectionName = this.selectionData?.name || 'Подборка недвижимости';
         const likes = this.reactions.filter(r => r.reaction === 'like');
         
-        const shareText = likes.length > 0 
-            ? `${selectionName} - мне понравилось ${likes.length} объектов!`
-            : `${selectionName} - посмотрите эту подборку недвижимости на Кипре`;
+        const shareText = `Посмотрите подборку недвижимости на Кипре: ${selectionName}`;
 
         // Try Web Share API first (works on mobile)
         if (navigator.share) {
