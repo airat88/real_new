@@ -931,10 +931,15 @@ class SwipeApp {
         this.messageText = encodeURIComponent(likedPropertiesText);
 
         screen.innerHTML = `
-            <div class="completion-icon">🎉</div>
-            <h2 class="completion-title">Готово!</h2>
+            <div class="completion-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="48" height="48">
+                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
+                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
+                </svg>
+            </div>
+            <h2 class="completion-title">Готово</h2>
             <p class="completion-text">
-                Вы просмотрели всю подборку!
+                Вы просмотрели всю подборку
             </p>
             <div class="completion-stats">
                 <div class="completion-stat">
@@ -951,19 +956,26 @@ class SwipeApp {
                 <div style="text-align: left; width: 100%; max-width: 300px; margin-bottom: var(--space-lg);">
                     <p style="font-size: 0.875rem; opacity: 0.7; margin-bottom: var(--space-sm);">Понравившиеся объекты:</p>
                     ${likes.map(l => `
-                        <div style="padding: var(--space-sm); background: rgba(255,255,255,0.1); border-radius: var(--radius); margin-bottom: var(--space-xs); font-size: 0.875rem;">
-                            ❤️ ${l.propertyId || l.propertyTitle}
+                        <div style="padding: var(--space-sm); background: rgba(255,255,255,0.1); border-radius: var(--radius); margin-bottom: var(--space-xs); font-size: 0.875rem; display: flex; align-items: center; gap: 8px;">
+                            <svg viewBox="0 0 24 24" fill="#059669" stroke="none" width="16" height="16">
+                                <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                            </svg>
+                            ${l.propertyId || l.propertyTitle}
                         </div>
                     `).join('')}
                 </div>
             ` : ''}
             
-            <div class="completion-actions" style="display: flex; flex-direction: column; gap: var(--space-md); width: 100%; max-width: 300px;">
+            <div class="completion-actions" style="display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 300px;">
                 
                 <!-- 1. Позвонить брокеру -->
                 ${brokerPhone ? `
-                    <a href="tel:${brokerPhone}" class="btn btn-primary btn-lg completion-btn" style="text-decoration: none;">
-                        <span class="completion-btn__icon">📞</span>
+                    <a href="tel:${brokerPhone}" class="completion-btn completion-btn--primary" style="text-decoration: none;">
+                        <span class="completion-btn__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                <path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"></path>
+                            </svg>
+                        </span>
                         <span class="completion-btn__text">
                             <span class="completion-btn__title">Позвонить брокеру</span>
                             <span class="completion-btn__subtitle">${this.formatPhone(brokerPhone)}</span>
@@ -972,8 +984,12 @@ class SwipeApp {
                 ` : ''}
                 
                 <!-- 2. Написать брокеру -->
-                <button class="btn btn-secondary btn-lg completion-btn" onclick="window.swipeAppInstance && window.swipeAppInstance.showContactModal()">
-                    <span class="completion-btn__icon">💬</span>
+                <button class="completion-btn completion-btn--secondary" onclick="window.swipeAppInstance && window.swipeAppInstance.showContactModal()">
+                    <span class="completion-btn__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                            <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                        </svg>
+                    </span>
                     <span class="completion-btn__text">
                         <span class="completion-btn__title">Написать брокеру</span>
                         <span class="completion-btn__subtitle">WhatsApp, Telegram, Email</span>
@@ -982,8 +998,13 @@ class SwipeApp {
                 
                 <!-- 3. Пока не подошли -->
                 ${dislikes.length > 0 ? `
-                    <button class="btn btn-outline btn-lg completion-btn" onclick="window.swipeAppInstance && window.swipeAppInstance.reviewDisliked()">
-                        <span class="completion-btn__icon">🔄</span>
+                    <button class="completion-btn completion-btn--outline" onclick="window.swipeAppInstance && window.swipeAppInstance.reviewDisliked()">
+                        <span class="completion-btn__icon">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                                <polyline points="1 4 1 10 7 10"></polyline>
+                                <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                            </svg>
+                        </span>
                         <span class="completion-btn__text">
                             <span class="completion-btn__title">Пока не подошли</span>
                             <span class="completion-btn__subtitle">Посмотреть ещё раз (${dislikes.length})</span>
@@ -992,10 +1013,18 @@ class SwipeApp {
                 ` : ''}
                 
                 <!-- 4. Поделиться подборкой -->
-                <button class="btn btn-outline btn-lg completion-btn" onclick="window.swipeAppInstance && window.swipeAppInstance.shareSelection()" style="border-color: rgba(255,255,255,0.3);">
-                    <span class="completion-btn__icon">📤</span>
+                <button class="completion-btn completion-btn--outline" onclick="window.swipeAppInstance && window.swipeAppInstance.shareSelection()">
+                    <span class="completion-btn__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                            <circle cx="18" cy="5" r="3"></circle>
+                            <circle cx="6" cy="12" r="3"></circle>
+                            <circle cx="18" cy="19" r="3"></circle>
+                            <line x1="8.59" y1="13.51" x2="15.42" y2="17.49"></line>
+                            <line x1="15.41" y1="6.51" x2="8.59" y2="10.49"></line>
+                        </svg>
+                    </span>
                     <span class="completion-btn__text">
-                        <span class="completion-btn__title">Поделиться подборкой</span>
+                        <span class="completion-btn__title">Поделиться</span>
                         <span class="completion-btn__subtitle">Отправить друзьям</span>
                     </span>
                 </button>

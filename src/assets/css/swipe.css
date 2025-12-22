@@ -1,11 +1,11 @@
 /* ============================================
-   SWIPE PAGE STYLES - Tinder-like Cards
+   SWIPE PAGE STYLES - Corporate Design
    ============================================ */
 
 .swipe-page {
     min-height: 100vh;
     min-height: 100dvh;
-    background: var(--gradient-dark);
+    background: #0f172a;
     display: flex;
     flex-direction: column;
     overflow: hidden;
@@ -13,32 +13,31 @@
 
 /* Header */
 .swipe-header {
-    padding: var(--space-md) var(--space-lg);
+    padding: 16px 20px;
     display: flex;
     align-items: center;
     justify-content: space-between;
-    color: var(--white);
-    gap: var(--space-md);
+    color: white;
+    gap: 16px;
 }
 
 .swipe-header__back {
-    width: 2.5rem;
-    height: 2.5rem;
+    width: 40px;
+    height: 40px;
     display: flex;
     align-items: center;
     justify-content: center;
     background: rgba(255, 255, 255, 0.1);
     border: none;
-    border-radius: var(--radius-full);
-    color: var(--white);
+    border-radius: 8px;
+    color: white;
     cursor: pointer;
-    transition: all var(--transition);
+    transition: all 0.2s;
     flex-shrink: 0;
 }
 
 .swipe-header__back:hover {
-    background: rgba(255, 255, 255, 0.2);
-    transform: scale(1.05);
+    background: rgba(255, 255, 255, 0.15);
 }
 
 .swipe-header__back:active {
@@ -569,19 +568,19 @@
 .completion-screen {
     position: fixed;
     inset: 0;
-    background: var(--gradient-dark);
+    background: #0f172a;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
-    padding: var(--space-xl);
-    padding-top: var(--space-2xl);
+    padding: 32px 24px;
+    padding-top: 48px;
     text-align: center;
-    color: var(--white);
+    color: white;
     z-index: 50;
     opacity: 0;
     visibility: hidden;
-    transition: all var(--transition-slow);
+    transition: all 0.3s;
     overflow-y: auto;
     -webkit-overflow-scrolling: touch;
 }
@@ -592,27 +591,34 @@
 }
 
 .completion-icon {
-    font-size: 5rem;
-    margin-bottom: var(--space-lg);
-    animation: pulse 2s infinite;
+    width: 64px;
+    height: 64px;
+    background: rgba(5, 150, 105, 0.15);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+    color: #059669;
 }
 
 .completion-title {
-    font-size: 1.75rem;
-    margin-bottom: var(--space-md);
+    font-size: 1.5rem;
+    font-weight: 600;
+    margin-bottom: 8px;
 }
 
 .completion-text {
-    font-size: 1rem;
-    opacity: 0.8;
-    margin-bottom: var(--space-xl);
+    font-size: 0.9375rem;
+    color: #94a3b8;
+    margin-bottom: 32px;
     max-width: 300px;
 }
 
 .completion-stats {
     display: flex;
-    gap: var(--space-xl);
-    margin-bottom: var(--space-2xl);
+    gap: 48px;
+    margin-bottom: 32px;
 }
 
 .completion-stat {
@@ -620,30 +626,111 @@
 }
 
 .completion-stat__value {
-    font-size: 2.5rem;
+    font-size: 2rem;
     font-weight: 700;
 }
 
 .completion-stat__value--like {
-    color: var(--success);
+    color: #059669;
 }
 
 .completion-stat__value--dislike {
-    color: var(--danger);
+    color: #dc2626;
 }
 
 .completion-stat__label {
     font-size: 0.875rem;
-    opacity: 0.7;
+    color: #94a3b8;
 }
 
 .completion-actions {
     display: flex;
     flex-direction: column;
-    gap: var(--space-md);
+    gap: 12px;
     width: 100%;
     max-width: 320px;
-    margin-top: var(--space-lg);
+    margin-top: 16px;
+}
+
+/* Completion Buttons */
+.completion-btn {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 14px 20px;
+    border-radius: 10px;
+    border: none;
+    cursor: pointer;
+    transition: all 0.2s;
+    text-align: left;
+    width: 100%;
+}
+
+.completion-btn__icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.completion-btn__text {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+.completion-btn__title {
+    font-size: 0.9375rem;
+    font-weight: 600;
+}
+
+.completion-btn__subtitle {
+    font-size: 0.75rem;
+    opacity: 0.7;
+}
+
+.completion-btn--primary {
+    background: #0d9488;
+    color: white;
+}
+
+.completion-btn--primary .completion-btn__icon {
+    background: rgba(255, 255, 255, 0.15);
+}
+
+.completion-btn--primary:hover {
+    background: #14b8a6;
+}
+
+.completion-btn--secondary {
+    background: #1e293b;
+    color: white;
+    border: 1px solid #334155;
+}
+
+.completion-btn--secondary .completion-btn__icon {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.completion-btn--secondary:hover {
+    background: #334155;
+}
+
+.completion-btn--outline {
+    background: transparent;
+    color: white;
+    border: 1px solid #334155;
+}
+
+.completion-btn--outline .completion-btn__icon {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+.completion-btn--outline:hover {
+    background: #1e293b;
 }
 
 /* Empty state */
