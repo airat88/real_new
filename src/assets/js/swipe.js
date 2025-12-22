@@ -990,6 +990,15 @@ class SwipeApp {
                         </span>
                     </button>
                 ` : ''}
+                
+                <!-- 4. Поделиться подборкой -->
+                <button class="btn btn-outline btn-lg completion-btn" onclick="window.swipeAppInstance && window.swipeAppInstance.shareSelection()" style="border-color: rgba(255,255,255,0.3);">
+                    <span class="completion-btn__icon">📤</span>
+                    <span class="completion-btn__text">
+                        <span class="completion-btn__title">Поделиться подборкой</span>
+                        <span class="completion-btn__subtitle">Отправить друзьям</span>
+                    </span>
+                </button>
             </div>
             
             <!-- Contact Modal -->
@@ -1383,6 +1392,169 @@ class SwipeApp {
         this.renderCards();
         
         console.log(`Reviewing ${dislikedProperties.length} disliked properties`);
+    }
+
+    // Share selection
+    async shareSelection() {
+        const selectionUrl = window.location.href;
+        const selectionName = this.selectionData?.name || 'Подборка недвижимости';
+        const likes = this.reactions.filter(r => r.reaction === 'like');
+        
+        const shareText = likes.length > 0 
+            ? `${selectionName} - мне понравилось ${likes.length} объектов!`
+            : `${selectionName} - посмотрите эту подборку недвижимости на Кипре`;
+
+        // Try Web Share API first (works on mobile)
+        if (navigator.share) {
+            try {
+                await navigator.share({
+                    title: selectionName,
+                    text: shareText,
+                    url: selectionUrl
+                });
+                console.log('Shared successfully');
+                return;
+            } catch (error) {
+                if (error.name !== 'AbortError') {
+                    console.error('Share failed:', error);
+                }
+            }
+        }
+
+        // Fallback: show share modal
+        this.showShareModal(selectionUrl, shareText);
+    }
+
+    // Show share modal (fallback for desktop)
+    showShareModal(url, text) {
+        const encodedUrl = encodeURIComponent(url);
+        const encodedText = encodeURIComponent(text);
+
+        const modal = document.createElement('div');
+        modal.className = 'share-modal';
+        modal.innerHTML = `
+            <div class="share-modal__overlay" onclick="this.parentElement.remove()"></div>
+            <div class="share-modal__content">
+                <div class="share-modal__header">
+                    <h3>Поделиться подборкой</h3>
+                    <button class="share-modal__close" onclick="this.closest('.share-modal').remove()">✕</button>
+                </div>
+                <div class="share-modal__options">
+                    <a href="https://wa.me/?text=${encodedText}%20${encodedUrl}" target="_blank" class="share-option share-option--whatsapp">
+                        <span class="share-option__icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M17.472 14.382c-.297-.149-1.758-.867-2.03-.967-.273-.099-.471-.148-.67.15-.197.297-.767.966-.94 1.164-.173.199-.347.223-.644.075-.297-.15-1.255-.463-2.39-1.475-.883-.788-1.48-1.761-1.653-2.059-.173-.297-.018-.458.13-.606.134-.133.298-.347.446-.52.149-.174.198-.298.298-.497.099-.198.05-.371-.025-.52-.075-.149-.669-1.612-.916-2.207-.242-.579-.487-.5-.669-.51-.173-.008-.371-.01-.57-.01-.198 0-.52.074-.792.372-.272.297-1.04 1.016-1.04 2.479 0 1.462 1.065 2.875 1.213 3.074.149.198 2.096 3.2 5.077 4.487.709.306 1.262.489 1.694.625.712.227 1.36.195 1.871.118.571-.085 1.758-.719 2.006-1.413.248-.694.248-1.289.173-1.413-.074-.124-.272-.198-.57-.347m-5.421 7.403h-.004a9.87 9.87 0 01-5.031-1.378l-.361-.214-3.741.982.998-3.648-.235-.374a9.86 9.86 0 01-1.51-5.26c.001-5.45 4.436-9.884 9.888-9.884 2.64 0 5.122 1.03 6.988 2.898a9.825 9.825 0 012.893 6.994c-.003 5.45-4.437 9.884-9.885 9.884m8.413-18.297A11.815 11.815 0 0012.05 0C5.495 0 .16 5.335.157 11.892c0 2.096.547 4.142 1.588 5.945L.057 24l6.305-1.654a11.882 11.882 0 005.683 1.448h.005c6.554 0 11.89-5.335 11.893-11.893a11.821 11.821 0 00-3.48-8.413z"/>
+                            </svg>
+                        </span>
+                        <span>WhatsApp</span>
+                    </a>
+                    <a href="https://t.me/share/url?url=${encodedUrl}&text=${encodedText}" target="_blank" class="share-option share-option--telegram">
+                        <span class="share-option__icon">
+                            <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                                <path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/>
+                            </svg>
+                        </span>
+                        <span>Telegram</span>
+                    </a>
+                    <a href="mailto:?subject=${encodeURIComponent('Подборка недвижимости на Кипре')}&body=${encodedText}%0A%0A${encodedUrl}" class="share-option share-option--email">
+                        <span class="share-option__icon">📧</span>
+                        <span>Email</span>
+                    </a>
+                    <button class="share-option share-option--copy" onclick="navigator.clipboard.writeText('${url}').then(() => { this.innerHTML = '<span class=\\'share-option__icon\\'>✓</span><span>Скопировано!</span>'; setTimeout(() => { this.innerHTML = '<span class=\\'share-option__icon\\'>📋</span><span>Копировать ссылку</span>'; }, 2000); })">
+                        <span class="share-option__icon">📋</span>
+                        <span>Копировать ссылку</span>
+                    </button>
+                </div>
+            </div>
+        `;
+
+        document.body.appendChild(modal);
+
+        // Add styles if not already added
+        if (!document.getElementById('share-modal-styles')) {
+            const style = document.createElement('style');
+            style.id = 'share-modal-styles';
+            style.textContent = `
+                .share-modal {
+                    position: fixed;
+                    inset: 0;
+                    z-index: 10000;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .share-modal__overlay {
+                    position: absolute;
+                    inset: 0;
+                    background: rgba(0,0,0,0.6);
+                    backdrop-filter: blur(4px);
+                }
+                .share-modal__content {
+                    position: relative;
+                    background: white;
+                    border-radius: 20px;
+                    padding: 24px;
+                    max-width: 320px;
+                    width: 90%;
+                    box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+                }
+                .share-modal__header {
+                    display: flex;
+                    justify-content: space-between;
+                    align-items: center;
+                    margin-bottom: 20px;
+                }
+                .share-modal__header h3 {
+                    margin: 0;
+                    font-size: 1.125rem;
+                    color: #1e1b4b;
+                }
+                .share-modal__close {
+                    background: none;
+                    border: none;
+                    font-size: 1.5rem;
+                    cursor: pointer;
+                    color: #6b7280;
+                    padding: 0;
+                    line-height: 1;
+                }
+                .share-modal__options {
+                    display: flex;
+                    flex-direction: column;
+                    gap: 12px;
+                }
+                .share-option {
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    padding: 14px 16px;
+                    border-radius: 12px;
+                    text-decoration: none;
+                    color: white;
+                    font-weight: 500;
+                    transition: transform 0.2s, box-shadow 0.2s;
+                    border: none;
+                    cursor: pointer;
+                    font-size: 1rem;
+                }
+                .share-option:hover {
+                    transform: translateY(-2px);
+                    box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+                }
+                .share-option__icon {
+                    width: 24px;
+                    height: 24px;
+                    display: flex;
+                    align-items: center;
+                    justify-content: center;
+                }
+                .share-option--whatsapp { background: linear-gradient(135deg, #25D366, #128C7E); }
+                .share-option--telegram { background: linear-gradient(135deg, #0088cc, #0066aa); }
+                .share-option--email { background: linear-gradient(135deg, #6366f1, #8b5cf6); }
+                .share-option--copy { background: linear-gradient(135deg, #374151, #1f2937); }
+            `;
+            document.head.appendChild(style);
+        }
     }
 }
 
