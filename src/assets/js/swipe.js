@@ -1299,7 +1299,7 @@ class SwipeApp {
         // Render thumbnails
         thumbsContainer.innerHTML = photos.map((photo, idx) => `
             <img src="${photo}" class="fullscreen-gallery__thumb ${idx === this.galleryIndex ? 'active' : ''}"
-                 onclick="SwipeApp.galleryGoTo(${idx})"
+                 onclick="window.swipeAppInstance && window.swipeAppInstance.galleryGoTo(${idx})"
                  onerror="this.style.display='none'">
         `).join('');
 
@@ -1320,6 +1320,14 @@ class SwipeApp {
 
         this.galleryIndex = (this.galleryIndex + direction + this.galleryPhotos.length) % this.galleryPhotos.length;
         this.updateGalleryView();
+    }
+
+    galleryPrev() {
+        this.galleryNav(-1);
+    }
+
+    galleryNext() {
+        this.galleryNav(1);
     }
 
     galleryGoTo(index) {

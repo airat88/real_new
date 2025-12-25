@@ -258,7 +258,7 @@
                 // Initialize SwipeApp with filtered properties
                 console.log('=== INITIALIZING SWIPE APP ===');
                 console.log('Properties to display:', filteredProperties.length);
-                const swipeApp = new SwipeApp('swipeContainer', {
+                window.swipeAppInstance = new SwipeApp('swipeContainer', {
                     properties: filteredProperties,
                     selectionId: selection.id,
                     selectionToken: token,
