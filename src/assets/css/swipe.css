@@ -1041,12 +1041,13 @@
     }
 
     .details-gallery__main {
-        max-height: 35vh;
+        max-height: 40vh;
     }
 
     .details-gallery__main img {
-        max-height: 35vh;
-        object-fit: cover;
+        max-height: 40vh;
+        object-fit: contain; /* Show full photo without cropping */
+        background: #000; /* Black background for letterboxing */
     }
 
     .details-stats {

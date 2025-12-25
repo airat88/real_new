@@ -359,6 +359,20 @@ class SwipeApp {
                     <div class="details-modal__body"></div>
                 </div>
             </div>
+
+            <!-- Fullscreen Gallery -->
+            <div class="fullscreen-gallery" id="fullscreenGallery">
+                <div class="fullscreen-gallery__header">
+                    <div class="fullscreen-gallery__counter" id="galleryCounter">1 / 1</div>
+                    <button class="fullscreen-gallery__close" onclick="window.swipeAppInstance && window.swipeAppInstance.closeFullscreenGallery()">✕</button>
+                </div>
+                <div class="fullscreen-gallery__main">
+                    <img src="" alt="Property photo" class="fullscreen-gallery__image" id="galleryMainImage">
+                    <button class="fullscreen-gallery__nav fullscreen-gallery__nav--prev" onclick="window.swipeAppInstance && window.swipeAppInstance.galleryPrev()">‹</button>
+                    <button class="fullscreen-gallery__nav fullscreen-gallery__nav--next" onclick="window.swipeAppInstance && window.swipeAppInstance.galleryNext()">›</button>
+                </div>
+                <div class="fullscreen-gallery__thumbs" id="galleryThumbs"></div>
+            </div>
         `;
     }
 
@@ -841,6 +855,17 @@ class SwipeApp {
         const viewPhotosBtn = modal.querySelector('#viewAllPhotosBtn');
         if (viewPhotosBtn) {
             viewPhotosBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                modal.classList.remove('details-modal--open');
+                setTimeout(() => this.openFullscreenGallery(), 100);
+            });
+        }
+
+        // Main photo click handler - open fullscreen gallery
+        const mainPhoto = modal.querySelector('#mainPhoto');
+        if (mainPhoto) {
+            mainPhoto.style.cursor = 'pointer';
+            mainPhoto.addEventListener('click', (e) => {
                 e.stopPropagation();
                 modal.classList.remove('details-modal--open');
                 setTimeout(() => this.openFullscreenGallery(), 100);
@@ -1344,6 +1369,14 @@ class SwipeApp {
                 }
             }
         }, { passive: true });
+
+        // Close on backdrop click (click outside the image)
+        gallery.addEventListener('click', (e) => {
+            // Close if clicking on the gallery background, not on the image or controls
+            if (e.target === gallery || e.target.classList.contains('fullscreen-gallery__main')) {
+                this.closeFullscreenGallery();
+            }
+        });
     }
 
     // Share selection method
