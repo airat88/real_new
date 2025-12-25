@@ -847,7 +847,7 @@ const PDFExport = {
                     if (prop.latitude && prop.longitude && !isNaN(prop.latitude) && !isNaN(prop.longitude)) {
                         console.log(`✅ Coordinates valid for ${prop.id}, generating map...`);
                         try {
-                            mapImg = await this.generateStaticMap(prop.latitude, prop.longitude, 16, 400, 240);
+                            mapImg = await this.generateStaticMap(prop.latitude, prop.longitude, 16, 200, 120);
                             console.log(`📍 Map result for ${prop.id}:`, mapImg ? `SUCCESS (${mapImg.substring(0, 50)}...)` : 'NULL');
                         } catch (mapError) {
                             console.error('❌ Map generation error for', prop.id, mapError);
@@ -1036,7 +1036,7 @@ const PDFExport = {
                     const mapContent = [];
                     
                     mapContent.push({
-                        text: `📍 ${this.t('mapLocation', lang)}`,
+                        text: `▸ ${this.t('mapLocation', lang)}`,
                         style: 'mapTitle',
                         margin: [0, 10, 0, 8]
                     });
@@ -1045,7 +1045,7 @@ const PDFExport = {
                         console.log(`✅ Inserting map image into PDF (${mapImg.substring(0, 50)}...)`);
                         mapContent.push({
                             image: mapImg,
-                            width: 400,
+                            width: 200,
                             margin: [0, 0, 0, 10]
                         });
                     } else {
