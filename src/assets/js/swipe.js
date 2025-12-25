@@ -325,6 +325,9 @@ class SwipeApp {
             return;
         }
 
+        // Save original properties for restart functionality
+        this.originalProperties = [...this.properties];
+
         // Create structure if container ID was provided
         if (this.containerId) {
             this.createStructure();
@@ -956,10 +959,7 @@ class SwipeApp {
 
         screen.innerHTML = `
             <div class="completion-icon">
-                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="48" height="48">
-                    <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                    <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                </svg>
+                🎉
             </div>
             <h2 class="completion-title">Готово</h2>
             <p class="completion-text">
@@ -991,6 +991,20 @@ class SwipeApp {
             ` : ''}
             
             <div class="completion-actions" style="display: flex; flex-direction: column; gap: 12px; width: 100%; max-width: 300px;">
+                
+                <!-- Restart Button -->
+                <button class="completion-btn completion-btn--restart" onclick="window.swipeAppInstance && window.swipeAppInstance.restartSelection()">
+                    <span class="completion-btn__icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" width="20" height="20">
+                            <polyline points="1 4 1 10 7 10"></polyline>
+                            <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                        </svg>
+                    </span>
+                    <span class="completion-btn__text">
+                        <span class="completion-btn__title">Посмотреть заново</span>
+                        <span class="completion-btn__subtitle">Начать подборку сначала</span>
+                    </span>
+                </button>
                 
                 <!-- 1. Позвонить брокеру -->
                 ${brokerPhone ? `
@@ -1239,6 +1253,9 @@ class SwipeApp {
         // Store instance globally for button callbacks
         window.swipeAppInstance = this;
 
+        // Trigger confetti celebration
+        setTimeout(() => this.triggerConfetti(), 300);
+
         console.log('✅ Selection completed:', results);
     }
 
@@ -1463,6 +1480,45 @@ class SwipeApp {
         console.log(`Reviewing ${dislikedProperties.length} disliked properties`);
     }
 
+    async restartSelection() {
+        // Store original properties if not already stored
+        if (!this.originalProperties) {
+            this.originalProperties = [...this.properties];
+        } else {
+            // Restore original properties
+            this.properties = [...this.originalProperties];
+        }
+
+        // Reset state
+        this.currentIndex = 0;
+        this.currentPhotoIndex = 0;
+        
+        // Clear all reactions in database if we have a selection ID
+        if (this.selectionId && typeof SupabaseClient !== 'undefined') {
+            try {
+                // Delete all reactions for this selection
+                await SupabaseClient.clearSelectionReactions(this.selectionId);
+                console.log('✅ Cleared all reactions in database');
+            } catch (error) {
+                console.error('Failed to clear reactions:', error);
+            }
+        }
+        
+        // Clear local reactions
+        this.reactions = [];
+        
+        // Hide completion screen
+        const screen = document.querySelector('.completion-screen');
+        screen.classList.remove('completion-screen--visible');
+        
+        // Re-render everything
+        this.renderHeader();
+        this.renderCards();
+        this.updateProgress();
+        
+        console.log('🔄 Selection restarted - all reactions cleared');
+    }
+
     // Share selection
     async shareSelection() {
         // Generate clean selection URL (without reactions)
@@ -1625,6 +1681,52 @@ class SwipeApp {
                 .share-option--copy { background: linear-gradient(135deg, #374151, #1f2937); }
             `;
             document.head.appendChild(style);
+        }
+    }
+
+    triggerConfetti() {
+        const colors = ['#667eea', '#764ba2', '#f093fb', '#4facfe', '#43e97b', '#fa709a'];
+        const confettiCount = 50;
+        
+        for (let i = 0; i < confettiCount; i++) {
+            setTimeout(() => {
+                const confetti = document.createElement('div');
+                confetti.style.cssText = `
+                    position: fixed;
+                    width: 10px;
+                    height: 10px;
+                    background: ${colors[Math.floor(Math.random() * colors.length)]};
+                    left: ${Math.random() * 100}vw;
+                    top: -10px;
+                    opacity: 1;
+                    transform: rotate(${Math.random() * 360}deg);
+                    pointer-events: none;
+                    z-index: 10000;
+                    border-radius: ${Math.random() > 0.5 ? '50%' : '0'};
+                `;
+                
+                document.body.appendChild(confetti);
+                
+                const duration = 2000 + Math.random() * 2000;
+                const angle = Math.random() * 40 - 20;
+                const distance = Math.random() * 100 + 50;
+                
+                confetti.animate([
+                    { 
+                        transform: `translateY(0) translateX(0) rotate(0deg)`,
+                        opacity: 1 
+                    },
+                    { 
+                        transform: `translateY(${window.innerHeight}px) translateX(${distance * Math.sin(angle)}px) rotate(${360 + Math.random() * 360}deg)`,
+                        opacity: 0 
+                    }
+                ], {
+                    duration: duration,
+                    easing: 'cubic-bezier(0.25, 0.46, 0.45, 0.94)'
+                });
+                
+                setTimeout(() => confetti.remove(), duration);
+            }, i * 30);
         }
     }
 }

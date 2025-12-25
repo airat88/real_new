@@ -592,15 +592,30 @@
 }
 
 .completion-icon {
-    width: 64px;
-    height: 64px;
-    background: rgba(5, 150, 105, 0.15);
+    width: 80px;
+    height: 80px;
+    background: linear-gradient(135deg, rgba(102, 126, 234, 0.2), rgba(118, 75, 162, 0.2));
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
     margin-bottom: 24px;
-    color: #059669;
+    font-size: 3rem;
+    animation: celebration-bounce 0.6s ease-out;
+}
+
+@keyframes celebration-bounce {
+    0% {
+        transform: scale(0);
+        opacity: 0;
+    }
+    50% {
+        transform: scale(1.1);
+    }
+    100% {
+        transform: scale(1);
+        opacity: 1;
+    }
 }
 
 .completion-title {
@@ -732,6 +747,23 @@
 
 .completion-btn--outline:hover {
     background: #1e293b;
+}
+
+.completion-btn--restart {
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
+    border: none;
+    box-shadow: 0 4px 16px rgba(102, 126, 234, 0.4);
+}
+
+.completion-btn--restart .completion-btn__icon {
+    background: rgba(255, 255, 255, 0.2);
+}
+
+.completion-btn--restart:hover {
+    background: linear-gradient(135deg, #7c8df8 0%, #8b5cb8 100%);
+    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.5);
+    transform: translateY(-2px);
 }
 
 /* Empty state */
