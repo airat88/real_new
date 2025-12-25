@@ -454,7 +454,6 @@ class SwipeApp {
                 <div class="property-card__price">
                     <div>${price}</div>
                 </div>
-                <div class="property-card__title">${property.projectTitle || property.title || 'Property'}</div>
                 <div class="property-card__location">
                     <span>📍</span>
                     <span>${property.location || 'Cyprus'}</span>
@@ -1041,7 +1040,7 @@ class SwipeApp {
                         </span>
                         <span class="completion-btn__text">
                             <span class="completion-btn__title">Пока не подошли</span>
-                            <span class="completion-btn__subtitle">ПОСМОТРЕТЬ ЕЩЁ РАЗ (${dislikes.length})</span>
+                            <span class="completion-btn__subtitle">Посмотреть ещё раз (${dislikes.length})</span>
                         </span>
                     </button>
                 ` : ''}
