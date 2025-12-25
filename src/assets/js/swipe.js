@@ -243,30 +243,9 @@ class SwipeApp {
                     console.log('📞 Broker phone added to properties:', selection.broker_phone);
                 }
 
-                // Load existing reactions to skip already-reviewed properties
-                const existingReactions = await SupabaseClient.getSelectionReactions(selection.id);
-                const reviewedIds = new Set(existingReactions.map(r => r.property_id));
-
-                // Filter out already reviewed properties
-                this.properties = this.properties.filter(p => !reviewedIds.has(p.id));
-
-                // Load existing reactions into our reactions array
-                existingReactions.forEach(r => {
-                    this.reactions.push({
-                        propertyId: r.property_id,
-                        propertyTitle: r.property_title,
-                        reaction: r.reaction,
-                        timestamp: r.created_at,
-                        synced: true
-                    });
-                });
-
-                console.log(`📦 Loaded ${this.properties.length} remaining properties from selection (${existingReactions.length} already reviewed)`);
-
-                // If all properties already reviewed, show completion
-                if (this.properties.length === 0 && existingReactions.length > 0) {
-                    this.showCompletion();
-                }
+                // Always start fresh - don't load existing reactions
+                // This ensures every visit to the link starts the selection from the beginning
+                console.log(`📦 Loaded ${this.properties.length} properties from selection - starting fresh`);
 
                 return;
             } catch (error) {
