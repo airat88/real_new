@@ -1116,6 +1116,16 @@
     .cards-stack {
         max-width: 380px;
         aspect-ratio: 2/3;
+        overflow: visible; /* Allow buttons to show below card */
+    }
+
+    .property-card {
+        overflow: visible; /* Allow buttons to show below card */
+    }
+
+    .property-card__image {
+        border-radius: var(--radius-2xl); /* Keep rounded corners on image */
+        overflow: hidden;
     }
 
     .details-modal__content {
@@ -1125,10 +1135,10 @@
         border-radius: var(--radius-2xl);
     }
 
-    /* Hide header title on desktop */
+    /* Move selection title below the card */
     .swipe-header__title {
         position: absolute;
-        bottom: -60px; /* Moved even lower - below the card */
+        bottom: -140px; /* Moved below the card and buttons */
         left: 20px;
         top: auto;
         color: #1a1a1a;
@@ -1147,11 +1157,11 @@
         position: relative;
     }
 
-    /* Position action buttons at the bottom of card on desktop */
+    /* Position action buttons below the card on desktop */
     .property-card__actions {
         position: absolute;
         top: auto;
-        bottom: 20px; /* At the very bottom of the card */
+        bottom: -80px; /* Below the card - won't cover property info */
         left: 50%;
         transform: translateX(-50%);
     }
