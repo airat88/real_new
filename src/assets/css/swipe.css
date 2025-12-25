@@ -179,6 +179,7 @@
     left: 0;
     right: 0;
     padding: var(--space-xl);
+    padding-bottom: 80px; /* Extra space for action buttons */
     color: var(--white);
     z-index: 5;
 }
@@ -187,7 +188,7 @@
 .property-card__actions {
     position: absolute;
     top: auto;
-    bottom: 80px; /* Moved even lower on desktop */
+    bottom: 15px; /* Lower position - above the bottom edge */
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -1002,7 +1003,7 @@
 
     /* Card action buttons on mobile */
     .property-card__actions {
-        bottom: 100px; /* Moved lower on mobile - closer to the bottom */
+        bottom: 15px; /* Near the bottom on mobile */
         gap: var(--space-sm);
     }
 
@@ -1084,7 +1085,7 @@
 
     /* Card action buttons for medium devices */
     .property-card__actions {
-        bottom: 110px; /* Moved lower on tablets - closer to the bottom */
+        bottom: 15px; /* Near the bottom on tablets */
     }
 
     .details-modal__content {
@@ -1116,16 +1117,10 @@
     .cards-stack {
         max-width: 380px;
         aspect-ratio: 2/3;
-        overflow: visible; /* Allow buttons to show below card */
     }
 
     .property-card {
-        overflow: visible; /* Allow buttons to show below card */
-    }
-
-    .property-card__image {
-        border-radius: var(--radius-2xl); /* Keep rounded corners on image */
-        overflow: hidden;
+        overflow: hidden; /* Keep overflow hidden on card */
     }
 
     .details-modal__content {
@@ -1135,19 +1130,19 @@
         border-radius: var(--radius-2xl);
     }
 
-    /* Move selection title below the card */
+    /* Compact selection title below the card */
     .swipe-header__title {
         position: absolute;
-        bottom: -140px; /* Moved below the card and buttons */
+        bottom: -65px; /* Closer to the card */
         left: 20px;
         top: auto;
         color: #1a1a1a;
         background: rgba(255, 255, 255, 0.95);
-        padding: 12px 20px;
-        border-radius: 12px;
-        font-size: 1.1rem;
+        padding: 8px 16px; /* Smaller padding */
+        border-radius: 8px; /* Smaller radius */
+        font-size: 0.9rem; /* Smaller font */
         font-weight: 600;
-        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
         z-index: 10;
         backdrop-filter: blur(10px);
     }
@@ -1157,11 +1152,11 @@
         position: relative;
     }
 
-    /* Position action buttons below the card on desktop */
+    /* Position action buttons at the very bottom of card on desktop */
     .property-card__actions {
         position: absolute;
         top: auto;
-        bottom: -80px; /* Below the card - won't cover property info */
+        bottom: 10px; /* Very bottom of the card, just above the edge */
         left: 50%;
         transform: translateX(-50%);
     }
