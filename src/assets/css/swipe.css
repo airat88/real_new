@@ -1147,11 +1147,11 @@
         position: relative;
     }
 
-    /* Move action buttons below card on desktop */
+    /* Position action buttons at the bottom of card on desktop */
     .property-card__actions {
         position: absolute;
-        top: 110%; /* Position below the card */
-        bottom: auto;
+        top: auto;
+        bottom: 20px; /* At the very bottom of the card */
         left: 50%;
         transform: translateX(-50%);
     }
