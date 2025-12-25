@@ -303,20 +303,19 @@ const PDFExport = {
             // Try Google Maps Static API if key is available
             const googleMapsKey = this.getGoogleMapsKey();
             if (googleMapsKey) {
-                const googleMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=${zoom}&size=${width}x${height}&markers=color:red%7C${lat},${lng}&key=${googleMapsKey}`;
+                console.log('🗺️ Using Google Maps Static API');
+                const googleMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=${zoom}&size=${width}x${height}&scale=2&markers=color:red%7C${lat},${lng}&key=${googleMapsKey}`;
                 const googleMapImg = await this.loadImage(googleMapUrl);
                 if (googleMapImg) {
+                    console.log('✅ Google Maps loaded successfully');
                     return this.addMapOverlay(googleMapImg, lat, lng, width, height);
+                } else {
+                    console.warn('❌ Google Maps failed to load');
                 }
             }
             
-            // Try OpenStreetMap tiles as fallback
-            const mapCanvas = await this.loadOpenStreetMap(lat, lng, zoom, width, height);
-            if (mapCanvas) {
-                return mapCanvas;
-            }
-            
-            // Final fallback to drawn map
+            // Use drawn map as default (always works)
+            console.log('🎨 Using drawn map (no API key or Google Maps failed)');
             return this.generateDrawnMap(lat, lng, width, height);
             
         } catch (error) {
@@ -511,6 +510,7 @@ const PDFExport = {
 
     // Fallback: generate drawn map (previous implementation improved)
     generateDrawnMap(lat, lng, width, height) {
+        console.log(`🎨 Generating drawn map for coordinates: ${lat}, ${lng}`);
         const canvas = document.createElement('canvas');
         canvas.width = width;
         canvas.height = height;
@@ -596,7 +596,9 @@ const PDFExport = {
         ctx.lineWidth = 3;
         ctx.strokeRect(0, 0, width, height);
         
-        return canvas.toDataURL('image/png');
+        const dataUrl = canvas.toDataURL('image/png');
+        console.log(`✅ Drawn map generated, length: ${dataUrl.length}`);
+        return dataUrl;
     },
 
     // Get Google Maps URL
@@ -697,7 +699,14 @@ const PDFExport = {
                     // Generate map if coordinates available
                     let mapImg = null;
                     if (prop.latitude && prop.longitude && !isNaN(prop.latitude) && !isNaN(prop.longitude)) {
-                        mapImg = await this.generateStaticMap(prop.latitude, prop.longitude, 16, 500, 300);
+                        try {
+                            mapImg = await this.generateStaticMap(prop.latitude, prop.longitude, 16, 500, 300);
+                            console.log(`✅ Map generated for property ${prop.id}:`, mapImg ? 'SUCCESS' : 'NULL');
+                        } catch (mapError) {
+                            console.error('Map generation error for', prop.id, mapError);
+                            // Force fallback to drawn map
+                            mapImg = this.generateDrawnMap(prop.latitude, prop.longitude, 500, 300);
+                        }
                     }
                     
                     this.updateLoading('Loading images...', `${idx + 1} / ${properties.length}`);
@@ -872,6 +881,7 @@ const PDFExport = {
 
                 // Map section (if coordinates available)
                 if (mapImg || googleMapsUrl) {
+                    console.log(`📍 Adding map to PDF for property ${index + 1}, mapImg:`, mapImg ? 'EXISTS' : 'NULL');
                     const mapContent = [];
                     
                     mapContent.push({
@@ -881,11 +891,14 @@ const PDFExport = {
                     });
 
                     if (mapImg) {
+                        console.log(`✅ Inserting map image into PDF (${mapImg.substring(0, 50)}...)`);
                         mapContent.push({
                             image: mapImg,
                             width: 500,
                             margin: [0, 0, 0, 10]
                         });
+                    } else {
+                        console.warn(`⚠️ No map image available for property ${index + 1}`);
                     }
 
                     if (googleMapsUrl) {
