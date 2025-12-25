@@ -187,7 +187,7 @@
 .property-card__actions {
     position: absolute;
     top: auto;
-    bottom: 260px; /* Adjusted to avoid covering photo */
+    bottom: 120px; /* Moved lower - closer to the bottom of the card */
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -428,10 +428,10 @@
 
 .details-modal__close {
     position: absolute;
-    top: var(--space-md);
-    right: var(--space-md);
-    width: 2.5rem;
-    height: 2.5rem;
+    top: var(--space-lg);
+    right: var(--space-lg);
+    width: 2.75rem;
+    height: 2.75rem;
     display: flex;
     align-items: center;
     justify-content: center;
@@ -439,11 +439,11 @@
     border: 2px solid var(--gray-300);
     border-radius: var(--radius-full);
     cursor: pointer;
-    font-size: 1.25rem;
+    font-size: 1.5rem;
     color: var(--gray-700);
     z-index: 50;
     transition: all var(--transition);
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.1);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
 }
 
 .details-modal__close:hover {
@@ -1002,7 +1002,7 @@
 
     /* Card action buttons on mobile */
     .property-card__actions {
-        bottom: 240px; /* Adjusted to avoid covering photo on mobile */
+        bottom: 100px; /* Moved lower on mobile - closer to the bottom */
         gap: var(--space-sm);
     }
 
@@ -1079,7 +1079,7 @@
 
     /* Card action buttons for medium devices */
     .property-card__actions {
-        bottom: 260px; /* Adjusted to avoid covering photo on tablets */
+        bottom: 110px; /* Moved lower on tablets - closer to the bottom */
     }
 
     .details-modal__content {
