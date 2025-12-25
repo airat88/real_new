@@ -1128,7 +1128,7 @@
     /* Hide header title on desktop */
     .swipe-header__title {
         position: absolute;
-        bottom: 20px;
+        bottom: -60px; /* Moved even lower - below the card */
         left: 20px;
         top: auto;
         color: #1a1a1a;
@@ -1145,5 +1145,14 @@
     /* Move header to relative positioning */
     .swipe-header {
         position: relative;
+    }
+
+    /* Move action buttons below card on desktop */
+    .property-card__actions {
+        position: absolute;
+        top: 110%; /* Position below the card */
+        bottom: auto;
+        left: 50%;
+        transform: translateX(-50%);
     }
 }
