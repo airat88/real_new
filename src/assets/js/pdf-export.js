@@ -294,86 +294,309 @@ const PDFExport = {
     },
 
     // Generate static map image - simple canvas-based map with marker
-    async generateStaticMap(lat, lng, zoom = 15, width = 400, height = 200) {
+    async generateStaticMap(lat, lng, zoom = 15, width = 500, height = 300) {
         if (!lat || !lng || isNaN(lat) || isNaN(lng)) {
             return null;
         }
 
         try {
-            // Create canvas for simple map visualization
+            // Try Google Maps Static API if key is available
+            const googleMapsKey = this.getGoogleMapsKey();
+            if (googleMapsKey) {
+                const googleMapUrl = `https://maps.googleapis.com/maps/api/staticmap?center=${lat},${lng}&zoom=${zoom}&size=${width}x${height}&markers=color:red%7C${lat},${lng}&key=${googleMapsKey}`;
+                const googleMapImg = await this.loadImage(googleMapUrl);
+                if (googleMapImg) {
+                    return this.addMapOverlay(googleMapImg, lat, lng, width, height);
+                }
+            }
+            
+            // Try OpenStreetMap tiles as fallback
+            const mapCanvas = await this.loadOpenStreetMap(lat, lng, zoom, width, height);
+            if (mapCanvas) {
+                return mapCanvas;
+            }
+            
+            // Final fallback to drawn map
+            return this.generateDrawnMap(lat, lng, width, height);
+            
+        } catch (error) {
+            console.error('Error generating static map:', error);
+            return this.generateDrawnMap(lat, lng, width, height);
+        }
+    },
+
+    // Get Google Maps API key from window config or environment
+    getGoogleMapsKey() {
+        // Check window.GOOGLE_MAPS_API_KEY or return null
+        return window.GOOGLE_MAPS_API_KEY || null;
+    },
+
+    // Add border and coordinates overlay to Google Maps image
+    addMapOverlay(mapImg, lat, lng, width, height) {
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        
+        // Draw the map
+        ctx.drawImage(mapImg, 0, 0, width, height);
+        
+        // Add coordinates label
+        const coordText = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+        ctx.font = 'bold 11px Arial';
+        const textWidth = ctx.measureText(coordText).width;
+        
+        ctx.fillRect(width / 2 - textWidth / 2 - 10, height - 30, textWidth + 20, 22);
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(width / 2 - textWidth / 2 - 10, height - 30, textWidth + 20, 22);
+        
+        ctx.fillStyle = '#475569';
+        ctx.textAlign = 'center';
+        ctx.fillText(coordText, width / 2, height - 14);
+        
+        // Border
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(0, 0, width, height);
+        
+        return canvas.toDataURL('image/png');
+    },
+
+    // Load real map from OpenStreetMap
+    async loadOpenStreetMap(lat, lng, zoom, width, height) {
+        try {
+            const tileSize = 256;
+            const scale = 2; // For retina display
+            
+            // Calculate tile coordinates
+            const x = Math.floor((lng + 180) / 360 * Math.pow(2, zoom));
+            const y = Math.floor((1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom));
+            
+            // Create canvas
             const canvas = document.createElement('canvas');
             canvas.width = width;
             canvas.height = height;
             const ctx = canvas.getContext('2d');
             
-            // Create gradient background (water/land like appearance)
-            const gradient = ctx.createLinearGradient(0, 0, width, height);
-            gradient.addColorStop(0, '#e8f4f8');
-            gradient.addColorStop(0.5, '#dbeafe');
-            gradient.addColorStop(1, '#e0e7ff');
-            ctx.fillStyle = gradient;
-            ctx.fillRect(0, 0, width, height);
+            // Calculate how many tiles we need
+            const tilesX = Math.ceil(width / tileSize) + 1;
+            const tilesY = Math.ceil(height / tileSize) + 1;
             
-            // Add some texture/grid lines to simulate map
+            // Calculate center offset
+            const centerTileX = (lng + 180) / 360 * Math.pow(2, zoom);
+            const centerTileY = (1 - Math.log(Math.tan(lat * Math.PI / 180) + 1 / Math.cos(lat * Math.PI / 180)) / Math.PI) / 2 * Math.pow(2, zoom);
+            
+            const offsetX = (centerTileX - Math.floor(centerTileX)) * tileSize;
+            const offsetY = (centerTileY - Math.floor(centerTileY)) * tileSize;
+            
+            const startX = Math.floor(centerTileX) - Math.floor(tilesX / 2);
+            const startY = Math.floor(centerTileY) - Math.floor(tilesY / 2);
+            
+            // Load tiles
+            const tilePromises = [];
+            for (let dx = 0; dx < tilesX; dx++) {
+                for (let dy = 0; dy < tilesY; dy++) {
+                    const tileX = startX + dx;
+                    const tileY = startY + dy;
+                    
+                    // OSM tile URL
+                    const tileUrl = `https://tile.openstreetmap.org/${zoom}/${tileX}/${tileY}.png`;
+                    
+                    tilePromises.push(
+                        this.loadImage(tileUrl).then(img => ({
+                            img,
+                            x: dx * tileSize - offsetX + (width - tilesX * tileSize) / 2,
+                            y: dy * tileSize - offsetY + (height - tilesY * tileSize) / 2
+                        }))
+                    );
+                }
+            }
+            
+            // Wait for all tiles to load
+            const tiles = await Promise.all(tilePromises);
+            
+            // Draw tiles on canvas
+            tiles.forEach(tile => {
+                if (tile.img) {
+                    ctx.drawImage(tile.img, tile.x, tile.y, tileSize, tileSize);
+                }
+            });
+            
+            // Draw location marker
+            this.drawMarker(ctx, width / 2, height / 2);
+            
+            // Add coordinates label
+            const coordText = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+            ctx.fillStyle = 'rgba(255, 255, 255, 0.95)';
+            ctx.font = 'bold 11px Arial';
+            const textWidth = ctx.measureText(coordText).width;
+            
+            // Background for coordinates
+            ctx.fillRect(width / 2 - textWidth / 2 - 10, height - 30, textWidth + 20, 22);
+            
+            // Border
             ctx.strokeStyle = '#cbd5e1';
-            ctx.lineWidth = 0.5;
-            for (let x = 0; x < width; x += 40) {
-                ctx.beginPath();
-                ctx.moveTo(x, 0);
-                ctx.lineTo(x, height);
-                ctx.stroke();
-            }
-            for (let y = 0; y < height; y += 40) {
-                ctx.beginPath();
-                ctx.moveTo(0, y);
-                ctx.lineTo(width, y);
-                ctx.stroke();
-            }
+            ctx.lineWidth = 1;
+            ctx.strokeRect(width / 2 - textWidth / 2 - 10, height - 30, textWidth + 20, 22);
             
-            // Draw marker at center
-            const centerX = width / 2;
-            const centerY = height / 2;
-            
-            // Shadow
-            ctx.beginPath();
-            ctx.ellipse(centerX, centerY + 18, 10, 4, 0, 0, 2 * Math.PI);
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.2)';
-            ctx.fill();
-            
-            // Marker pin shape
-            ctx.beginPath();
-            ctx.moveTo(centerX, centerY + 15);
-            ctx.bezierCurveTo(centerX - 15, centerY, centerX - 15, centerY - 20, centerX, centerY - 25);
-            ctx.bezierCurveTo(centerX + 15, centerY - 20, centerX + 15, centerY, centerX, centerY + 15);
-            ctx.fillStyle = '#ef4444';
-            ctx.fill();
-            ctx.strokeStyle = '#b91c1c';
-            ctx.lineWidth = 2;
-            ctx.stroke();
-            
-            // Inner circle
-            ctx.beginPath();
-            ctx.arc(centerX, centerY - 10, 6, 0, 2 * Math.PI);
-            ctx.fillStyle = '#ffffff';
-            ctx.fill();
-            
-            // Add border to map
-            ctx.strokeStyle = '#94a3b8';
-            ctx.lineWidth = 2;
-            ctx.strokeRect(1, 1, width - 2, height - 2);
-            
-            // Add coordinate text at bottom
-            ctx.fillStyle = '#64748b';
-            ctx.font = '10px Arial';
+            // Text
+            ctx.fillStyle = '#475569';
             ctx.textAlign = 'center';
-            ctx.fillText(`${lat.toFixed(5)}, ${lng.toFixed(5)}`, centerX, height - 8);
+            ctx.fillText(coordText, width / 2, height - 14);
+            
+            // Border around entire map
+            ctx.strokeStyle = '#94a3b8';
+            ctx.lineWidth = 3;
+            ctx.strokeRect(0, 0, width, height);
             
             return canvas.toDataURL('image/png');
             
         } catch (error) {
-            console.error('Error generating static map:', error);
+            console.error('Failed to load OSM tiles:', error);
             return null;
         }
+    },
+
+    // Helper to load image
+    loadImage(url) {
+        return new Promise((resolve) => {
+            const img = new Image();
+            img.crossOrigin = 'anonymous';
+            img.onload = () => resolve(img);
+            img.onerror = () => resolve(null);
+            img.src = url;
+            
+            // Timeout after 3 seconds
+            setTimeout(() => resolve(null), 3000);
+        });
+    },
+
+    // Draw location marker on canvas
+    drawMarker(ctx, x, y) {
+        // Marker shadow
+        ctx.beginPath();
+        ctx.ellipse(x, y + 25, 14, 5, 0, 0, 2 * Math.PI);
+        ctx.fillStyle = 'rgba(0, 0, 0, 0.4)';
+        ctx.fill();
+        
+        // Marker pin
+        ctx.beginPath();
+        ctx.moveTo(x, y + 20);
+        ctx.bezierCurveTo(x - 20, y, x - 20, y - 28, x, y - 35);
+        ctx.bezierCurveTo(x + 20, y - 28, x + 20, y, x, y + 20);
+        
+        // Gradient for pin
+        const pinGradient = ctx.createLinearGradient(x - 20, y - 35, x + 20, y + 20);
+        pinGradient.addColorStop(0, '#ef4444');
+        pinGradient.addColorStop(1, '#dc2626');
+        ctx.fillStyle = pinGradient;
+        ctx.fill();
+        
+        // Pin border
+        ctx.strokeStyle = '#991b1b';
+        ctx.lineWidth = 3;
+        ctx.stroke();
+        
+        // Inner white circle
+        ctx.beginPath();
+        ctx.arc(x, y - 15, 8, 0, 2 * Math.PI);
+        ctx.fillStyle = '#ffffff';
+        ctx.fill();
+        ctx.strokeStyle = '#dc2626';
+        ctx.lineWidth = 2;
+        ctx.stroke();
+    },
+
+    // Fallback: generate drawn map (previous implementation improved)
+    generateDrawnMap(lat, lng, width, height) {
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        
+        // Background - realistic map colors
+        const gradient = ctx.createLinearGradient(0, 0, 0, height);
+        gradient.addColorStop(0, '#f0f4f8');
+        gradient.addColorStop(0.5, '#e8f0f7');
+        gradient.addColorStop(1, '#dde8f0');
+        ctx.fillStyle = gradient;
+        ctx.fillRect(0, 0, width, height);
+        
+        // Add organic shapes to simulate land/water features
+        ctx.save();
+        ctx.globalAlpha = 0.1;
+        
+        for (let i = 0; i < 15; i++) {
+            ctx.beginPath();
+            const x = Math.random() * width;
+            const y = Math.random() * height;
+            const radius = 20 + Math.random() * 60;
+            ctx.arc(x, y, radius, 0, 2 * Math.PI);
+            ctx.fillStyle = i % 3 === 0 ? '#93c5fd' : '#c7d2fe';
+            ctx.fill();
+        }
+        ctx.restore();
+        
+        // Grid lines
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1;
+        
+        for (let x = 0; x < width; x += 60) {
+            ctx.beginPath();
+            ctx.moveTo(x, 0);
+            ctx.lineTo(x, height);
+            ctx.stroke();
+        }
+        
+        for (let y = 0; y < height; y += 60) {
+            ctx.beginPath();
+            ctx.moveTo(0, y);
+            ctx.lineTo(width, y);
+            ctx.stroke();
+        }
+        
+        // Main roads
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 2;
+        const mainRoadX = width / 2 + (Math.random() - 0.5) * 100;
+        const mainRoadY = height / 2 + (Math.random() - 0.5) * 80;
+        
+        ctx.beginPath();
+        ctx.moveTo(mainRoadX, 0);
+        ctx.lineTo(mainRoadX, height);
+        ctx.stroke();
+        
+        ctx.beginPath();
+        ctx.moveTo(0, mainRoadY);
+        ctx.lineTo(width, mainRoadY);
+        ctx.stroke();
+        
+        // Draw marker
+        this.drawMarker(ctx, width / 2, height / 2);
+        
+        // Coordinates
+        const coordText = `${lat.toFixed(5)}, ${lng.toFixed(5)}`;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.9)';
+        ctx.font = 'bold 11px Arial';
+        const textWidth = ctx.measureText(coordText).width;
+        ctx.fillRect(width / 2 - textWidth/2 - 10, height - 30, textWidth + 20, 22);
+        
+        ctx.strokeStyle = '#cbd5e1';
+        ctx.lineWidth = 1;
+        ctx.strokeRect(width / 2 - textWidth/2 - 10, height - 30, textWidth + 20, 22);
+        
+        ctx.fillStyle = '#475569';
+        ctx.textAlign = 'center';
+        ctx.fillText(coordText, width / 2, height - 14);
+        
+        // Border
+        ctx.strokeStyle = '#94a3b8';
+        ctx.lineWidth = 3;
+        ctx.strokeRect(0, 0, width, height);
+        
+        return canvas.toDataURL('image/png');
     },
 
     // Get Google Maps URL
@@ -474,7 +697,7 @@ const PDFExport = {
                     // Generate map if coordinates available
                     let mapImg = null;
                     if (prop.latitude && prop.longitude && !isNaN(prop.latitude) && !isNaN(prop.longitude)) {
-                        mapImg = await this.generateStaticMap(prop.latitude, prop.longitude, 14, 400, 200);
+                        mapImg = await this.generateStaticMap(prop.latitude, prop.longitude, 16, 500, 300);
                     }
                     
                     this.updateLoading('Loading images...', `${idx + 1} / ${properties.length}`);
@@ -652,16 +875,16 @@ const PDFExport = {
                     const mapContent = [];
                     
                     mapContent.push({
-                        text: `📍 ${this.t('mapLocation', lang)}`,
+                        text: `🗺️  ${this.t('mapLocation', lang)}`,
                         style: 'mapTitle',
-                        margin: [0, 5, 0, 5]
+                        margin: [0, 10, 0, 8]
                     });
 
                     if (mapImg) {
                         mapContent.push({
                             image: mapImg,
-                            width: 400,
-                            margin: [0, 0, 0, 5]
+                            width: 500,
+                            margin: [0, 0, 0, 10]
                         });
                     }
 
