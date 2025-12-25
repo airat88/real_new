@@ -472,8 +472,7 @@ class SwipeApp {
                 <div class="property-card__price">
                     <div>${price}</div>
                 </div>
-                ${property.projectTitle ? `<div class="property-card__object">${property.projectTitle}</div>` : ''}
-                <div class="property-card__title">${property.title || 'Property'}</div>
+                <div class="property-card__title">${property.projectTitle || property.title || 'Property'}</div>
                 <div class="property-card__location">
                     <span>📍</span>
                     <span>${property.location || 'Cyprus'}</span>
