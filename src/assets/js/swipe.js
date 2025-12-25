@@ -1041,7 +1041,7 @@ class SwipeApp {
                         </span>
                         <span class="completion-btn__text">
                             <span class="completion-btn__title">Пока не подошли</span>
-                            <span class="completion-btn__subtitle">Посмотреть ещё раз (${dislikes.length})</span>
+                            <span class="completion-btn__subtitle">ПОСМОТРЕТЬ ЕЩЁ РАЗ (${dislikes.length})</span>
                         </span>
                     </button>
                 ` : ''}
