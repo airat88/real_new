@@ -458,6 +458,15 @@ class SwipeApp {
                 <div class="property-card__location">
                     <span>📍</span>
                     <span>${property.location || 'Cyprus'}</span>
+                    ${property.latitude && property.longitude ? `
+                        <a href="https://www.google.com/maps?q=${property.latitude},${property.longitude}" 
+                           target="_blank" 
+                           class="map-link"
+                           onclick="event.stopPropagation();"
+                           title="Открыть на Google Maps">
+                            🗺️ Карта
+                        </a>
+                    ` : ''}
                 </div>
                 <div class="property-card__tags">
                     <span class="property-tag">🛏️ ${bedroomText}</span>
@@ -768,6 +777,14 @@ class SwipeApp {
                 <div class="details-location">
                     <span>📍</span>
                     <span>${property.location || 'Cyprus'}</span>
+                    ${property.latitude && property.longitude ? `
+                        <a href="https://www.google.com/maps?q=${property.latitude},${property.longitude}" 
+                           target="_blank" 
+                           class="map-link"
+                           title="Открыть на Google Maps">
+                            🗺️ Карта
+                        </a>
+                    ` : ''}
                 </div>
                 
                 ${property.broker_phone || property.brokerPhone ? `
@@ -1024,7 +1041,7 @@ class SwipeApp {
                         </span>
                         <span class="completion-btn__text">
                             <span class="completion-btn__title">Пока не подошли</span>
-                            <span class="completion-btn__subtitle">ПОСМОТРЕТЬ ЕЩЁ РАЗ (${dislikes.length})</span>
+                            <span class="completion-btn__subtitle">Посмотреть ещё раз (${dislikes.length})</span>
                         </span>
                     </button>
                 ` : ''}
