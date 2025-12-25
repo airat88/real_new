@@ -187,7 +187,7 @@
 .property-card__actions {
     position: absolute;
     top: auto;
-    bottom: 120px; /* Moved lower - closer to the bottom of the card */
+    bottom: 80px; /* Moved even lower on desktop */
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -1019,6 +1019,11 @@
         font-size: 1.5rem;
     }
 
+    /* Header title stays at top on mobile */
+    .swipe-header__title {
+        color: white;
+    }
+
     /* Улучшенная адаптация модального окна для маленьких экранов */
     .details-modal__content {
         max-height: 98vh;
@@ -1118,5 +1123,27 @@
         margin: auto;
         max-height: 90vh;
         border-radius: var(--radius-2xl);
+    }
+
+    /* Hide header title on desktop */
+    .swipe-header__title {
+        position: absolute;
+        bottom: 20px;
+        left: 20px;
+        top: auto;
+        color: #1a1a1a;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 12px 20px;
+        border-radius: 12px;
+        font-size: 1.1rem;
+        font-weight: 600;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+        z-index: 10;
+        backdrop-filter: blur(10px);
+    }
+
+    /* Move header to relative positioning */
+    .swipe-header {
+        position: relative;
     }
 }
