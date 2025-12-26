@@ -284,13 +284,39 @@
                 // Initialize Supabase for data operations (not auth)
                 console.log('🔧 Initializing Supabase...');
                 
-                // Use the window.supabaseClient that was already created above
-                if (window.supabaseClient) {
-                    SupabaseClient.client = window.supabaseClient;
-                    SupabaseClient.initialized = true;
-                    console.log('✅ Using window.supabaseClient');
-                } else {
-                    SupabaseClient.init();
+                // Wait for window.supabaseClient to be ready (in case scripts load async)
+                const initSupabase = () => {
+                    if (window.supabaseClient) {
+                        SupabaseClient.client = window.supabaseClient;
+                        SupabaseClient.initialized = true;
+                        console.log('✅ Using window.supabaseClient');
+                        return true;
+                    } else {
+                        console.log('⏳ window.supabaseClient not ready yet, trying SupabaseClient.init()...');
+                        const result = SupabaseClient.init();
+                        if (result) {
+                            console.log('✅ SupabaseClient.init() succeeded');
+                            return true;
+                        }
+                        return false;
+                    }
+                };
+                
+                // Try to initialize, with retry if needed
+                if (!initSupabase()) {
+                    console.log('⏳ Waiting for Supabase to be ready...');
+                    // Wait a bit and try again
+                    setTimeout(() => {
+                        if (!initSupabase()) {
+                            console.error('❌ Failed to initialize Supabase after retry');
+                        } else {
+                            console.log('✅ Supabase initialized after retry:', !!SupabaseClient.client);
+                            // Load dashboard data after successful retry
+                            console.log('🚀 Calling loadDashboardData() after retry...');
+                            loadDashboardData();
+                        }
+                    }, 500); // Wait 500ms for scripts to load
+                    return; // Exit early, will continue in setTimeout
                 }
                 
                 console.log('✅ Supabase initialized:', !!SupabaseClient.client);
