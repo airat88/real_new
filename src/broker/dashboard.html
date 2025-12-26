@@ -282,10 +282,18 @@
                 }
                 
                 // Initialize Supabase for data operations (not auth)
+                console.log('🔧 Initializing Supabase...');
                 SupabaseClient.init();
+                console.log('✅ Supabase initialized');
+                
+                // Check if DataSync is available
+                console.log('🔧 Checking DataSync availability...', typeof DataSync);
+                console.log('🔧 Checking SupabaseClient availability...', typeof SupabaseClient);
 
                 // Load dashboard data
+                console.log('🚀 Calling loadDashboardData()...');
                 loadDashboardData();
+                console.log('✅ loadDashboardData() called (async, will complete later)');
             } catch (e) {
                 console.error('❌ Invalid session data:', e);
                 localStorage.removeItem('broker_session');
@@ -316,33 +324,66 @@
 
         // Load dashboard data
         async function loadDashboardData() {
+            console.log('🚀 [START] loadDashboardData called');
+            
+            // Check if DOM elements exist
+            const elements = {
+                statProperties: document.getElementById('statProperties'),
+                statPropertiesChange: document.getElementById('statPropertiesChange'),
+                statSelections: document.getElementById('statSelections'),
+                statSelectionsChange: document.getElementById('statSelectionsChange'),
+                statViewRate: document.getElementById('statViewRate'),
+                statViewRateChange: document.getElementById('statViewRateChange'),
+                statLikeRate: document.getElementById('statLikeRate'),
+                statLikeRateChange: document.getElementById('statLikeRateChange')
+            };
+            
+            console.log('📋 DOM elements check:', {
+                statProperties: !!elements.statProperties,
+                statSelections: !!elements.statSelections,
+                statViewRate: !!elements.statViewRate,
+                statLikeRate: !!elements.statLikeRate
+            });
+            
+            if (!elements.statProperties) {
+                console.error('❌ CRITICAL: DOM elements not found!');
+                return;
+            }
+            
             try {
-                console.log('📊 Loading dashboard data...');
+                console.log('📊 Step 1: Loading dashboard data...');
                 
                 // Auto-load CSV data if not in memory
+                console.log('📊 Step 2: Calling DataSync.autoSync()...');
                 await DataSync.autoSync();
+                console.log('✅ Step 2: DataSync.autoSync() completed');
 
                 // Load properties count
+                console.log('📊 Step 3: Getting properties from DataSync...');
                 const properties = DataSync.getProperties();
                 const propCount = properties.length;
-                console.log(`✅ Loaded ${propCount} properties`);
+                console.log(`✅ Step 3: Loaded ${propCount} properties`);
                 
-                document.getElementById('statProperties').textContent = propCount || '-';
-                document.getElementById('statPropertiesChange').textContent = propCount > 0 ? 'From CSV' : 'Load data';
-                document.getElementById('statPropertiesChange').className = 'stat-card__change';
+                elements.statProperties.textContent = propCount || '-';
+                elements.statPropertiesChange.textContent = propCount > 0 ? 'From CSV' : 'Load data';
+                elements.statPropertiesChange.className = 'stat-card__change';
+                console.log('✅ Step 3: Updated properties stats in DOM');
 
                 // Load selections from Supabase
-                console.log('📊 Loading selections from Supabase...');
+                console.log('📊 Step 4: Loading selections from Supabase...');
                 const selections = await SupabaseClient.getBrokerSelections();
-                console.log(`✅ Loaded ${selections.length} selections`);
+                console.log(`✅ Step 4: Loaded ${selections.length} selections`);
                 
                 const activeSelections = selections.filter(s => s.status !== 'completed');
+                console.log(`✅ Step 4: Found ${activeSelections.length} active selections`);
 
-                document.getElementById('statSelections').textContent = activeSelections.length || '-';
-                document.getElementById('statSelectionsChange').textContent = `${selections.length} total`;
-                document.getElementById('statSelectionsChange').className = 'stat-card__change';
+                elements.statSelections.textContent = activeSelections.length || '-';
+                elements.statSelectionsChange.textContent = `${selections.length} total`;
+                elements.statSelectionsChange.className = 'stat-card__change';
+                console.log('✅ Step 4: Updated selections stats in DOM');
 
                 // Calculate view and like rates
+                console.log('📊 Step 5: Calculating rates...');
                 let totalViewed = 0;
                 let totalProperties = 0;
                 let totalLiked = 0;
@@ -357,43 +398,68 @@
 
                 const viewRate = totalProperties > 0 ? Math.round((totalViewed / totalProperties) * 100) : 0;
                 const likeRate = totalReacted > 0 ? Math.round((totalLiked / totalReacted) * 100) : 0;
+                
+                console.log('✅ Step 5: Calculated rates', {
+                    viewRate,
+                    likeRate,
+                    totalViewed,
+                    totalProperties,
+                    totalLiked,
+                    totalReacted
+                });
 
-                document.getElementById('statViewRate').textContent = viewRate + '%';
-                document.getElementById('statViewRateChange').textContent = `${totalViewed}/${totalProperties} viewed`;
-                document.getElementById('statViewRateChange').className = 'stat-card__change';
+                elements.statViewRate.textContent = viewRate + '%';
+                elements.statViewRateChange.textContent = `${totalViewed}/${totalProperties} viewed`;
+                elements.statViewRateChange.className = 'stat-card__change';
 
-                document.getElementById('statLikeRate').textContent = likeRate + '%';
-                document.getElementById('statLikeRateChange').textContent = `${totalLiked} liked`;
-                document.getElementById('statLikeRateChange').className = 'stat-card__change';
+                elements.statLikeRate.textContent = likeRate + '%';
+                elements.statLikeRateChange.textContent = `${totalLiked} liked`;
+                elements.statLikeRateChange.className = 'stat-card__change';
+                console.log('✅ Step 5: Updated rates in DOM');
 
-                console.log('✅ Dashboard stats loaded successfully');
+                console.log('✅ [COMPLETE] Dashboard stats loaded successfully!');
 
                 // Render recent selections
+                console.log('📊 Step 6: Rendering recent selections...');
                 renderRecentSelections(selections.slice(0, 5));
+                console.log('✅ Step 6: Recent selections rendered');
 
                 // Render recent activity
+                console.log('📊 Step 7: Rendering recent activity...');
                 await renderRecentActivity(selections);
+                console.log('✅ Step 7: Recent activity rendered');
+                
+                console.log('🎉 [SUCCESS] All dashboard data loaded!');
 
             } catch (error) {
-                console.error('❌ Failed to load dashboard data:', error);
-                console.error('Error stack:', error.stack);
+                console.error('❌ [ERROR] Failed to load dashboard data:', error);
+                console.error('❌ Error message:', error.message);
+                console.error('❌ Error stack:', error.stack);
                 
                 // Set default values if loading fails
-                document.getElementById('statProperties').textContent = '-';
-                document.getElementById('statPropertiesChange').textContent = 'Error loading';
-                document.getElementById('statPropertiesChange').className = 'stat-card__change stat-card__change--negative';
+                if (elements.statProperties) {
+                    elements.statProperties.textContent = '-';
+                    elements.statPropertiesChange.textContent = 'Error loading';
+                    elements.statPropertiesChange.className = 'stat-card__change stat-card__change--negative';
+                }
                 
-                document.getElementById('statSelections').textContent = '-';
-                document.getElementById('statSelectionsChange').textContent = 'Error loading';
-                document.getElementById('statSelectionsChange').className = 'stat-card__change stat-card__change--negative';
+                if (elements.statSelections) {
+                    elements.statSelections.textContent = '-';
+                    elements.statSelectionsChange.textContent = 'Error loading';
+                    elements.statSelectionsChange.className = 'stat-card__change stat-card__change--negative';
+                }
                 
-                document.getElementById('statViewRate').textContent = '-';
-                document.getElementById('statViewRateChange').textContent = 'Error loading';
-                document.getElementById('statViewRateChange').className = 'stat-card__change stat-card__change--negative';
+                if (elements.statViewRate) {
+                    elements.statViewRate.textContent = '-';
+                    elements.statViewRateChange.textContent = 'Error loading';
+                    elements.statViewRateChange.className = 'stat-card__change stat-card__change--negative';
+                }
                 
-                document.getElementById('statLikeRate').textContent = '-';
-                document.getElementById('statLikeRateChange').textContent = 'Error loading';
-                document.getElementById('statLikeRateChange').className = 'stat-card__change stat-card__change--negative';
+                if (elements.statLikeRate) {
+                    elements.statLikeRate.textContent = '-';
+                    elements.statLikeRateChange.textContent = 'Error loading';
+                    elements.statLikeRateChange.className = 'stat-card__change stat-card__change--negative';
+                }
             }
         }
 
