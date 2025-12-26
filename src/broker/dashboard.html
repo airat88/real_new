@@ -234,11 +234,8 @@
     <script src="../assets/js/supabase-client.js"></script>
 
     <script>
-        // Initialize global Supabase client
-        const supabaseUrl = 'https://ymizsgrtfkezzsichfwy.supabase.co';
-        const supabaseKey = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InltaXpzZ3J0ZmtlenpzaWNoZnd5Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NjU3MzQ5NjIsImV4cCI6MjA4MTMxMDk2Mn0.2XJd1cc_IODicg7ElBGmcVp9Z5RrNccEWm2flV_nrqs';
-        const supabaseClient = supabase.createClient(supabaseUrl, supabaseKey);
-        window.supabaseClient = supabaseClient;
+        // Supabase will be initialized by SupabaseClient.init() after page loads
+        // This ensures the library is fully loaded before trying to create a client
         
         // Register Service Worker
         if ('serviceWorker' in navigator) {
@@ -284,31 +281,27 @@
                 // Initialize Supabase for data operations (not auth)
                 console.log('🔧 Initializing Supabase...');
                 
-                // Wait for window.supabaseClient to be ready (in case scripts load async)
+                // Initialize with retry logic (CDN scripts may load async)
                 const initSupabase = () => {
-                    if (window.supabaseClient) {
-                        SupabaseClient.client = window.supabaseClient;
-                        SupabaseClient.initialized = true;
-                        console.log('✅ Using window.supabaseClient');
+                    console.log('⏳ Calling SupabaseClient.init()...');
+                    const result = SupabaseClient.init();
+                    if (result && SupabaseClient.client) {
+                        console.log('✅ Supabase initialized successfully');
                         return true;
                     } else {
-                        console.log('⏳ window.supabaseClient not ready yet, trying SupabaseClient.init()...');
-                        const result = SupabaseClient.init();
-                        if (result) {
-                            console.log('✅ SupabaseClient.init() succeeded');
-                            return true;
-                        }
+                        console.log('❌ Supabase init failed - library may not be loaded yet');
                         return false;
                     }
                 };
                 
                 // Try to initialize, with retry if needed
                 if (!initSupabase()) {
-                    console.log('⏳ Waiting for Supabase to be ready...');
+                    console.log('⏳ Waiting for Supabase library to load (retry in 500ms)...');
                     // Wait a bit and try again
                     setTimeout(() => {
                         if (!initSupabase()) {
                             console.error('❌ Failed to initialize Supabase after retry');
+                            console.error('Check that CDN script loaded: https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
                         } else {
                             console.log('✅ Supabase initialized after retry:', !!SupabaseClient.client);
                             // Load dashboard data after successful retry
@@ -319,7 +312,7 @@
                     return; // Exit early, will continue in setTimeout
                 }
                 
-                console.log('✅ Supabase initialized:', !!SupabaseClient.client);
+                console.log('✅ Supabase ready immediately:', !!SupabaseClient.client);
                 
                 // Check if DataSync is available
                 console.log('🔧 Checking DataSync availability...', typeof DataSync);
