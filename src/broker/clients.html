@@ -1,0 +1,759 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clients | Cyprus Real Estate</title>
+
+    <!-- Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+    <!-- Styles -->
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/broker.css">
+
+    <!-- Favicon -->
+    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
+
+    <style>
+        .clients-container {
+            padding: 2rem;
+            max-width: 1400px;
+            margin: 0 auto;
+        }
+
+        .clients-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .clients-header h1 {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #1e293b;
+            margin: 0;
+        }
+
+        .search-bar {
+            margin-bottom: 2rem;
+            position: relative;
+        }
+
+        .search-bar input {
+            width: 100%;
+            padding: 1rem 1rem 1rem 3rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 12px;
+            font-size: 1rem;
+            transition: all 0.3s;
+        }
+
+        .search-bar input:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .search-bar::before {
+            content: '🔍';
+            position: absolute;
+            left: 1rem;
+            top: 50%;
+            transform: translateY(-50%);
+            font-size: 1.2rem;
+        }
+
+        .clients-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .client-card {
+            background: white;
+            border-radius: 16px;
+            padding: 1.5rem;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .client-card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            border-color: #4f46e5;
+        }
+
+        .client-header {
+            display: flex;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .client-avatar {
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: 700;
+            margin-right: 1rem;
+        }
+
+        .client-info h3 {
+            margin: 0;
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+
+        .client-info p {
+            margin: 0.25rem 0 0 0;
+            font-size: 0.9rem;
+            color: #64748b;
+        }
+
+        .client-details {
+            margin: 1rem 0;
+            padding: 1rem 0;
+            border-top: 1px solid #e2e8f0;
+            border-bottom: 1px solid #e2e8f0;
+        }
+
+        .client-detail {
+            display: flex;
+            align-items: center;
+            margin-bottom: 0.75rem;
+        }
+
+        .client-detail:last-child {
+            margin-bottom: 0;
+        }
+
+        .client-detail span:first-child {
+            width: 30px;
+            font-size: 1.2rem;
+        }
+
+        .client-detail span:last-child {
+            color: #475569;
+            font-size: 0.95rem;
+        }
+
+        .client-actions {
+            display: flex;
+            gap: 0.5rem;
+            margin-top: 1rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-size: 0.95rem;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.4);
+        }
+
+        .btn-secondary {
+            background: #f1f5f9;
+            color: #475569;
+            flex: 1;
+        }
+
+        .btn-secondary:hover {
+            background: #e2e8f0;
+        }
+
+        .btn-danger {
+            background: #fee2e2;
+            color: #dc2626;
+            flex: 1;
+        }
+
+        .btn-danger:hover {
+            background: #fecaca;
+        }
+
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            animation: fadeIn 0.3s;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #1e293b;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: #64748b;
+            padding: 0;
+            width: 32px;
+            height: 32px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 8px;
+        }
+
+        .close-btn:hover {
+            background: #f1f5f9;
+        }
+
+        .form-group {
+            margin-bottom: 1.5rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: #334155;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-family: inherit;
+            transition: all 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #4f46e5;
+            box-shadow: 0 0 0 3px rgba(79, 70, 229, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 4rem 2rem;
+        }
+
+        .empty-state-icon {
+            font-size: 4rem;
+            margin-bottom: 1rem;
+        }
+
+        .empty-state h3 {
+            font-size: 1.5rem;
+            color: #1e293b;
+            margin-bottom: 0.5rem;
+        }
+
+        .empty-state p {
+            color: #64748b;
+            margin-bottom: 2rem;
+        }
+
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+
+        .loading {
+            text-align: center;
+            padding: 4rem 2rem;
+            color: #64748b;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar__header">
+            <span class="sidebar__logo">🏠</span>
+            <span class="sidebar__title">RealEstate</span>
+        </div>
+
+        <div class="sidebar__nav">
+            <a href="dashboard.html" class="nav-item">
+                <span class="nav-item__icon">📊</span>
+                <span>Dashboard</span>
+            </a>
+            <a href="properties.html" class="nav-item">
+                <span class="nav-item__icon">🏘️</span>
+                <span>Properties</span>
+            </a>
+            <a href="add-property.html" class="nav-item">
+                <span class="nav-item__icon">➕</span>
+                <span>Add Property</span>
+            </a>
+            <a href="selections.html" class="nav-item">
+                <span class="nav-item__icon">📋</span>
+                <span>Selections</span>
+            </a>
+            <a href="clients.html" class="nav-item nav-item--active">
+                <span class="nav-item__icon">👥</span>
+                <span>Clients</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-item__icon">📈</span>
+                <span>Analytics</span>
+            </a>
+            <a href="#" class="nav-item">
+                <span class="nav-item__icon">⚙️</span>
+                <span>Settings</span>
+            </a>
+            <a href="#" class="nav-item" onclick="logout(); return false;">
+                <span class="nav-item__icon">🚪</span>
+                <span>Logout</span>
+            </a>
+        </div>
+
+        <div class="sidebar__footer">
+            <div class="sidebar__user">
+                <div class="sidebar__user-avatar">M</div>
+                <div class="sidebar__user-info">
+                    <div class="sidebar__user-name" id="userName">Maria</div>
+                    <div class="sidebar__user-role">Senior Broker</div>
+                </div>
+            </div>
+            
+            <a href="../index.html" class="nav-item nav-item--home">
+                <span class="nav-item__icon">🏡</span>
+                <span>Home Page</span>
+            </a>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <div class="clients-container">
+            <div class="clients-header">
+                <h1>Clients</h1>
+                <button class="btn btn-primary" onclick="openAddClientModal()">
+                    ➕ Add Client
+                </button>
+            </div>
+
+            <div class="search-bar">
+                <input type="text" id="searchInput" placeholder="Search clients by name, email, or phone..." oninput="filterClients()">
+            </div>
+
+            <div id="clientsGrid" class="clients-grid">
+                <div class="loading">
+                    <p>Loading clients...</p>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Add/Edit Client Modal -->
+    <div id="clientModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="modalTitle">Add New Client</h2>
+                <button class="close-btn" onclick="closeClientModal()">×</button>
+            </div>
+
+            <form id="clientForm" onsubmit="saveClient(event)">
+                <input type="hidden" id="clientId">
+                
+                <div class="form-group">
+                    <label for="clientName">Full Name *</label>
+                    <input type="text" id="clientName" required placeholder="John Smith">
+                </div>
+
+                <div class="form-group">
+                    <label for="clientEmail">Email *</label>
+                    <input type="email" id="clientEmail" required placeholder="john@example.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="clientPhone">Phone *</label>
+                    <input type="tel" id="clientPhone" required placeholder="+357 99 123456">
+                </div>
+
+                <div class="form-group">
+                    <label for="clientNotes">Notes (Optional)</label>
+                    <textarea id="clientNotes" placeholder="Additional information about the client..."></textarea>
+                </div>
+
+                <div style="display: flex; gap: 1rem;">
+                    <button type="button" class="btn btn-secondary" onclick="closeClientModal()">Cancel</button>
+                    <button type="submit" class="btn btn-primary">Save Client</button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <!-- Supabase -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase-client.js"></script>
+
+    <script>
+        let allClients = [];
+        let editingClientId = null;
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            checkAuth();
+            initSupabase();
+            loadClients();
+        });
+
+        function checkAuth() {
+            const session = localStorage.getItem('broker_session');
+            if (!session) {
+                window.location.href = 'login.html?from=clients';
+                return;
+            }
+
+            try {
+                const { email, name } = JSON.parse(session);
+                const userNameEl = document.getElementById('userName');
+                if (userNameEl && name) {
+                    userNameEl.textContent = name.charAt(0).toUpperCase() + name.slice(1);
+                }
+            } catch (e) {
+                console.error('Invalid session:', e);
+                localStorage.removeItem('broker_session');
+                window.location.href = 'login.html?from=clients';
+            }
+        }
+
+        function initSupabase() {
+            console.log('Initializing Supabase...');
+            const result = SupabaseClient.init();
+            if (!result) {
+                console.error('Failed to initialize Supabase');
+                setTimeout(initSupabase, 500);
+            } else {
+                console.log('Supabase initialized');
+            }
+        }
+
+        async function loadClients() {
+            try {
+                console.log('Loading clients...');
+                
+                if (!SupabaseClient.client) {
+                    console.error('Supabase not initialized');
+                    setTimeout(loadClients, 500);
+                    return;
+                }
+
+                const { data, error } = await SupabaseClient.client
+                    .from('clients')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    console.error('Error loading clients:', error);
+                    showError('Failed to load clients. Please refresh the page.');
+                    return;
+                }
+
+                allClients = data || [];
+                console.log('Loaded clients:', allClients.length);
+                renderClients(allClients);
+
+            } catch (error) {
+                console.error('Error:', error);
+                showError('An error occurred while loading clients.');
+            }
+        }
+
+        function renderClients(clients) {
+            const grid = document.getElementById('clientsGrid');
+
+            if (clients.length === 0) {
+                grid.innerHTML = `
+                    <div class="empty-state">
+                        <div class="empty-state-icon">👥</div>
+                        <h3>No clients yet</h3>
+                        <p>Add your first client to get started!</p>
+                        <button class="btn btn-primary" onclick="openAddClientModal()">
+                            ➕ Add Client
+                        </button>
+                    </div>
+                `;
+                return;
+            }
+
+            grid.innerHTML = clients.map(client => `
+                <div class="client-card">
+                    <div class="client-header">
+                        <div class="client-avatar">${getInitials(client.name)}</div>
+                        <div class="client-info">
+                            <h3>${escapeHtml(client.name)}</h3>
+                            <p>${client.email}</p>
+                        </div>
+                    </div>
+
+                    <div class="client-details">
+                        <div class="client-detail">
+                            <span>📧</span>
+                            <span>${client.email}</span>
+                        </div>
+                        <div class="client-detail">
+                            <span>📱</span>
+                            <span>${client.phone || 'No phone'}</span>
+                        </div>
+                        ${client.notes ? `
+                        <div class="client-detail">
+                            <span>📝</span>
+                            <span>${escapeHtml(client.notes)}</span>
+                        </div>
+                        ` : ''}
+                    </div>
+
+                    <div class="client-actions">
+                        <button class="btn btn-secondary" onclick="editClient('${client.id}')">
+                            ✏️ Edit
+                        </button>
+                        <button class="btn btn-danger" onclick="deleteClient('${client.id}', '${escapeHtml(client.name)}')">
+                            🗑️ Delete
+                        </button>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function getInitials(name) {
+            if (!name) return '?';
+            const parts = name.split(' ');
+            if (parts.length >= 2) {
+                return (parts[0][0] + parts[1][0]).toUpperCase();
+            }
+            return name.substring(0, 2).toUpperCase();
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            const div = document.createElement('div');
+            div.textContent = text;
+            return div.innerHTML;
+        }
+
+        function filterClients() {
+            const searchTerm = document.getElementById('searchInput').value.toLowerCase();
+            
+            if (!searchTerm) {
+                renderClients(allClients);
+                return;
+            }
+
+            const filtered = allClients.filter(client => {
+                return client.name.toLowerCase().includes(searchTerm) ||
+                       client.email.toLowerCase().includes(searchTerm) ||
+                       (client.phone && client.phone.toLowerCase().includes(searchTerm));
+            });
+
+            renderClients(filtered);
+        }
+
+        function openAddClientModal() {
+            editingClientId = null;
+            document.getElementById('modalTitle').textContent = 'Add New Client';
+            document.getElementById('clientForm').reset();
+            document.getElementById('clientId').value = '';
+            document.getElementById('clientModal').classList.add('active');
+        }
+
+        function editClient(clientId) {
+            const client = allClients.find(c => c.id === clientId);
+            if (!client) return;
+
+            editingClientId = clientId;
+            document.getElementById('modalTitle').textContent = 'Edit Client';
+            document.getElementById('clientId').value = client.id;
+            document.getElementById('clientName').value = client.name;
+            document.getElementById('clientEmail').value = client.email;
+            document.getElementById('clientPhone').value = client.phone || '';
+            document.getElementById('clientNotes').value = client.notes || '';
+            document.getElementById('clientModal').classList.add('active');
+        }
+
+        function closeClientModal() {
+            document.getElementById('clientModal').classList.remove('active');
+            document.getElementById('clientForm').reset();
+            editingClientId = null;
+        }
+
+        async function saveClient(event) {
+            event.preventDefault();
+
+            const name = document.getElementById('clientName').value.trim();
+            const email = document.getElementById('clientEmail').value.trim();
+            const phone = document.getElementById('clientPhone').value.trim();
+            const notes = document.getElementById('clientNotes').value.trim();
+
+            if (!name || !email || !phone) {
+                alert('Please fill in all required fields');
+                return;
+            }
+
+            try {
+                const clientData = {
+                    name,
+                    email,
+                    phone,
+                    notes: notes || null
+                };
+
+                let result;
+                if (editingClientId) {
+                    // Update existing client
+                    result = await SupabaseClient.client
+                        .from('clients')
+                        .update(clientData)
+                        .eq('id', editingClientId);
+                } else {
+                    // Create new client
+                    result = await SupabaseClient.client
+                        .from('clients')
+                        .insert([clientData]);
+                }
+
+                if (result.error) {
+                    console.error('Error saving client:', result.error);
+                    alert('Failed to save client. Please try again.');
+                    return;
+                }
+
+                closeClientModal();
+                loadClients();
+                
+                const action = editingClientId ? 'updated' : 'added';
+                showSuccess(`Client ${action} successfully!`);
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        async function deleteClient(clientId, clientName) {
+            if (!confirm(`Are you sure you want to delete ${clientName}?`)) {
+                return;
+            }
+
+            try {
+                const { error } = await SupabaseClient.client
+                    .from('clients')
+                    .delete()
+                    .eq('id', clientId);
+
+                if (error) {
+                    console.error('Error deleting client:', error);
+                    alert('Failed to delete client. Please try again.');
+                    return;
+                }
+
+                loadClients();
+                showSuccess('Client deleted successfully!');
+
+            } catch (error) {
+                console.error('Error:', error);
+                alert('An error occurred. Please try again.');
+            }
+        }
+
+        function showSuccess(message) {
+            // Simple success message (you can enhance this with a toast notification)
+            const temp = document.createElement('div');
+            temp.style.cssText = 'position:fixed;top:20px;right:20px;background:#10b981;color:white;padding:1rem 2rem;border-radius:8px;z-index:10000;animation:fadeIn 0.3s';
+            temp.textContent = message;
+            document.body.appendChild(temp);
+            setTimeout(() => temp.remove(), 3000);
+        }
+
+        function showError(message) {
+            const temp = document.createElement('div');
+            temp.style.cssText = 'position:fixed;top:20px;right:20px;background:#ef4444;color:white;padding:1rem 2rem;border-radius:8px;z-index:10000;animation:fadeIn 0.3s';
+            temp.textContent = message;
+            document.body.appendChild(temp);
+            setTimeout(() => temp.remove(), 3000);
+        }
+
+        function logout() {
+            localStorage.removeItem('broker_session');
+            window.location.href = 'login.html';
+        }
+
+        // Close modal on Escape key
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                closeClientModal();
+            }
+        });
+
+        // Close modal on background click
+        document.getElementById('clientModal').addEventListener('click', (e) => {
+            if (e.target.id === 'clientModal') {
+                closeClientModal();
+            }
+        });
+    </script>
+</body>
+</html>
