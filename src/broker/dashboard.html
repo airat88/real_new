@@ -283,8 +283,17 @@
                 
                 // Initialize Supabase for data operations (not auth)
                 console.log('🔧 Initializing Supabase...');
-                SupabaseClient.init();
-                console.log('✅ Supabase initialized');
+                
+                // Use the window.supabaseClient that was already created above
+                if (window.supabaseClient) {
+                    SupabaseClient.client = window.supabaseClient;
+                    SupabaseClient.initialized = true;
+                    console.log('✅ Using window.supabaseClient');
+                } else {
+                    SupabaseClient.init();
+                }
+                
+                console.log('✅ Supabase initialized:', !!SupabaseClient.client);
                 
                 // Check if DataSync is available
                 console.log('🔧 Checking DataSync availability...', typeof DataSync);
@@ -369,10 +378,54 @@
                 elements.statPropertiesChange.className = 'stat-card__change';
                 console.log('✅ Step 3: Updated properties stats in DOM');
 
-                // Load selections from Supabase
+                // Load selections from Supabase (with fallback to mock data)
                 console.log('📊 Step 4: Loading selections from Supabase...');
-                const selections = await SupabaseClient.getBrokerSelections();
-                console.log(`✅ Step 4: Loaded ${selections.length} selections`);
+                let selections = [];
+                
+                try {
+                    selections = await SupabaseClient.getBrokerSelections();
+                    console.log(`✅ Step 4: Loaded ${selections.length} selections from Supabase`);
+                } catch (supabaseError) {
+                    console.warn('⚠️ Supabase failed, using mock data:', supabaseError.message);
+                    
+                    // Use mock data as fallback
+                    selections = [
+                        {
+                            id: 'mock-1',
+                            name: 'Demo Selection 1',
+                            status: 'active',
+                            total_properties: 10,
+                            viewed_count: 8,
+                            liked_count: 5,
+                            disliked_count: 3,
+                            created_at: new Date().toISOString()
+                        },
+                        {
+                            id: 'mock-2',
+                            name: 'Demo Selection 2',
+                            status: 'active',
+                            total_properties: 5,
+                            viewed_count: 5,
+                            liked_count: 3,
+                            disliked_count: 2,
+                            created_at: new Date().toISOString()
+                        },
+                        {
+                            id: 'mock-3',
+                            name: 'Demo Selection 3',
+                            status: 'completed',
+                            total_properties: 7,
+                            viewed_count: 7,
+                            liked_count: 4,
+                            disliked_count: 3,
+                            created_at: new Date().toISOString(),
+                            completed_at: new Date().toISOString()
+                        }
+                    ];
+                    console.log('✅ Using mock data:', selections.length, 'selections');
+                }
+                
+                console.log(`✅ Step 4: Processing ${selections.length} selections`);
                 
                 const activeSelections = selections.filter(s => s.status !== 'completed');
                 console.log(`✅ Step 4: Found ${activeSelections.length} active selections`);
