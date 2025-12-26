@@ -317,21 +317,28 @@
         // Load dashboard data
         async function loadDashboardData() {
             try {
+                console.log('📊 Loading dashboard data...');
+                
                 // Auto-load CSV data if not in memory
                 await DataSync.autoSync();
 
                 // Load properties count
                 const properties = DataSync.getProperties();
                 const propCount = properties.length;
+                console.log(`✅ Loaded ${propCount} properties`);
+                
                 document.getElementById('statProperties').textContent = propCount || '-';
                 document.getElementById('statPropertiesChange').textContent = propCount > 0 ? 'From CSV' : 'Load data';
                 document.getElementById('statPropertiesChange').className = 'stat-card__change';
 
                 // Load selections from Supabase
+                console.log('📊 Loading selections from Supabase...');
                 const selections = await SupabaseClient.getBrokerSelections();
+                console.log(`✅ Loaded ${selections.length} selections`);
+                
                 const activeSelections = selections.filter(s => s.status !== 'completed');
 
-                document.getElementById('statSelections').textContent = activeSelections.length;
+                document.getElementById('statSelections').textContent = activeSelections.length || '-';
                 document.getElementById('statSelectionsChange').textContent = `${selections.length} total`;
                 document.getElementById('statSelectionsChange').className = 'stat-card__change';
 
@@ -359,6 +366,8 @@
                 document.getElementById('statLikeRateChange').textContent = `${totalLiked} liked`;
                 document.getElementById('statLikeRateChange').className = 'stat-card__change';
 
+                console.log('✅ Dashboard stats loaded successfully');
+
                 // Render recent selections
                 renderRecentSelections(selections.slice(0, 5));
 
@@ -366,7 +375,25 @@
                 await renderRecentActivity(selections);
 
             } catch (error) {
-                console.error('Failed to load dashboard data:', error);
+                console.error('❌ Failed to load dashboard data:', error);
+                console.error('Error stack:', error.stack);
+                
+                // Set default values if loading fails
+                document.getElementById('statProperties').textContent = '-';
+                document.getElementById('statPropertiesChange').textContent = 'Error loading';
+                document.getElementById('statPropertiesChange').className = 'stat-card__change stat-card__change--negative';
+                
+                document.getElementById('statSelections').textContent = '-';
+                document.getElementById('statSelectionsChange').textContent = 'Error loading';
+                document.getElementById('statSelectionsChange').className = 'stat-card__change stat-card__change--negative';
+                
+                document.getElementById('statViewRate').textContent = '-';
+                document.getElementById('statViewRateChange').textContent = 'Error loading';
+                document.getElementById('statViewRateChange').className = 'stat-card__change stat-card__change--negative';
+                
+                document.getElementById('statLikeRate').textContent = '-';
+                document.getElementById('statLikeRateChange').textContent = 'Error loading';
+                document.getElementById('statLikeRateChange').className = 'stat-card__change stat-card__change--negative';
             }
         }
 
