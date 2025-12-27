@@ -99,6 +99,9 @@
                 </button>
                 <h1 class="topbar__title">Dashboard</h1>
                 <div class="topbar__actions">
+                    <button class="btn btn-secondary" onclick="loadDashboardData()" title="Refresh Dashboard Data" style="padding: 0 16px;">
+                        🔄 Refresh
+                    </button>
                     <button class="btn btn-secondary" onclick="window.location.href='add-property.html'" title="Add New Property">
                         ➕ Add Property
                     </button>
@@ -244,6 +247,28 @@
                 .catch(err => console.log('SW failed:', err));
         }
 
+        // Helper function to check if all components are ready
+        function areComponentsReady() {
+            const checks = {
+                supabase: typeof supabase !== 'undefined',
+                DataSync: typeof DataSync !== 'undefined',
+                SupabaseClient: typeof SupabaseClient !== 'undefined',
+                supabaseInit: SupabaseClient && SupabaseClient.initialized,
+                domReady: document.readyState === 'complete' || document.readyState === 'interactive'
+            };
+            
+            console.log('📋 Components readiness check:', checks);
+            
+            const allReady = Object.values(checks).every(v => v === true);
+            if (!allReady) {
+                const missing = Object.entries(checks)
+                    .filter(([k, v]) => !v)
+                    .map(([k]) => k);
+                console.warn('⚠️ Not ready yet. Missing:', missing.join(', '));
+            }
+            return allReady;
+        }
+
         // Check authentication
         async function checkAuth() {
             console.log('🔍 Checking authentication...');
@@ -296,7 +321,7 @@
                 
                 // Try to initialize, with retry if needed
                 if (!initSupabase()) {
-                    console.log('⏳ Waiting for Supabase library to load (retry in 500ms)...');
+                    console.log('⏳ Waiting for Supabase library to load (retry in 800ms)...');
                     // Wait a bit and try again
                     setTimeout(() => {
                         if (!initSupabase()) {
@@ -304,11 +329,14 @@
                             console.error('Check that CDN script loaded: https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
                         } else {
                             console.log('✅ Supabase initialized after retry:', !!SupabaseClient.client);
-                            // Load dashboard data after successful retry
-                            console.log('🚀 Calling loadDashboardData() after retry...');
-                            loadDashboardData();
+                            // Load dashboard data after successful retry with additional delay
+                            console.log('⏳ Scheduling loadDashboardData() after retry (400ms additional delay)...');
+                            setTimeout(() => {
+                                console.log('🚀 Calling loadDashboardData() after retry...');
+                                loadDashboardData();
+                            }, 400); // Additional 400ms after retry
                         }
-                    }, 500); // Wait 500ms for scripts to load
+                    }, 800); // Wait 800ms for scripts to load
                     return; // Exit early, will continue in setTimeout
                 }
                 
@@ -318,10 +346,25 @@
                 console.log('🔧 Checking DataSync availability...', typeof DataSync);
                 console.log('🔧 Checking SupabaseClient availability...', typeof SupabaseClient);
 
-                // Load dashboard data
-                console.log('🚀 Calling loadDashboardData()...');
-                loadDashboardData();
-                console.log('✅ loadDashboardData() called (async, will complete later)');
+                // Load dashboard data with delay to ensure all libraries are ready
+                // This fixes the issue where data doesn't appear until manual call
+                console.log('⏳ Scheduling loadDashboardData() with 800ms delay...');
+                setTimeout(() => {
+                    // Double-check that all components are ready
+                    if (areComponentsReady()) {
+                        console.log('🚀 Now calling loadDashboardData()...');
+                        loadDashboardData();
+                        console.log('✅ loadDashboardData() called (async, will complete later)');
+                    } else {
+                        console.error('❌ Components still not ready after 800ms delay');
+                        // Try one more time with longer delay
+                        console.log('⏳ Attempting final retry in 1200ms...');
+                        setTimeout(() => {
+                            console.log('🚀 Final attempt to call loadDashboardData()...');
+                            loadDashboardData();
+                        }, 1200);
+                    }
+                }, 800); // 800ms delay ensures all libraries are fully loaded
             } catch (e) {
                 console.error('❌ Invalid session data:', e);
                 localStorage.removeItem('broker_session');
