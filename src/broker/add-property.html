@@ -345,8 +345,12 @@
                 <div class="form-grid">
                     <div class="form-group">
                         <label for="location" class="required">Город/Район</label>
-                        <input type="text" id="location" name="location" required 
-                               placeholder="Например: Лимассол">
+                        <select id="location" name="location" required onchange="handleLocationChange()">
+                            <option value="">Загрузка городов...</option>
+                        </select>
+                        <span class="info-text" style="display: block; margin-top: 5px; color: #666; font-size: 0.875rem;">
+                            Выберите из списка существующих городов
+                        </span>
                     </div>
 
                     <div class="form-group">
@@ -510,6 +514,91 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
+        // Загрузка списка городов из базы данных
+        async function loadCities() {
+            console.log('📍 Loading cities from database...');
+            const locationSelect = document.getElementById('location');
+            
+            try {
+                if (!window.supabaseClient) {
+                    console.error('❌ Supabase client not available');
+                    locationSelect.innerHTML = '<option value="">Ошибка загрузки городов</option>';
+                    return;
+                }
+                
+                // Получаем уникальные города из таблицы properties
+                const { data, error } = await window.supabaseClient
+                    .from('properties')
+                    .select('location')
+                    .not('location', 'is', null)
+                    .order('location');
+                
+                if (error) {
+                    console.error('❌ Error loading cities:', error);
+                    locationSelect.innerHTML = '<option value="">Ошибка загрузки</option>';
+                    return;
+                }
+                
+                // Получаем уникальные значения
+                const uniqueCities = [...new Set(data.map(item => item.location))].sort();
+                
+                console.log(`✅ Loaded ${uniqueCities.length} cities:`, uniqueCities);
+                
+                // Заполняем select
+                locationSelect.innerHTML = '<option value="">Выберите город/район</option>';
+                
+                uniqueCities.forEach(city => {
+                    const option = document.createElement('option');
+                    option.value = city;
+                    option.textContent = city;
+                    locationSelect.appendChild(option);
+                });
+                
+                // Добавляем опцию "Другое" в конце
+                const otherOption = document.createElement('option');
+                otherOption.value = 'other';
+                otherOption.textContent = '➕ Добавить новый город';
+                otherOption.style.fontWeight = 'bold';
+                otherOption.style.color = '#6366f1';
+                locationSelect.appendChild(otherOption);
+                
+                console.log('✅ Cities dropdown populated');
+                
+            } catch (error) {
+                console.error('❌ Error in loadCities:', error);
+                locationSelect.innerHTML = '<option value="">Ошибка: обновите страницу</option>';
+            }
+        }
+        
+        // Обработчик выбора "Другое" в городах
+        function handleLocationChange() {
+            const locationSelect = document.getElementById('location');
+            const selectedValue = locationSelect.value;
+            
+            if (selectedValue === 'other') {
+                const newCity = prompt('Введите название нового города/района:');
+                
+                if (newCity && newCity.trim()) {
+                    // Добавляем новый город в список
+                    const option = document.createElement('option');
+                    option.value = newCity.trim();
+                    option.textContent = newCity.trim();
+                    
+                    // Вставляем перед "Другое"
+                    const otherOption = locationSelect.querySelector('option[value="other"]');
+                    locationSelect.insertBefore(option, otherOption);
+                    
+                    // Выбираем новый город
+                    locationSelect.value = newCity.trim();
+                    
+                    console.log(`✅ Added new city: ${newCity.trim()}`);
+                } else {
+                    // Сбрасываем выбор
+                    locationSelect.value = '';
+                }
+            }
+        }
+        
         // Инициализация карты
         let map, marker;
         
@@ -944,6 +1033,11 @@
             setTimeout(() => {
                 initMap();
             }, 100);
+            
+            // Загружаем города (параллельно)
+            setTimeout(() => {
+                loadCities();
+            }, 200);
             
             // Проверка авторизации (параллельно) - НЕ блокирует карту
             try {
