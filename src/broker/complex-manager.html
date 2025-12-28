@@ -1,0 +1,756 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Управление комплексами - Cyprus Real Estate</title>
+    <link rel="stylesheet" href="../assets/css/global.css">
+    <style>
+        .page-header {
+            background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+            color: white;
+            padding: 2rem;
+            margin-bottom: 2rem;
+            border-radius: 12px;
+        }
+
+        .page-header h1 {
+            margin: 0 0 0.5rem 0;
+            font-size: 2rem;
+        }
+
+        .page-header p {
+            margin: 0;
+            opacity: 0.9;
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        @media (max-width: 968px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        }
+
+        .card h2 {
+            margin: 0 0 1.5rem 0;
+            color: #1f2937;
+            font-size: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            color: #374151;
+            font-weight: 500;
+        }
+
+        .form-group label .required {
+            color: #ef4444;
+        }
+
+        .form-group input,
+        .form-group textarea {
+            width: 100%;
+            padding: 0.75rem;
+            border: 1px solid #d1d5db;
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group textarea:focus {
+            outline: none;
+            border-color: #6366f1;
+            box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.1);
+        }
+
+        .form-group textarea {
+            min-height: 100px;
+            resize: vertical;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 1rem;
+            margin-top: 1.5rem;
+        }
+
+        .btn {
+            padding: 0.75rem 1.5rem;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            font-weight: 500;
+        }
+
+        .btn-primary {
+            background: #6366f1;
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4f46e5;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(99, 102, 241, 0.3);
+        }
+
+        .btn-secondary {
+            background: #e5e7eb;
+            color: #374151;
+        }
+
+        .btn-secondary:hover {
+            background: #d1d5db;
+        }
+
+        .btn-danger {
+            background: #ef4444;
+            color: white;
+        }
+
+        .btn-danger:hover {
+            background: #dc2626;
+        }
+
+        .btn-sm {
+            padding: 0.5rem 1rem;
+            font-size: 0.875rem;
+        }
+
+        .complex-list {
+            max-height: 600px;
+            overflow-y: auto;
+        }
+
+        .complex-item {
+            background: #f9fafb;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            padding: 1rem;
+            margin-bottom: 1rem;
+            transition: all 0.3s;
+        }
+
+        .complex-item:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            transform: translateX(4px);
+        }
+
+        .complex-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: start;
+            margin-bottom: 0.75rem;
+        }
+
+        .complex-code {
+            background: #6366f1;
+            color: white;
+            padding: 0.25rem 0.75rem;
+            border-radius: 6px;
+            font-weight: 600;
+            font-size: 0.875rem;
+        }
+
+        .complex-name {
+            font-weight: 600;
+            color: #1f2937;
+            margin-bottom: 0.25rem;
+        }
+
+        .complex-developer {
+            color: #6b7280;
+            font-size: 0.875rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .complex-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+            padding-top: 0.75rem;
+            border-top: 1px solid #e5e7eb;
+        }
+
+        .detail-item {
+            font-size: 0.875rem;
+            color: #6b7280;
+        }
+
+        .detail-item strong {
+            color: #374151;
+        }
+
+        .complex-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 3rem 1rem;
+            color: #6b7280;
+        }
+
+        .empty-state svg {
+            width: 64px;
+            height: 64px;
+            margin-bottom: 1rem;
+            opacity: 0.5;
+        }
+
+        .toast {
+            position: fixed;
+            bottom: 2rem;
+            right: 2rem;
+            background: white;
+            padding: 1rem 1.5rem;
+            border-radius: 8px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            z-index: 1000;
+            animation: slideIn 0.3s ease-out;
+        }
+
+        @keyframes slideIn {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        .toast.success {
+            border-left: 4px solid #10b981;
+        }
+
+        .toast.error {
+            border-left: 4px solid #ef4444;
+        }
+
+        .loading {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #f3f4f6;
+            border-top-color: #6366f1;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: white;
+            border-radius: 12px;
+            padding: 1.5rem;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+            text-align: center;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #6366f1;
+            margin-bottom: 0.25rem;
+        }
+
+        .stat-label {
+            color: #6b7280;
+            font-size: 0.875rem;
+        }
+    </style>
+</head>
+<body>
+    <div class="layout">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar__header">
+                <div class="sidebar__logo">🏢 Cyprus RE</div>
+            </div>
+            <nav class="sidebar__nav">
+                <a href="dashboard.html" class="sidebar__link">
+                    <span class="sidebar__icon">📊</span>
+                    <span class="sidebar__text">Dashboard</span>
+                </a>
+                <a href="selections.html" class="sidebar__link">
+                    <span class="sidebar__icon">⭐</span>
+                    <span class="sidebar__text">Selections</span>
+                </a>
+                <a href="properties.html" class="sidebar__link">
+                    <span class="sidebar__icon">🏠</span>
+                    <span class="sidebar__text">Properties</span>
+                </a>
+                <a href="complex-manager.html" class="sidebar__link sidebar__link--active">
+                    <span class="sidebar__icon">🏗️</span>
+                    <span class="sidebar__text">Комплексы</span>
+                </a>
+            </nav>
+            <div class="sidebar__footer">
+                <div class="user-info">
+                    <div class="user-avatar">👤</div>
+                    <div class="user-details">
+                        <div class="user-name">Broker</div>
+                        <div class="user-role">Real Estate Agent</div>
+                    </div>
+                </div>
+                <button class="btn-logout" onclick="logout()">Выход</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Topbar -->
+            <header class="topbar">
+                <button class="mobile-menu-btn" id="menuBtn" onclick="toggleMobileMenu()">
+                    <span></span>
+                    <span></span>
+                    <span></span>
+                </button>
+                <h1 class="topbar__title">Управление комплексами</h1>
+            </header>
+
+            <!-- Page Header -->
+            <div class="page-header">
+                <h1>🏗️ Управление информацией о комплексах</h1>
+                <p>Добавляйте и редактируйте информацию о застройщиках и комплексах</p>
+            </div>
+
+            <!-- Stats -->
+            <div class="stats-grid">
+                <div class="stat-card">
+                    <div class="stat-value" id="totalComplexes">0</div>
+                    <div class="stat-label">Всего комплексов</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="totalDevelopers">0</div>
+                    <div class="stat-label">Застройщиков</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-value" id="addedThisMonth">0</div>
+                    <div class="stat-label">Добавлено в этом месяце</div>
+                </div>
+            </div>
+
+            <!-- Content Grid -->
+            <div class="content-grid">
+                <!-- Form Card -->
+                <div class="card">
+                    <h2>
+                        <span id="formTitle">➕ Добавить комплекс</span>
+                    </h2>
+                    <form id="complexForm">
+                        <input type="hidden" id="editingId">
+                        
+                        <div class="form-group">
+                            <label for="objectCode">
+                                Код объекта <span class="required">*</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                id="objectCode" 
+                                placeholder="Например: BB-6122, A100, K48"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="complexName">
+                                Название комплекса <span class="required">*</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                id="complexName" 
+                                placeholder="Официальное название комплекса"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="developerName">
+                                Застройщик <span class="required">*</span>
+                            </label>
+                            <input 
+                                type="text" 
+                                id="developerName" 
+                                placeholder="Название застройщика"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="phone">
+                                Телефон <span class="required">*</span>
+                            </label>
+                            <input 
+                                type="tel" 
+                                id="phone" 
+                                placeholder="+357 25 123456"
+                                required
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="email">Email</label>
+                            <input 
+                                type="email" 
+                                id="email" 
+                                placeholder="info@developer.com"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="website">Веб-сайт</label>
+                            <input 
+                                type="url" 
+                                id="website" 
+                                placeholder="https://developer.com"
+                            >
+                        </div>
+
+                        <div class="form-group">
+                            <label for="address">Адрес</label>
+                            <textarea 
+                                id="address" 
+                                placeholder="Адрес комплекса"
+                            ></textarea>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="notes">Дополнительные заметки</label>
+                            <textarea 
+                                id="notes" 
+                                placeholder="Любая дополнительная информация"
+                            ></textarea>
+                        </div>
+
+                        <div class="form-actions">
+                            <button type="submit" class="btn btn-primary" id="submitBtn">
+                                <span id="submitText">💾 Сохранить</span>
+                            </button>
+                            <button type="button" class="btn btn-secondary" onclick="resetForm()">
+                                🔄 Очистить
+                            </button>
+                        </div>
+                    </form>
+                </div>
+
+                <!-- List Card -->
+                <div class="card">
+                    <h2>📋 Список комплексов</h2>
+                    <div class="complex-list" id="complexList">
+                        <div class="empty-state">
+                            <div class="loading"></div>
+                            <p>Загрузка данных...</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <script src="../assets/js/supabase-client.js"></script>
+    <script>
+        let complexes = [];
+        let editingComplex = null;
+
+        // Initialize
+        async function init() {
+            console.log('🚀 Initializing Complex Manager...');
+            
+            // Check authentication
+            const session = localStorage.getItem('broker_session');
+            if (!session) {
+                window.location.href = 'login.html?from=complex-manager';
+                return;
+            }
+
+            // Initialize Supabase
+            await new Promise(resolve => setTimeout(resolve, 500)); // Wait for library
+            SupabaseClient.init();
+
+            // Load data
+            await loadComplexes();
+            updateStats();
+        }
+
+        // Load all complexes
+        async function loadComplexes() {
+            try {
+                console.log('📥 Loading complexes...');
+                
+                const { data, error } = await SupabaseClient.client
+                    .from('complex_info')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) {
+                    console.error('❌ Error loading complexes:', error);
+                    showToast('Ошибка загрузки данных', 'error');
+                    return;
+                }
+
+                complexes = data || [];
+                console.log('✅ Loaded complexes:', complexes.length);
+                renderComplexList();
+            } catch (e) {
+                console.error('❌ Exception loading complexes:', e);
+                showToast('Ошибка загрузки данных', 'error');
+            }
+        }
+
+        // Render complex list
+        function renderComplexList() {
+            const listEl = document.getElementById('complexList');
+            
+            if (complexes.length === 0) {
+                listEl.innerHTML = `
+                    <div class="empty-state">
+                        <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" 
+                                d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4" />
+                        </svg>
+                        <p>Пока нет добавленных комплексов</p>
+                        <p style="font-size: 0.875rem; margin-top: 0.5rem;">Используйте форму слева для добавления первого комплекса</p>
+                    </div>
+                `;
+                return;
+            }
+
+            listEl.innerHTML = complexes.map(complex => `
+                <div class="complex-item">
+                    <div class="complex-header">
+                        <div>
+                            <div class="complex-code">${complex.object_code}</div>
+                        </div>
+                        <div class="complex-actions">
+                            <button class="btn btn-secondary btn-sm" onclick="editComplex('${complex.id}')">
+                                ✏️ Изменить
+                            </button>
+                            <button class="btn btn-danger btn-sm" onclick="deleteComplex('${complex.id}', '${complex.object_code}')">
+                                🗑️
+                            </button>
+                        </div>
+                    </div>
+                    <div class="complex-name">${complex.complex_name || 'Без названия'}</div>
+                    <div class="complex-developer">🏢 ${complex.developer_name || 'Не указан'}</div>
+                    <div class="complex-details">
+                        ${complex.phone ? `<div class="detail-item">📞 ${complex.phone}</div>` : ''}
+                        ${complex.email ? `<div class="detail-item">📧 ${complex.email}</div>` : ''}
+                        ${complex.website ? `<div class="detail-item">🌐 <a href="${complex.website}" target="_blank">Сайт</a></div>` : ''}
+                        ${complex.address ? `<div class="detail-item">📍 ${complex.address}</div>` : ''}
+                    </div>
+                    ${complex.notes ? `
+                        <div style="margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #e5e7eb;">
+                            <small style="color: #6b7280;">${complex.notes}</small>
+                        </div>
+                    ` : ''}
+                </div>
+            `).join('');
+        }
+
+        // Handle form submit
+        document.getElementById('complexForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const submitBtn = document.getElementById('submitBtn');
+            const submitText = document.getElementById('submitText');
+            const originalText = submitText.textContent;
+            
+            submitBtn.disabled = true;
+            submitText.innerHTML = '<span class="loading"></span> Сохранение...';
+
+            try {
+                const session = JSON.parse(localStorage.getItem('broker_session'));
+                const formData = {
+                    object_code: document.getElementById('objectCode').value.trim(),
+                    complex_name: document.getElementById('complexName').value.trim(),
+                    developer_name: document.getElementById('developerName').value.trim(),
+                    phone: document.getElementById('phone').value.trim(),
+                    email: document.getElementById('email').value.trim() || null,
+                    website: document.getElementById('website').value.trim() || null,
+                    address: document.getElementById('address').value.trim() || null,
+                    notes: document.getElementById('notes').value.trim() || null,
+                };
+
+                const editingId = document.getElementById('editingId').value;
+
+                if (editingId) {
+                    // Update existing
+                    formData.updated_by = session.email;
+                    
+                    const { error } = await SupabaseClient.client
+                        .from('complex_info')
+                        .update(formData)
+                        .eq('id', editingId);
+
+                    if (error) throw error;
+                    showToast('✅ Комплекс обновлен', 'success');
+                } else {
+                    // Create new
+                    formData.created_by = session.email;
+                    
+                    const { error } = await SupabaseClient.client
+                        .from('complex_info')
+                        .insert([formData]);
+
+                    if (error) throw error;
+                    showToast('✅ Комплекс добавлен', 'success');
+                }
+
+                resetForm();
+                await loadComplexes();
+                updateStats();
+
+            } catch (error) {
+                console.error('❌ Error saving:', error);
+                if (error.code === '23505') {
+                    showToast('❌ Комплекс с таким кодом уже существует', 'error');
+                } else {
+                    showToast('❌ Ошибка сохранения: ' + error.message, 'error');
+                }
+            } finally {
+                submitBtn.disabled = false;
+                submitText.textContent = originalText;
+            }
+        });
+
+        // Edit complex
+        function editComplex(id) {
+            const complex = complexes.find(c => c.id === id);
+            if (!complex) return;
+
+            document.getElementById('formTitle').textContent = '✏️ Редактировать комплекс';
+            document.getElementById('editingId').value = id;
+            document.getElementById('objectCode').value = complex.object_code;
+            document.getElementById('complexName').value = complex.complex_name || '';
+            document.getElementById('developerName').value = complex.developer_name || '';
+            document.getElementById('phone').value = complex.phone || '';
+            document.getElementById('email').value = complex.email || '';
+            document.getElementById('website').value = complex.website || '';
+            document.getElementById('address').value = complex.address || '';
+            document.getElementById('notes').value = complex.notes || '';
+            document.getElementById('submitText').textContent = '💾 Обновить';
+
+            // Scroll to form
+            document.getElementById('complexForm').scrollIntoView({ behavior: 'smooth' });
+        }
+
+        // Delete complex
+        async function deleteComplex(id, code) {
+            if (!confirm(`Удалить комплекс ${code}?`)) return;
+
+            try {
+                const { error } = await SupabaseClient.client
+                    .from('complex_info')
+                    .delete()
+                    .eq('id', id);
+
+                if (error) throw error;
+
+                showToast('✅ Комплекс удален', 'success');
+                await loadComplexes();
+                updateStats();
+            } catch (error) {
+                console.error('❌ Error deleting:', error);
+                showToast('❌ Ошибка удаления', 'error');
+            }
+        }
+
+        // Reset form
+        function resetForm() {
+            document.getElementById('complexForm').reset();
+            document.getElementById('editingId').value = '';
+            document.getElementById('formTitle').textContent = '➕ Добавить комплекс';
+            document.getElementById('submitText').textContent = '💾 Сохранить';
+        }
+
+        // Update statistics
+        function updateStats() {
+            const total = complexes.length;
+            const developers = new Set(complexes.map(c => c.developer_name)).size;
+            
+            const now = new Date();
+            const thisMonth = complexes.filter(c => {
+                const created = new Date(c.created_at);
+                return created.getMonth() === now.getMonth() && 
+                       created.getFullYear() === now.getFullYear();
+            }).length;
+
+            document.getElementById('totalComplexes').textContent = total;
+            document.getElementById('totalDevelopers').textContent = developers;
+            document.getElementById('addedThisMonth').textContent = thisMonth;
+        }
+
+        // Show toast notification
+        function showToast(message, type = 'success') {
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <span>${type === 'success' ? '✅' : '❌'}</span>
+                <span>${message}</span>
+            `;
+            document.body.appendChild(toast);
+
+            setTimeout(() => {
+                toast.style.animation = 'slideIn 0.3s ease-out reverse';
+                setTimeout(() => toast.remove(), 300);
+            }, 3000);
+        }
+
+        // Logout
+        function logout() {
+            localStorage.removeItem('broker_session');
+            window.location.href = 'login.html';
+        }
+
+        // Mobile menu toggle
+        function toggleMobileMenu() {
+            document.getElementById('sidebar').classList.toggle('sidebar--open');
+        }
+
+        // Initialize on load
+        window.addEventListener('DOMContentLoaded', init);
+    </script>
+</body>
+</html>
