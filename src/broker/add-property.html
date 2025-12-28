@@ -504,8 +504,12 @@
         </form>
     </div>
 
+    <!-- Data loading scripts (same as properties.html) -->
+    <script src="../assets/js/data-sync.js"></script>
+    <script src="../assets/js/mock-data.js"></script>
+    
     <!-- Подключение Supabase -->
-    <script src="../assets/js/supabase-client.js"></script>
+    <parameter name="../assets/js/supabase-client.js"></script>
     
     <!-- Image Compression Library -->
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
@@ -514,9 +518,9 @@
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
-        // Загрузка списка городов из CSV файла base.csv
+        // Загрузка списка городов - использует ту же логику что и в properties.html
         async function loadCities() {
-            console.log('📍 Loading cities from CSV file base.csv...');
+            console.log('📍 Loading cities from PropertyData...');
             const locationSelect = document.getElementById('location');
             
             if (!locationSelect) {
@@ -525,60 +529,22 @@
             }
             
             try {
-                // Загружаем CSV файл
-                console.log('📂 Fetching base.csv...');
-                const response = await fetch('../base.csv');
-                
-                if (!response.ok) {
-                    throw new Error(`HTTP error! status: ${response.status}`);
+                // Загружаем данные если ещё не загружены
+                if (!DataSync.isLoaded()) {
+                    console.log('📂 Loading CSV data...');
+                    await DataSync.autoSync();
                 }
                 
-                const csvText = await response.text();
-                console.log('✅ CSV file loaded, size:', csvText.length, 'bytes');
+                // Получаем опции фильтров (включая locations)
+                const options = PropertyData.getFilterOptions();
+                const cities = options.locations;
                 
-                // Парсим CSV
-                console.log('📊 Parsing CSV...');
-                const lines = csvText.split('\n');
-                const headers = lines[0].split(',');
+                console.log(`✅ Loaded ${cities.length} unique cities:`, cities);
                 
-                console.log('📋 Headers:', headers);
-                
-                // Находим индекс столбца Location
-                const locationIndex = headers.findIndex(h => h.trim() === 'Location');
-                
-                if (locationIndex === -1) {
-                    throw new Error('Column "Location" not found in CSV');
-                }
-                
-                console.log(`✅ Found "Location" column at index ${locationIndex}`);
-                
-                // Извлекаем все значения из столбца Location
-                const locations = [];
-                for (let i = 1; i < lines.length; i++) {
-                    const line = lines[i].trim();
-                    if (!line) continue; // Пропускаем пустые строки
+                if (cities.length === 0) {
+                    console.warn('⚠️ No cities found in data');
+                    locationSelect.innerHTML = '<option value="">Нет городов</option>';
                     
-                    // Простой парсинг CSV (для более сложных случаев можно использовать PapaParse)
-                    const columns = line.split(',');
-                    const location = columns[locationIndex];
-                    
-                    if (location && location.trim() && location !== 'Location') {
-                        locations.push(location.trim());
-                    }
-                }
-                
-                console.log(`📊 Found ${locations.length} location entries`);
-                
-                // Получаем уникальные значения и сортируем
-                const uniqueCities = [...new Set(locations)].sort();
-                
-                console.log(`✅ Loaded ${uniqueCities.length} unique cities from CSV:`, uniqueCities);
-                
-                if (uniqueCities.length === 0) {
-                    console.warn('⚠️ No cities found in CSV file');
-                    locationSelect.innerHTML = '<option value="">Нет городов в CSV</option>';
-                    
-                    // Добавляем только опцию "Другое"
                     const otherOption = document.createElement('option');
                     otherOption.value = 'other';
                     otherOption.textContent = '➕ Добавить первый город';
@@ -591,7 +557,7 @@
                 // Заполняем select
                 locationSelect.innerHTML = '<option value="">Выберите город/район</option>';
                 
-                uniqueCities.forEach(city => {
+                cities.forEach(city => {
                     const option = document.createElement('option');
                     option.value = city;
                     option.textContent = city;
