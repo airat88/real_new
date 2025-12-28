@@ -28,6 +28,36 @@
         .property-body {padding: 1rem;}
         .property-title {font-weight: 600; margin-bottom: 0.5rem; font-size: 0.875rem;}
         .property-details {display: flex; gap: 0.5rem; font-size: 0.75rem; color: #64748b;}
+        
+        /* Message styles */
+        .info-message {
+            padding: 1rem;
+            border-radius: 8px;
+            margin-bottom: 1rem;
+            font-size: 0.875rem;
+            animation: slideIn 0.3s ease;
+        }
+        
+        .info-message.editing {
+            background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+            color: white;
+        }
+        
+        .info-message.new {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+            color: white;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(-10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
     </style>
 </head>
 <body>
@@ -185,13 +215,154 @@
             
             console.log('✅ Dropdown populated');
             
-            select.addEventListener('change', e => {
+            select.addEventListener('change', async e => {
                 if (e.target.value) {
+                    await loadComplexData(e.target.value);
                     showPreview(e.target.value);
                 } else {
+                    clearForm();
                     clearPreview();
                 }
             });
+        }
+
+        // Load existing complex data from Supabase
+        async function loadComplexData(code) {
+            console.log('🔍 Checking for existing data for code:', code);
+            
+            if (typeof SupabaseClient === 'undefined' || !SupabaseClient.client) {
+                console.log('⚠️ Supabase not available');
+                return;
+            }
+            
+            try {
+                SupabaseClient.init();
+                
+                const { data, error } = await SupabaseClient.client
+                    .from('complex_info')
+                    .select('*')
+                    .eq('object_code', code)
+                    .single();
+                
+                if (error) {
+                    if (error.code === 'PGRST116') {
+                        // No data found - this is ok, new entry
+                        console.log('ℹ️ No existing data for this code');
+                        clearForm();
+                        showNewEntryMessage();
+                    } else {
+                        console.error('Error loading complex data:', error);
+                    }
+                    return;
+                }
+                
+                if (data) {
+                    console.log('✅ Found existing data:', data);
+                    fillFormWithData(data);
+                    showEditingMessage(data);
+                }
+                
+            } catch (e) {
+                console.log('No existing data:', e);
+                clearForm();
+                showNewEntryMessage();
+            }
+        }
+
+        // Fill form with existing data
+        function fillFormWithData(data) {
+            document.getElementById('complexName').value = data.complex_name || '';
+            document.getElementById('developer').value = data.developer_name || '';
+            document.getElementById('phone').value = data.phone || '';
+            document.getElementById('email').value = data.email || '';
+            document.getElementById('website').value = data.website || '';
+            
+            // Store the ID for update
+            document.getElementById('objectCode').dataset.existingId = data.id;
+            
+            // Update button text
+            const submitBtn = document.querySelector('.btn-primary');
+            submitBtn.textContent = '✏️ Обновить данные';
+            submitBtn.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+        }
+
+        // Show editing message
+        function showEditingMessage(data) {
+            let messageDiv = document.getElementById('existingDataMessage');
+            if (!messageDiv) {
+                messageDiv = document.createElement('div');
+                messageDiv.id = 'existingDataMessage';
+                messageDiv.style.cssText = `
+                    background: linear-gradient(135deg, #f59e0b 0%, #d97706 100%);
+                    color: white;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    margin-bottom: 1rem;
+                    font-size: 0.875rem;
+                `;
+                document.querySelector('.form-card h2').after(messageDiv);
+            }
+            
+            messageDiv.innerHTML = `
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">✏️ Редактирование существующих данных</div>
+                <div style="opacity: 0.9;">
+                    Комплекс: <strong>${data.complex_name || 'Не указан'}</strong><br>
+                    Застройщик: <strong>${data.developer_name || 'Не указан'}</strong><br>
+                    <small>Измените поля и нажмите "Обновить данные"</small>
+                </div>
+            `;
+        }
+
+        // Show new entry message
+        function showNewEntryMessage() {
+            let messageDiv = document.getElementById('existingDataMessage');
+            if (!messageDiv) {
+                messageDiv = document.createElement('div');
+                messageDiv.id = 'existingDataMessage';
+                messageDiv.style.cssText = `
+                    background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+                    color: white;
+                    padding: 1rem;
+                    border-radius: 8px;
+                    margin-bottom: 1rem;
+                    font-size: 0.875rem;
+                `;
+                document.querySelector('.form-card h2').after(messageDiv);
+            }
+            
+            messageDiv.innerHTML = `
+                <div style="font-weight: 600; margin-bottom: 0.5rem;">➕ Новый комплекс</div>
+                <div style="opacity: 0.9;">
+                    Для этого кода пока нет данных. Заполните форму чтобы добавить информацию.
+                </div>
+            `;
+            
+            // Reset button
+            const submitBtn = document.querySelector('.btn-primary');
+            submitBtn.textContent = '💾 Сохранить';
+            submitBtn.style.background = 'linear-gradient(135deg, #6366f1, #8b5cf6)';
+        }
+
+        // Clear form
+        function clearForm() {
+            document.getElementById('complexName').value = '';
+            document.getElementById('developer').value = '';
+            document.getElementById('phone').value = '';
+            document.getElementById('email').value = '';
+            document.getElementById('website').value = '';
+            
+            delete document.getElementById('objectCode').dataset.existingId;
+            
+            // Remove message if exists
+            const messageDiv = document.getElementById('existingDataMessage');
+            if (messageDiv) {
+                messageDiv.remove();
+            }
+            
+            // Reset button
+            const submitBtn = document.querySelector('.btn-primary');
+            submitBtn.textContent = '💾 Сохранить';
+            submitBtn.style.background = 'linear-gradient(135deg, #6366f1, #8b5cf6)';
         }
 
         function showPreview(code) {
@@ -246,6 +417,9 @@
                 return;
             }
             
+            const existingId = document.getElementById('objectCode').dataset.existingId;
+            const isUpdate = !!existingId;
+            
             const formData = {
                 object_code: document.getElementById('objectCode').value,
                 complex_name: document.getElementById('complexName').value,
@@ -253,25 +427,56 @@
                 phone: document.getElementById('phone').value,
                 email: document.getElementById('email').value || null,
                 website: document.getElementById('website').value || null,
-                created_by: 'broker'
             };
             
             try {
                 SupabaseClient.init();
                 
-                const { error } = await SupabaseClient.client
-                    .from('complex_info')
-                    .insert([formData]);
+                let error;
+                
+                if (isUpdate) {
+                    // Update existing record
+                    console.log('Updating existing complex:', existingId);
+                    const result = await SupabaseClient.client
+                        .from('complex_info')
+                        .update(formData)
+                        .eq('id', existingId);
+                    error = result.error;
+                    
+                    if (!error) {
+                        alert('✅ Данные обновлены!');
+                    }
+                } else {
+                    // Insert new record
+                    console.log('Creating new complex');
+                    formData.created_by = 'broker';
+                    const result = await SupabaseClient.client
+                        .from('complex_info')
+                        .insert([formData]);
+                    error = result.error;
+                    
+                    if (!error) {
+                        alert('✅ Комплекс добавлен!');
+                    }
+                }
                 
                 if (error) throw error;
                 
-                alert('✅ Комплекс сохранён!');
+                // Reset form
                 document.getElementById('complexForm').reset();
+                clearForm();
                 clearPreview();
+                
+                // Reset dropdown
+                document.getElementById('objectCode').value = '';
                 
             } catch (error) {
                 console.error('Error:', error);
-                alert('❌ Ошибка сохранения: ' + error.message);
+                if (error.code === '23505') {
+                    alert('❌ Комплекс с таким кодом уже существует!');
+                } else {
+                    alert('❌ Ошибка: ' + error.message);
+                }
             }
         });
 
