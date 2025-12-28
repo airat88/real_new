@@ -2213,7 +2213,7 @@
         let currentModalPhotos = [];
         let currentPhotoIndex = 0;
 
-        function openPropertyModal(id) {
+        async function openPropertyModal(id) {
             event.stopPropagation();
             const property = allProperties.find(p => p.id === id);
             if (!property) return;
@@ -2232,6 +2232,25 @@
 
             // Parse features
             const features = property.features ? property.features.split(/[,;]/).map(f => f.trim()).filter(f => f) : [];
+
+            // Load complex info from Supabase
+            let complexInfo = null;
+            if (property.object && SupabaseClient && SupabaseClient.client) {
+                try {
+                    const { data, error } = await SupabaseClient.client
+                        .from('complex_info')
+                        .select('*')
+                        .eq('object_code', property.object)
+                        .single();
+                    
+                    if (!error && data) {
+                        complexInfo = data;
+                        console.log('✅ Loaded complex info:', complexInfo);
+                    }
+                } catch (e) {
+                    console.log('No complex info found for', property.object);
+                }
+            }
 
             // Build gallery HTML
             const showNav = currentModalPhotos.length > 1;
@@ -2267,17 +2286,41 @@
                 <div class="property-detail__location">📍 ${property.location || 'Unknown'} ${property.type ? `• ${property.type}` : ''}</div>
                 
                 ${(() => {
-                    // Get broker phone from localStorage or default
-                    const brokerPhone = localStorage.getItem('broker_phone') || '+357 99 123456';
-                    const brokerName = localStorage.getItem('broker_name') || 'Broker';
-                    
-                    return `
-                    <div style="margin-top: 16px;">
-                        <a href="tel:${brokerPhone}" class="btn btn-primary" style="text-decoration: none; display: inline-block; padding: 12px 24px;">
-                            📞 Contact Broker: ${brokerPhone}
-                        </a>
-                    </div>
-                    `;
+                    if (complexInfo) {
+                        // Show developer/complex information
+                        return `
+                        <div style="margin-top: 16px; padding: 16px; background: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%); border-radius: 12px; color: white;">
+                            <div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 8px;">🏗️ Застройщик</div>
+                            <div style="font-weight: 700; font-size: 1.125rem; margin-bottom: 4px;">${complexInfo.developer_name || 'Не указан'}</div>
+                            ${complexInfo.complex_name ? `<div style="font-size: 0.875rem; opacity: 0.9; margin-bottom: 8px;">Комплекс: ${complexInfo.complex_name}</div>` : ''}
+                            <a href="tel:${complexInfo.phone}" class="btn" style="margin-top: 12px; background: white; color: #6366f1; text-decoration: none; display: inline-block; padding: 10px 20px; border-radius: 8px; font-weight: 600;">
+                                📞 ${complexInfo.phone}
+                            </a>
+                            ${complexInfo.email ? `
+                                <div style="margin-top: 8px; font-size: 0.875rem;">
+                                    📧 <a href="mailto:${complexInfo.email}" style="color: white; text-decoration: underline;">${complexInfo.email}</a>
+                                </div>
+                            ` : ''}
+                            ${complexInfo.website ? `
+                                <div style="margin-top: 8px; font-size: 0.875rem;">
+                                    🌐 <a href="${complexInfo.website}" target="_blank" style="color: white; text-decoration: underline;">Веб-сайт</a>
+                                </div>
+                            ` : ''}
+                        </div>
+                        `;
+                    } else {
+                        // Show default broker information
+                        const brokerPhone = localStorage.getItem('broker_phone') || '+357 99 123456';
+                        const brokerName = localStorage.getItem('broker_name') || 'Broker';
+                        
+                        return `
+                        <div style="margin-top: 16px;">
+                            <a href="tel:${brokerPhone}" class="btn btn-primary" style="text-decoration: none; display: inline-block; padding: 12px 24px;">
+                                📞 Contact Broker: ${brokerPhone}
+                            </a>
+                        </div>
+                        `;
+                    }
                 })()}
                 
                 ${property.deliveryInfo && property.deliveryInfo.status !== 'unknown' ? `
