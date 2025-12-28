@@ -563,6 +563,56 @@
         .range-slider__thumb.active {
             z-index: 3;
         }
+        /* Price Preset Buttons */
+        .price-preset-btn {
+            padding: 8px 14px;
+            border: 2px solid var(--gray-200, #e2e8f0);
+            border-radius: 8px;
+            background: white;
+            color: var(--gray-700, #374151);
+            font-size: 0.8125rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            white-space: nowrap;
+            flex-shrink: 0;
+        }
+        
+        .price-preset-btn:hover {
+            border-color: var(--primary, #6366f1);
+            background: var(--primary-50, #eef2ff);
+            color: var(--primary, #6366f1);
+            transform: translateY(-1px);
+        }
+        
+        .price-preset-btn:active {
+            transform: translateY(0);
+            box-shadow: inset 0 2px 4px rgba(0,0,0,0.1);
+        }
+        
+        @media (max-width: 768px) {
+            .price-preset-btn {
+                padding: 10px 16px;
+                font-size: 0.875rem;
+                min-width: 80px;
+                text-align: center;
+            }
+            
+            .price-presets {
+                margin-bottom: 16px !important;
+            }
+            
+            /* Make range slider thumbs bigger on mobile */
+            .range-slider__thumb {
+                width: 20px !important;
+                height: 20px !important;
+            }
+            
+            /* Increase touch target for range slider */
+            .range-slider {
+                padding: 12px 0 !important;
+            }
+        }
     </style>
 </head>
 <body>
@@ -762,6 +812,29 @@
                         </div>
                         <div class="filter-group" style="grid-column: span 1;">
                             <label class="filter-group__label">Price (€)</label>
+                            
+                            <!-- Quick Presets -->
+                            <div class="price-presets" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
+                                <button class="price-preset-btn" onclick="setPriceRange(0, 200000); event.preventDefault();">
+                                    <200K
+                                </button>
+                                <button class="price-preset-btn" onclick="setPriceRange(200000, 300000); event.preventDefault();">
+                                    200-300K
+                                </button>
+                                <button class="price-preset-btn" onclick="setPriceRange(300000, 500000); event.preventDefault();">
+                                    300-500K
+                                </button>
+                                <button class="price-preset-btn" onclick="setPriceRange(500000, 1000000); event.preventDefault();">
+                                    500K-1M
+                                </button>
+                                <button class="price-preset-btn" onclick="setPriceRange(1000000, 2000000); event.preventDefault();">
+                                    1-2M
+                                </button>
+                                <button class="price-preset-btn" onclick="setPriceRange(2000000, 50000000); event.preventDefault();">
+                                    >2M
+                                </button>
+                            </div>
+                            
                             <div class="price-range-inputs">
                                 <input type="number" class="input" placeholder="Min" id="priceMin">
                                 <span style="color: var(--gray-400);">-</span>
@@ -1372,6 +1445,39 @@
         // Load more properties
         function loadMoreProperties() {
             renderProperties(true);
+        }
+
+        // Set price range from preset buttons
+        function setPriceRange(min, max) {
+            console.log(`Setting price range: ${min} - ${max}`);
+            
+            // Update input fields
+            document.getElementById('priceMin').value = min;
+            document.getElementById('priceMax').value = max;
+            
+            // Trigger filter update
+            renderProperties();
+            
+            // Visual feedback
+            const allPresets = document.querySelectorAll('.price-preset-btn');
+            allPresets.forEach(btn => {
+                btn.style.background = 'white';
+                btn.style.borderColor = 'var(--gray-200, #e2e8f0)';
+                btn.style.color = 'var(--gray-700, #374151)';
+            });
+            
+            // Highlight clicked preset briefly
+            if (event && event.target) {
+                event.target.style.background = 'var(--primary, #6366f1)';
+                event.target.style.borderColor = 'var(--primary, #6366f1)';
+                event.target.style.color = 'white';
+                
+                setTimeout(() => {
+                    event.target.style.background = 'white';
+                    event.target.style.borderColor = 'var(--primary, #6366f1)';
+                    event.target.style.color = 'var(--primary, #6366f1)';
+                }, 300);
+            }
         }
 
         // Current filter states
