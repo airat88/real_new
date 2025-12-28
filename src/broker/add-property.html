@@ -6,6 +6,10 @@
     <title>Добавить объект недвижимости</title>
     <link rel="stylesheet" href="../assets/css/common.css">
     <link rel="stylesheet" href="../assets/css/broker.css">
+    
+    <!-- Leaflet CSS - должен быть в head! -->
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    
     <style>
         .add-property-container {
             max-width: 1200px;
@@ -502,8 +506,7 @@
     <!-- Image Compression Library -->
     <script src="https://cdn.jsdelivr.net/npm/browser-image-compression@2.0.2/dist/browser-image-compression.js"></script>
 
-    <!-- Leaflet для карты -->
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css" />
+    <!-- Leaflet JS для карты -->
     <script src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"></script>
 
     <script>
@@ -511,43 +514,71 @@
         let map, marker;
         
         function initMap() {
+            console.log('🗺️ Initializing map...');
+            
+            // Проверка что Leaflet загружен
+            if (typeof L === 'undefined') {
+                console.error('❌ Leaflet not loaded!');
+                alert('Ошибка: Leaflet не загружен. Обновите страницу.');
+                return;
+            }
+            
+            // Проверка что элемент карты существует
+            const mapElement = document.getElementById('map');
+            if (!mapElement) {
+                console.error('❌ Map element not found!');
+                return;
+            }
+            
+            console.log('✅ Leaflet loaded, map element found');
+            
             // Координаты центра Кипра
             const defaultLat = 34.9175;
             const defaultLng = 33.6300;
 
-            map = L.map('map').setView([defaultLat, defaultLng], 10);
+            try {
+                map = L.map('map').setView([defaultLat, defaultLng], 10);
+                console.log('✅ Map initialized');
 
-            L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-                attribution: '© OpenStreetMap contributors'
-            }).addTo(map);
+                L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+                    attribution: '© OpenStreetMap contributors',
+                    maxZoom: 19
+                }).addTo(map);
+                console.log('✅ Tiles added');
 
-            // Добавление маркера при клике
-            map.on('click', function(e) {
-                if (marker) {
-                    map.removeLayer(marker);
+                // Добавление маркера при клике
+                map.on('click', function(e) {
+                    if (marker) {
+                        map.removeLayer(marker);
+                    }
+                    
+                    marker = L.marker(e.latlng).addTo(map);
+                    document.getElementById('latitude').value = e.latlng.lat.toFixed(6);
+                    document.getElementById('longitude').value = e.latlng.lng.toFixed(6);
+                    
+                    // Визуальная обратная связь
+                    marker.bindPopup(`
+                        <div style="text-align: center;">
+                            <strong>📍 Локация выбрана</strong><br>
+                            <small>${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}</small>
+                        </div>
+                    `).openPopup();
+                });
+
+                // Если координаты уже заданы, показать маркер
+                const lat = parseFloat(document.getElementById('latitude').value);
+                const lng = parseFloat(document.getElementById('longitude').value);
+                
+                if (lat && lng) {
+                    marker = L.marker([lat, lng]).addTo(map);
+                    map.setView([lat, lng], 14);
+                    marker.bindPopup('<strong>📍 Текущая локация</strong>').openPopup();
                 }
                 
-                marker = L.marker(e.latlng).addTo(map);
-                document.getElementById('latitude').value = e.latlng.lat.toFixed(6);
-                document.getElementById('longitude').value = e.latlng.lng.toFixed(6);
-                
-                // Визуальная обратная связь
-                marker.bindPopup(`
-                    <div style="text-align: center;">
-                        <strong>📍 Локация выбрана</strong><br>
-                        <small>${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}</small>
-                    </div>
-                `).openPopup();
-            });
-
-            // Если координаты уже заданы, показать маркер
-            const lat = parseFloat(document.getElementById('latitude').value);
-            const lng = parseFloat(document.getElementById('longitude').value);
-            
-            if (lat && lng) {
-                marker = L.marker([lat, lng]).addTo(map);
-                map.setView([lat, lng], 14);
-                marker.bindPopup('<strong>📍 Текущая локация</strong>').openPopup();
+                console.log('✅ Map fully initialized');
+            } catch (error) {
+                console.error('❌ Error initializing map:', error);
+                alert('Ошибка инициализации карты: ' + error.message);
             }
         }
 
@@ -600,28 +631,41 @@
                     setTimeout(() => notification.remove(), 3000);
                 },
                 (error) => {
-                    console.error('Geolocation error:', error);
+                    console.error('❌ Geolocation error:', error.code, error.message);
                     let errorMsg = 'Не удалось определить местоположение';
+                    let hint = '';
                     
                     switch(error.code) {
                         case error.PERMISSION_DENIED:
-                            errorMsg = 'Доступ к геолокации запрещён. Разрешите доступ в настройках браузера.';
+                            errorMsg = 'Доступ к геолокации запрещён';
+                            hint = 'Разрешите доступ к геолокации в настройках браузера (иконка 🔒 в адресной строке)';
                             break;
                         case error.POSITION_UNAVAILABLE:
-                            errorMsg = 'Информация о местоположении недоступна.';
+                            errorMsg = 'Информация о местоположении недоступна';
+                            hint = 'Проверьте подключение к интернету или попробуйте позже';
                             break;
                         case error.TIMEOUT:
-                            errorMsg = 'Время ожидания истекло.';
+                            errorMsg = 'Время ожидания истекло (30 сек)';
+                            hint = 'Попробуйте ещё раз или установите маркер вручную на карте';
                             break;
                     }
                     
-                    alert('❌ ' + errorMsg);
+                    // Показать понятное сообщение
+                    const notification = document.createElement('div');
+                    notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #ef4444; color: white; padding: 16px 24px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); z-index: 10000; max-width: 400px; animation: slideIn 0.3s ease;';
+                    notification.innerHTML = `
+                        <div style="font-weight: 600; margin-bottom: 8px;">❌ ${errorMsg}</div>
+                        <div style="font-size: 0.875rem; opacity: 0.9;">${hint}</div>
+                    `;
+                    document.body.appendChild(notification);
+                    setTimeout(() => notification.remove(), 5000);
+                    
                     btn.innerHTML = originalText;
                     btn.disabled = false;
                 },
                 {
                     enableHighAccuracy: true,
-                    timeout: 10000,
+                    timeout: 30000,  // Увеличили до 30 секунд
                     maximumAge: 0
                 }
             );
@@ -893,14 +937,32 @@
 
         // Инициализация при загрузке
         window.addEventListener('load', async function() {
-            // Проверка авторизации
-            const { data: { user } } = await window.supabaseClient.auth.getUser();
-            if (!user) {
-                window.location.href = 'login.html';
-                return;
-            }
+            // Инициализируем карту сразу (не ждём авторизации и Supabase)
+            console.log('📄 Page loaded, initializing map...');
             
-            initMap();
+            // Небольшая задержка чтобы убедиться что DOM готов
+            setTimeout(() => {
+                initMap();
+            }, 100);
+            
+            // Проверка авторизации (параллельно) - НЕ блокирует карту
+            try {
+                if (window.supabaseClient && window.supabaseClient.auth) {
+                    const { data: { user } } = await window.supabaseClient.auth.getUser();
+                    if (!user) {
+                        console.warn('⚠️ User not authenticated, redirecting...');
+                        window.location.href = 'login.html';
+                        return;
+                    }
+                    console.log('✅ User authenticated');
+                } else {
+                    console.error('❌ Supabase client not loaded');
+                    alert('Ошибка: Supabase не загружен. Обновите страницу.');
+                }
+            } catch (error) {
+                console.error('❌ Auth check error:', error);
+                // Не редиректим, позволяем использовать карту
+            }
         });
 
         // Автозаполнение цены за м²
