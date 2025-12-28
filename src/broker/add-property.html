@@ -194,6 +194,33 @@
             color: #777;
             margin-top: 5px;
         }
+        
+        .btn-geolocation:hover:not(:disabled) {
+            background: #4f46e5 !important;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 8px rgba(99, 102, 241, 0.3);
+            transition: all 0.2s ease;
+        }
+        
+        .btn-geolocation:active {
+            transform: translateY(0);
+        }
+        
+        .btn-geolocation:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateX(100px);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
 
         .success-message,
         .error-message {
@@ -332,9 +359,21 @@
                     </div>
 
                     <div class="form-group full-width">
-                        <div class="map-container">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px;">
+                            <label style="font-weight: 600; color: #374151; margin: 0;">
+                                🗺️ Выберите на карте
+                            </label>
+                            <button type="button" class="btn-geolocation" onclick="getMyLocation()" style="padding: 8px 16px; background: #6366f1; color: white; border: none; border-radius: 6px; cursor: pointer; font-size: 0.875rem; display: flex; align-items: center; gap: 6px;">
+                                <span>📍</span>
+                                <span>Моя геолокация</span>
+                            </button>
+                        </div>
+                        <div class="map-container" style="border: 2px solid #e2e8f0; box-shadow: 0 4px 6px rgba(0,0,0,0.1);">
                             <div id="map"></div>
                         </div>
+                        <p style="font-size: 0.875rem; color: #64748b; margin-top: 8px; font-style: italic;">
+                            💡 Подсказка: Кликните на карте чтобы установить маркер и автоматически заполнить координаты
+                        </p>
                     </div>
                 </div>
             </div>
@@ -491,6 +530,14 @@
                 marker = L.marker(e.latlng).addTo(map);
                 document.getElementById('latitude').value = e.latlng.lat.toFixed(6);
                 document.getElementById('longitude').value = e.latlng.lng.toFixed(6);
+                
+                // Визуальная обратная связь
+                marker.bindPopup(`
+                    <div style="text-align: center;">
+                        <strong>📍 Локация выбрана</strong><br>
+                        <small>${e.latlng.lat.toFixed(5)}, ${e.latlng.lng.toFixed(5)}</small>
+                    </div>
+                `).openPopup();
             });
 
             // Если координаты уже заданы, показать маркер
@@ -500,7 +547,84 @@
             if (lat && lng) {
                 marker = L.marker([lat, lng]).addTo(map);
                 map.setView([lat, lng], 14);
+                marker.bindPopup('<strong>📍 Текущая локация</strong>').openPopup();
             }
+        }
+
+        // Геолокация - найти текущее местоположение
+        function getMyLocation() {
+            if (!navigator.geolocation) {
+                alert('❌ Геолокация не поддерживается вашим браузером');
+                return;
+            }
+
+            const btn = event.target.closest('button');
+            const originalText = btn.innerHTML;
+            btn.innerHTML = '<span>🔄</span> <span>Определение...</span>';
+            btn.disabled = true;
+
+            navigator.geolocation.getCurrentPosition(
+                (position) => {
+                    const lat = position.coords.latitude;
+                    const lng = position.coords.longitude;
+
+                    // Установить координаты
+                    document.getElementById('latitude').value = lat.toFixed(6);
+                    document.getElementById('longitude').value = lng.toFixed(6);
+
+                    // Переместить карту и добавить маркер
+                    if (marker) {
+                        map.removeLayer(marker);
+                    }
+                    
+                    marker = L.marker([lat, lng]).addTo(map);
+                    map.setView([lat, lng], 15);
+                    
+                    marker.bindPopup(`
+                        <div style="text-align: center;">
+                            <strong>📍 Ваша локация</strong><br>
+                            <small>${lat.toFixed(5)}, ${lng.toFixed(5)}</small><br>
+                            <small style="color: #10b981;">Точность: ±${position.coords.accuracy.toFixed(0)}м</small>
+                        </div>
+                    `).openPopup();
+
+                    // Восстановить кнопку
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+
+                    // Успешное уведомление
+                    const notification = document.createElement('div');
+                    notification.style.cssText = 'position: fixed; top: 20px; right: 20px; background: #10b981; color: white; padding: 12px 20px; border-radius: 8px; box-shadow: 0 4px 6px rgba(0,0,0,0.2); z-index: 10000; animation: slideIn 0.3s ease;';
+                    notification.innerHTML = '✅ Геолокация определена!';
+                    document.body.appendChild(notification);
+                    setTimeout(() => notification.remove(), 3000);
+                },
+                (error) => {
+                    console.error('Geolocation error:', error);
+                    let errorMsg = 'Не удалось определить местоположение';
+                    
+                    switch(error.code) {
+                        case error.PERMISSION_DENIED:
+                            errorMsg = 'Доступ к геолокации запрещён. Разрешите доступ в настройках браузера.';
+                            break;
+                        case error.POSITION_UNAVAILABLE:
+                            errorMsg = 'Информация о местоположении недоступна.';
+                            break;
+                        case error.TIMEOUT:
+                            errorMsg = 'Время ожидания истекло.';
+                            break;
+                    }
+                    
+                    alert('❌ ' + errorMsg);
+                    btn.innerHTML = originalText;
+                    btn.disabled = false;
+                },
+                {
+                    enableHighAccuracy: true,
+                    timeout: 10000,
+                    maximumAge: 0
+                }
+            );
         }
 
         // Обработка фотографий
