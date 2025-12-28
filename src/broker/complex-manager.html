@@ -792,15 +792,37 @@
                 
                 console.log('✅ Loaded properties:', allProperties.length);
                 
+                // Debug: show first property structure
+                if (allProperties.length > 0) {
+                    console.log('📋 Sample property:', {
+                        Object: allProperties[0].Object,
+                        PhotoURLs: allProperties[0].PhotoURLs?.substring(0, 100),
+                        ProjectTitle: allProperties[0].ProjectTitle
+                    });
+                }
+                
                 // Extract unique object codes
                 const codes = new Set();
-                allProperties.forEach(prop => {
-                    const code = extractObjectCode(prop.PhotoPaths);
-                    if (code) codes.add(code);
+                const codeExamples = [];
+                
+                allProperties.forEach((prop, index) => {
+                    const code = extractObjectCode(prop);
+                    if (code) {
+                        codes.add(code);
+                        // Save first 5 examples for debugging
+                        if (codeExamples.length < 5) {
+                            codeExamples.push({
+                                code: code,
+                                object: prop.Object?.substring(0, 80)
+                            });
+                        }
+                    }
                 });
                 
                 objectCodes = Array.from(codes).sort();
                 console.log('✅ Extracted object codes:', objectCodes.length);
+                console.log('📊 Codes:', objectCodes);
+                console.log('💡 Examples:', codeExamples);
                 
                 // Populate dropdown
                 populateCodeDropdown();
@@ -811,9 +833,11 @@
             }
         }
 
-        // Extract object code from photo path
-        function extractObjectCode(photoPath) {
-            if (!photoPath) return null;
+        // Extract object code from Object field
+        function extractObjectCode(property) {
+            // Use Object field from CSV
+            const objectField = property.Object;
+            if (!objectField) return null;
             
             // Try different patterns
             const patterns = [
@@ -822,7 +846,7 @@
             ];
             
             for (const pattern of patterns) {
-                const match = photoPath.match(pattern);
+                const match = objectField.match(pattern);
                 if (match) return match[1];
             }
             
@@ -833,7 +857,16 @@
         function populateCodeDropdown() {
             const select = document.getElementById('objectCode');
             
+            if (objectCodes.length === 0) {
+                select.innerHTML = '<option value="">⚠️ Не удалось загрузить коды объектов</option>';
+                console.error('❌ No object codes found!');
+                showToast('⚠️ Коды объектов не найдены. Проверьте консоль.', 'error');
+                return;
+            }
+            
             select.innerHTML = '<option value="">Выберите код объекта...</option>';
+            
+            console.log(`📋 Populating dropdown with ${objectCodes.length} codes...`);
             
             objectCodes.forEach(code => {
                 const option = document.createElement('option');
@@ -841,12 +874,14 @@
                 
                 // Count properties for this code
                 const count = allProperties.filter(p => 
-                    extractObjectCode(p.PhotoPaths) === code
+                    extractObjectCode(p) === code
                 ).length;
                 
                 option.textContent = `${code} (${count} ${count === 1 ? 'объект' : count < 5 ? 'объекта' : 'объектов'})`;
                 select.appendChild(option);
             });
+            
+            console.log('✅ Dropdown populated successfully');
 
             // Add change event
             select.addEventListener('change', (e) => {
@@ -862,7 +897,7 @@
         // Show properties preview
         function showPropertiesPreview(code) {
             const properties = allProperties.filter(p => 
-                extractObjectCode(p.PhotoPaths) === code
+                extractObjectCode(p) === code
             );
             
             const container = document.getElementById('previewContainer');
