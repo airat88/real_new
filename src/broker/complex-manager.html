@@ -4,7 +4,8 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Управление комплексами - Cyprus Real Estate</title>
-    <link rel="stylesheet" href="../assets/css/global.css">
+    <link rel="stylesheet" href="../assets/css/common.css">
+    <link rel="stylesheet" href="../assets/css/broker.css">
     <style>
         * {
             margin: 0;
@@ -761,15 +762,41 @@
             // Check authentication
             const session = localStorage.getItem('broker_session');
             if (!session) {
+                console.warn('⚠️ No session found, redirecting to login...');
                 window.location.href = 'login.html?from=complex-manager';
                 return;
             }
+            
+            console.log('✅ Session found:', session.substring(0, 50) + '...');
 
-            // Wait for libraries
-            await new Promise(resolve => setTimeout(resolve, 800));
+            // Wait for libraries to load
+            console.log('⏳ Waiting for libraries to load...');
+            await new Promise(resolve => setTimeout(resolve, 1000));
+            
+            // Check DataSync
+            if (typeof DataSync === 'undefined') {
+                console.error('❌ DataSync is not defined! Check if data-sync.js is loaded.');
+                showToast('❌ Ошибка: DataSync не загружен', 'error');
+                document.getElementById('objectCode').innerHTML = '<option value="">❌ DataSync не загружен</option>';
+                return;
+            }
+            console.log('✅ DataSync is available');
+            
+            // Check SupabaseClient
+            if (typeof SupabaseClient === 'undefined') {
+                console.error('❌ SupabaseClient is not defined!');
+                showToast('❌ Ошибка: SupabaseClient не загружен', 'error');
+                return;
+            }
+            console.log('✅ SupabaseClient is available');
             
             // Initialize Supabase
-            SupabaseClient.init();
+            try {
+                SupabaseClient.init();
+                console.log('✅ Supabase initialized');
+            } catch (e) {
+                console.error('❌ Error initializing Supabase:', e);
+            }
 
             // Load properties and extract codes
             await loadPropertiesAndCodes();
@@ -779,41 +806,75 @@
             
             // Update stats
             updateStats();
+            
+            console.log('🎉 Initialization complete!');
         }
 
         // Load properties and extract unique object codes
         async function loadPropertiesAndCodes() {
             try {
-                console.log('📥 Loading properties...');
+                console.log('📥 Loading properties from CSV...');
+                
+                // Check if DataSync exists
+                if (!DataSync || !DataSync.autoSync) {
+                    throw new Error('DataSync.autoSync is not available');
+                }
                 
                 // Auto-sync CSV data
+                console.log('🔄 Calling DataSync.autoSync()...');
                 await DataSync.autoSync();
+                
+                console.log('📊 Calling DataSync.getProperties()...');
                 allProperties = await DataSync.getProperties();
                 
+                if (!allProperties || !Array.isArray(allProperties)) {
+                    throw new Error('getProperties() did not return an array');
+                }
+                
                 console.log('✅ Loaded properties:', allProperties.length);
+                
+                if (allProperties.length === 0) {
+                    console.warn('⚠️ No properties loaded from CSV!');
+                    showToast('⚠️ Нет данных в CSV файле', 'error');
+                    document.getElementById('objectCode').innerHTML = '<option value="">⚠️ Нет данных в CSV</option>';
+                    return;
+                }
                 
                 // Debug: show first property structure
                 if (allProperties.length > 0) {
                     console.log('📋 Sample property:', {
                         Object: allProperties[0].Object,
                         PhotoURLs: allProperties[0].PhotoURLs?.substring(0, 100),
-                        ProjectTitle: allProperties[0].ProjectTitle
+                        ProjectTitle: allProperties[0].ProjectTitle,
+                        AllKeys: Object.keys(allProperties[0])
                     });
                 }
                 
                 // Extract unique object codes
                 const codes = new Set();
                 const codeExamples = [];
+                let successCount = 0;
+                let failCount = 0;
                 
                 allProperties.forEach((prop, index) => {
                     const code = extractObjectCode(prop);
                     if (code) {
                         codes.add(code);
+                        successCount++;
                         // Save first 5 examples for debugging
                         if (codeExamples.length < 5) {
                             codeExamples.push({
                                 code: code,
                                 object: prop.Object?.substring(0, 80)
+                            });
+                        }
+                    } else {
+                        failCount++;
+                        if (failCount <= 3) {
+                            console.warn(`⚠️ Could not extract code from property #${index}:`, {
+                                Object: prop.Object,
+                                PhotoPaths: prop.PhotoPaths,
+                                PhotoURLs: prop.PhotoURLs?.substring(0, 50)
                             });
                         }
                     }
@@ -823,13 +884,23 @@
                 console.log('✅ Extracted object codes:', objectCodes.length);
                 console.log('📊 Codes:', objectCodes);
                 console.log('💡 Examples:', codeExamples);
+                console.log(`📈 Success: ${successCount}, Failed: ${failCount}`);
+                
+                if (objectCodes.length === 0) {
+                    console.error('❌ No object codes extracted!');
+                    showToast('❌ Не удалось извлечь коды объектов', 'error');
+                    document.getElementById('objectCode').innerHTML = '<option value="">❌ Нет кодов объектов</option>';
+                    return;
+                }
                 
                 // Populate dropdown
                 populateCodeDropdown();
                 
             } catch (e) {
                 console.error('❌ Error loading properties:', e);
-                showToast('Ошибка загрузки объектов', 'error');
+                console.error('Stack trace:', e.stack);
+                showToast('❌ Ошибка загрузки объектов: ' + e.message, 'error');
+                document.getElementById('objectCode').innerHTML = '<option value="">❌ Ошибка загрузки</option>';
             }
         }
 
