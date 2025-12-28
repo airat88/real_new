@@ -520,18 +520,29 @@
             const locationSelect = document.getElementById('location');
             
             try {
+                // Ждём загрузки Supabase клиента
+                let attempts = 0;
+                while (!window.supabaseClient && attempts < 20) {
+                    console.log('⏳ Waiting for Supabase client...', attempts);
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                    attempts++;
+                }
+                
                 if (!window.supabaseClient) {
-                    console.error('❌ Supabase client not available');
-                    locationSelect.innerHTML = '<option value="">Ошибка загрузки городов</option>';
+                    console.error('❌ Supabase client not available after 2 seconds');
+                    locationSelect.innerHTML = '<option value="">Ошибка: Supabase не загружен</option>';
                     return;
                 }
                 
+                console.log('✅ Supabase client loaded, fetching cities...');
+                
                 // Получаем уникальные города из таблицы properties
+                // ВАЖНО: Столбец называется "Location" с большой буквы!
                 const { data, error } = await window.supabaseClient
                     .from('properties')
-                    .select('location')
-                    .not('location', 'is', null)
-                    .order('location');
+                    .select('Location')
+                    .not('Location', 'is', null)
+                    .order('Location');
                 
                 if (error) {
                     console.error('❌ Error loading cities:', error);
@@ -539,10 +550,26 @@
                     return;
                 }
                 
-                // Получаем уникальные значения
-                const uniqueCities = [...new Set(data.map(item => item.location))].sort();
+                console.log('📊 Raw data from database:', data);
                 
-                console.log(`✅ Loaded ${uniqueCities.length} cities:`, uniqueCities);
+                // Получаем уникальные значения (обратите внимание на регистр!)
+                const uniqueCities = [...new Set(data.map(item => item.Location))].sort();
+                
+                console.log(`✅ Loaded ${uniqueCities.length} unique cities:`, uniqueCities);
+                
+                if (uniqueCities.length === 0) {
+                    console.warn('⚠️ No cities found in database');
+                    locationSelect.innerHTML = '<option value="">Нет городов в базе</option>';
+                    
+                    // Добавляем только опцию "Другое"
+                    const otherOption = document.createElement('option');
+                    otherOption.value = 'other';
+                    otherOption.textContent = '➕ Добавить первый город';
+                    otherOption.style.fontWeight = 'bold';
+                    otherOption.style.color = '#6366f1';
+                    locationSelect.appendChild(otherOption);
+                    return;
+                }
                 
                 // Заполняем select
                 locationSelect.innerHTML = '<option value="">Выберите город/район</option>';
@@ -925,7 +952,7 @@
                     apartment_type: formData.get('apartmentType'),
                     url: formData.get('url'),
                     property_status: formData.get('propertyStatus'),
-                    location: formData.get('location'),
+                    Location: formData.get('location'),  // ← ВАЖНО: Capital L для соответствия базе данных!
                     bedrooms: parseInt(formData.get('bedrooms')),
                     plot: formData.get('plot'),
                     total_area: parseFloat(formData.get('totalArea')) || null,
