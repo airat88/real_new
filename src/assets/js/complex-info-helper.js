@@ -12,36 +12,22 @@
 
 const ComplexInfoHelper = {
     /**
-     * Извлечь Object Code из объекта property
-     * @param {Object} property - Объект недвижимости с полем Object
+     * Извлечь Object Code из пути к фото
+     * @param {string} photoPath - Путь к фото (например: "/photos/A100 - Name/img.jpg")
      * @returns {string|null} - Object code или null
      */
-    extractObjectCode(property) {
-        // Если передана строка (старый API) - пробуем извлечь из неё
-        if (typeof property === 'string') {
-            const patterns = [
-                /([A-Z]+-\d+)/,  // BB-6122
-                /([A-Z]+\d+)/    // A100, K48
-            ];
-            
-            for (const pattern of patterns) {
-                const match = property.match(pattern);
-                if (match) return match[1];
-            }
-            return null;
-        }
+    extractObjectCode(photoPath) {
+        if (!photoPath) return null;
         
-        // Если объект - используем поле Object
-        const objectField = property?.Object;
-        if (!objectField) return null;
-        
+        // Ищем паттерн: буквы + цифры (например: A100, BB-6122, K48)
+        // Учитываем возможный дефис
         const patterns = [
             /([A-Z]+-\d+)/,  // BB-6122
             /([A-Z]+\d+)/    // A100, K48
         ];
         
         for (const pattern of patterns) {
-            const match = objectField.match(pattern);
+            const match = photoPath.match(pattern);
             if (match) return match[1];
         }
         
