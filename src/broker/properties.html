@@ -856,22 +856,259 @@
                                 </button>
                             </div>
                             
-                            <div class="price-range-inputs">
-                                <input type="number" class="input" placeholder="Min" id="priceMin">
-                                <span style="color: var(--gray-400);">-</span>
-                                <input type="number" class="input" placeholder="Max" id="priceMax">
-                            </div>
-                            <!-- Range Slider -->
-                            <div class="range-slider-container">
-                                <div class="range-values">
-                                    <span id="priceRangeDisplay">0 - 50,000,000</span>
+                            <!-- Circular Price Knob -->
+                            <div class="circular-price-knob-container" style="margin-top: 20px;">
+                                <div class="circular-price-knob" id="priceKnob">
+                                    <svg width="220" height="220" viewBox="0 0 220 220">
+                                        <!-- Background circle -->
+                                        <circle cx="110" cy="110" r="80" fill="none" stroke="#e5e7eb" stroke-width="20"/>
+                                        
+                                        <!-- Main sector (0 - 1M): 0° to 345° -->
+                                        <circle cx="110" cy="110" r="80" fill="none" 
+                                                stroke="url(#mainGradient)" 
+                                                stroke-width="20"
+                                                stroke-dasharray="471 31.4"
+                                                stroke-dashoffset="125.7"
+                                                stroke-linecap="round"
+                                                transform="rotate(-90 110 110)"/>
+                                        
+                                        <!-- Premium sector (1M+): 345° to 360° (15°) -->
+                                        <circle cx="110" cy="110" r="80" fill="none" 
+                                                stroke="url(#premiumGradient)" 
+                                                stroke-width="20"
+                                                stroke-dasharray="20.9 481.5"
+                                                stroke-dashoffset="-345.6"
+                                                stroke-linecap="round"
+                                                transform="rotate(-90 110 110)"/>
+                                        
+                                        <!-- Active arc -->
+                                        <circle cx="110" cy="110" r="80" fill="none" 
+                                                id="priceKnobArc"
+                                                stroke="#6366f1" 
+                                                stroke-width="22"
+                                                stroke-dasharray="0 502.4"
+                                                stroke-dashoffset="125.7"
+                                                stroke-linecap="round"
+                                                transform="rotate(-90 110 110)"/>
+                                        
+                                        <!-- Handle -->
+                                        <g id="priceKnobHandle">
+                                            <circle cx="110" cy="30" r="14" fill="white" stroke="#6366f1" stroke-width="3"/>
+                                            <circle cx="110" cy="30" r="8" fill="#6366f1"/>
+                                        </g>
+                                        
+                                        <!-- Gradients -->
+                                        <defs>
+                                            <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.3" />
+                                                <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.8" />
+                                            </linearGradient>
+                                            <linearGradient id="premiumGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+                                                <stop offset="100%" style="stop-color:#fbbf24;stop-opacity:1" />
+                                            </linearGradient>
+                                        </defs>
+                                    </svg>
+                                    
+                                    <!-- Center display -->
+                                    <div class="knob-center-display">
+                                        <div class="knob-value" id="priceKnobValue">€0</div>
+                                        <div class="knob-label">Max Price</div>
+                                    </div>
                                 </div>
-                                <div class="range-slider" id="priceSlider" data-min="0" data-max="50000000">
-                                    <div class="range-slider__track"></div>
-                                    <div class="range-slider__thumb" data-thumb="min"></div>
-                                    <div class="range-slider__thumb" data-thumb="max"></div>
+                                
+                                <!-- Price range inputs below knob -->
+                                <div class="price-range-inputs" style="margin-top: 15px;">
+                                    <input type="number" class="input" placeholder="Min" id="priceMin" 
+                                           onchange="updatePriceFromInputs()" style="font-size: 0.875rem;">
+                                    <span style="color: var(--gray-400);">-</span>
+                                    <input type="number" class="input" placeholder="Max" id="priceMax" 
+                                           onchange="updatePriceFromInputs()" style="font-size: 0.875rem;">
                                 </div>
                             </div>
+                            
+                            <style>
+                            .circular-price-knob-container {
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                padding: 10px;
+                            }
+                            
+                            .circular-price-knob {
+                                position: relative;
+                                width: 220px;
+                                height: 220px;
+                                cursor: pointer;
+                                user-select: none;
+                            }
+                            
+                            .knob-center-display {
+                                position: absolute;
+                                top: 50%;
+                                left: 50%;
+                                transform: translate(-50%, -50%);
+                                text-align: center;
+                                pointer-events: none;
+                            }
+                            
+                            .knob-value {
+                                font-size: 1.5rem;
+                                font-weight: 700;
+                                color: #1f2937;
+                                margin-bottom: 4px;
+                            }
+                            
+                            .knob-label {
+                                font-size: 0.75rem;
+                                color: #6b7280;
+                                text-transform: uppercase;
+                                letter-spacing: 0.05em;
+                            }
+                            
+                            #priceKnobHandle {
+                                cursor: grab;
+                                transition: transform 0.05s ease-out;
+                            }
+                            
+                            #priceKnobHandle:active {
+                                cursor: grabbing;
+                            }
+                            
+                            .circular-price-knob:hover #priceKnobHandle circle:first-child {
+                                stroke-width: 4;
+                                r: 16;
+                            }
+                            </style>
+                            
+                            <script>
+                            // Circular Price Knob Logic
+                            (function() {
+                                const knob = document.getElementById('priceKnob');
+                                const handle = document.getElementById('priceKnobHandle');
+                                const arc = document.getElementById('priceKnobArc');
+                                const valueDisplay = document.getElementById('priceKnobValue');
+                                const priceMaxInput = document.getElementById('priceMax');
+                                
+                                let isDragging = false;
+                                let currentAngle = 0; // 0 to 360 degrees
+                                
+                                // Price mapping
+                                // Main sector: 0° - 345° maps to 0 - 1,000,000€
+                                // Premium sector: 345° - 360° maps to 1,000,000€ - ∞ (shows all premium)
+                                
+                                function angleToPrice(angle) {
+                                    if (angle <= 345) {
+                                        // Linear mapping: 0-345° → 0-1M€
+                                        return Math.round((angle / 345) * 1000000);
+                                    } else {
+                                        // Premium sector: 345-360° → 1M-50M€
+                                        return 50000000; // Show all premium
+                                    }
+                                }
+                                
+                                function priceToAngle(price) {
+                                    if (price <= 1000000) {
+                                        return (price / 1000000) * 345;
+                                    } else {
+                                        return 352.5; // Middle of premium sector
+                                    }
+                                }
+                                
+                                function formatPrice(price) {
+                                    if (price >= 50000000) return '€1M+';
+                                    if (price >= 1000000) return '€' + (price / 1000000).toFixed(1) + 'M';
+                                    if (price >= 1000) return '€' + (price / 1000).toFixed(0) + 'K';
+                                    return '€' + price;
+                                }
+                                
+                                function updateKnob(angle) {
+                                    currentAngle = Math.max(0, Math.min(360, angle));
+                                    
+                                    // Update handle position
+                                    const handleAngle = currentAngle - 90; // SVG rotation offset
+                                    handle.setAttribute('transform', `rotate(${handleAngle} 110 110)`);
+                                    
+                                    // Update arc
+                                    const arcLength = (currentAngle / 360) * 502.4;
+                                    arc.setAttribute('stroke-dasharray', `${arcLength} ${502.4 - arcLength}`);
+                                    
+                                    // Update price
+                                    const price = angleToPrice(currentAngle);
+                                    valueDisplay.textContent = formatPrice(price);
+                                    priceMaxInput.value = price >= 50000000 ? '' : price;
+                                    
+                                    // Change color in premium sector
+                                    if (currentAngle > 345) {
+                                        arc.setAttribute('stroke', '#f59e0b');
+                                        valueDisplay.style.color = '#f59e0b';
+                                    } else {
+                                        arc.setAttribute('stroke', '#6366f1');
+                                        valueDisplay.style.color = '#1f2937';
+                                    }
+                                    
+                                    // Trigger filter update
+                                    if (!isDragging || Date.now() % 100 < 10) { // Throttle updates while dragging
+                                        renderProperties();
+                                    }
+                                }
+                                
+                                function getAngleFromEvent(e) {
+                                    const rect = knob.getBoundingClientRect();
+                                    const centerX = rect.left + rect.width / 2;
+                                    const centerY = rect.top + rect.height / 2;
+                                    
+                                    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
+                                    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                                    
+                                    const deltaX = clientX - centerX;
+                                    const deltaY = clientY - centerY;
+                                    
+                                    let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) + 90;
+                                    if (angle < 0) angle += 360;
+                                    
+                                    return angle;
+                                }
+                                
+                                function startDrag(e) {
+                                    isDragging = true;
+                                    updateKnob(getAngleFromEvent(e));
+                                    e.preventDefault();
+                                }
+                                
+                                function drag(e) {
+                                    if (isDragging) {
+                                        updateKnob(getAngleFromEvent(e));
+                                        e.preventDefault();
+                                    }
+                                }
+                                
+                                function stopDrag() {
+                                    if (isDragging) {
+                                        isDragging = false;
+                                        renderProperties(); // Final update
+                                    }
+                                }
+                                
+                                // Event listeners
+                                knob.addEventListener('mousedown', startDrag);
+                                knob.addEventListener('touchstart', startDrag);
+                                document.addEventListener('mousemove', drag);
+                                document.addEventListener('touchmove', drag);
+                                document.addEventListener('mouseup', stopDrag);
+                                document.addEventListener('touchend', stopDrag);
+                                
+                                // Update from manual input
+                                window.updatePriceFromInputs = function() {
+                                    const maxPrice = parseInt(priceMaxInput.value) || 50000000;
+                                    const angle = priceToAngle(maxPrice);
+                                    updateKnob(angle);
+                                };
+                                
+                                // Initialize
+                                updateKnob(360); // Start at max (show all)
+                            })();
+                            </script>
                         </div>
                     </div>
 
