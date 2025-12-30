@@ -613,7 +613,425 @@
                 padding: 12px 0 !important;
             }
         }
-    </style>
+    
+
+/* ============================================
+   LOGICAL BLOCKS CSS - ADDED
+   ============================================ */
+
+/* ============================================
+   LOGICAL FILTER BLOCKS - COMPLETE CSS
+   ============================================ */
+
+/* Header with Sort By on the right */
+.filters-panel__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 16px 20px;
+    background: white;
+    border-bottom: 2px solid #e5e7eb;
+    margin-bottom: 0;
+}
+
+.filters-panel__title {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: #1f2937;
+}
+
+.filters-header-right {
+    display: flex;
+    gap: 16px;
+    align-items: center;
+}
+
+/* Sort by container - Gray background */
+.sort-by-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: #f3f4f6;
+    padding: 8px 16px;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.sort-by-label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #6b7280;
+    white-space: nowrap;
+}
+
+.sort-by-select {
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    padding: 6px 12px;
+    font-size: 0.875rem;
+    background: white;
+    cursor: pointer;
+    min-width: 150px;
+    color: #374151;
+}
+
+.sort-by-select:focus {
+    outline: none;
+    border-color: #6b7280;
+    box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1);
+}
+
+.sort-by-select:hover {
+    border-color: #9ca3af;
+}
+
+/* Filter Blocks - Card style containers */
+.filter-block {
+    background: white;
+    border: 2px solid #e5e7eb;
+    border-radius: 12px;
+    margin: 16px 0;
+    overflow: hidden;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+    transition: box-shadow 0.2s ease;
+}
+
+.filter-block:hover {
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.08);
+}
+
+.filter-block-header {
+    background: linear-gradient(to right, #f9fafb, #ffffff);
+    padding: 14px 20px;
+    border-bottom: 2px solid #f3f4f6;
+}
+
+.filter-block-title {
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: #1f2937;
+    letter-spacing: 0.02em;
+}
+
+.filter-block-content {
+    padding: 20px;
+}
+
+/* Block 1: Search */
+.input-large {
+    width: 100%;
+    padding: 12px 16px;
+    font-size: 1rem;
+    border: 2px solid #d1d5db;
+    border-radius: 8px;
+    transition: all 0.2s;
+}
+
+.input-large:focus {
+    outline: none;
+    border-color: #6b7280;
+    box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1);
+}
+
+.input-large:hover {
+    border-color: #9ca3af;
+}
+
+/* Block 2: Price Filters */
+.price-presets {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 24px;
+    padding-bottom: 20px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.price-preset-btn {
+    padding: 8px 14px;
+    border: 2px solid #e2e8f0;
+    border-radius: 8px;
+    background: white;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+    flex-shrink: 0;
+}
+
+.price-preset-btn:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+    transform: translateY(-1px);
+}
+
+.price-preset-btn.active,
+.price-preset-btn.price-preset-highlighted {
+    background: #6366f1;
+    border-color: #6366f1;
+    color: white;
+}
+
+.price-preset-btn.price-preset-warning {
+    background: #f59e0b;
+    border-color: #f59e0b;
+    color: white;
+}
+
+/* Knobs Grid - Simple without inner cards */
+.knobs-grid-simple {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+    justify-items: center;
+}
+
+@media (max-width: 1200px) {
+    .knobs-grid-simple {
+        grid-template-columns: repeat(2, 1fr);
+        gap: 24px;
+    }
+}
+
+@media (max-width: 768px) {
+    .knobs-grid-simple {
+        grid-template-columns: 1fr;
+        gap: 20px;
+    }
+}
+
+.knob-group {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    width: 100%;
+}
+
+.knob-group-title {
+    font-size: 0.9rem;
+    font-weight: 700;
+    color: #4b5563;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    margin-bottom: 4px;
+}
+
+.knob-pair {
+    display: flex;
+    gap: 20px;
+    justify-content: center;
+    align-items: center;
+}
+
+.knob-inputs {
+    display: flex;
+    gap: 8px;
+    align-items: center;
+    width: 100%;
+    max-width: 300px;
+    padding: 10px 12px;
+    background: #f9fafb;
+    border-radius: 8px;
+    border: 1px solid #e5e7eb;
+}
+
+.knob-inputs input {
+    flex: 1;
+    padding: 8px;
+    border: 1px solid #d1d5db;
+    border-radius: 6px;
+    text-align: center;
+    font-size: 0.875rem;
+    background: white;
+}
+
+.knob-inputs input:focus {
+    outline: none;
+    border-color: #6b7280;
+    box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1);
+}
+
+.knob-inputs .range-group__sep {
+    color: #6b7280;
+    font-weight: 600;
+    font-size: 1rem;
+}
+
+/* Block 3: Main Filters */
+.filters-row {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+}
+
+@media (max-width: 768px) {
+    .filters-row {
+        grid-template-columns: 1fr;
+    }
+}
+
+.filter-item {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+.filter-item label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+}
+
+/* Bedroom chips styling */
+.bedroom-chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 8px;
+}
+
+.bedroom-chip {
+    padding: 8px 16px;
+    border: 2px solid #e5e7eb;
+    border-radius: 8px;
+    background: white;
+    color: #374151;
+    font-size: 0.875rem;
+    font-weight: 600;
+    cursor: pointer;
+    transition: all 0.2s;
+}
+
+.bedroom-chip:hover {
+    border-color: #cbd5e1;
+    background: #f8fafc;
+}
+
+.bedroom-chip.active {
+    background: var(--primary, #6366f1);
+    border-color: var(--primary, #6366f1);
+    color: white;
+}
+
+/* Block 4: Extras & Delivery */
+.extras-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 16px;
+    margin-bottom: 20px;
+    padding-bottom: 16px;
+    border-bottom: 1px solid #e5e7eb;
+}
+
+.checkbox-label {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 0.9rem;
+    color: #374151;
+    cursor: pointer;
+    user-select: none;
+}
+
+.checkbox-label:hover {
+    color: #1f2937;
+}
+
+.checkbox-label input[type="checkbox"] {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+    accent-color: var(--primary, #6366f1);
+}
+
+.delivery-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+}
+
+.delivery-row label {
+    font-size: 0.875rem;
+    font-weight: 600;
+    color: #374151;
+    white-space: nowrap;
+}
+
+.delivery-row select {
+    flex: 1;
+    min-width: 200px;
+    max-width: 350px;
+}
+
+/* Mobile responsive adjustments */
+@media (max-width: 640px) {
+    .filters-panel__header {
+        flex-direction: column;
+        align-items: stretch;
+        gap: 12px;
+    }
+    
+    .filters-header-right {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    
+    .sort-by-container {
+        justify-content: space-between;
+    }
+    
+    .sort-by-select {
+        flex: 1;
+    }
+    
+    .filter-block-content {
+        padding: 16px;
+    }
+    
+    .price-presets {
+        gap: 6px;
+    }
+    
+    .price-preset-btn {
+        font-size: 0.8125rem;
+        padding: 6px 12px;
+    }
+    
+    .knob-group-title {
+        font-size: 0.85rem;
+    }
+}
+
+/* Remove old knob-column-wrapper card styles */
+.knob-column-wrapper {
+    background: none !important;
+    border: none !important;
+    box-shadow: none !important;
+    padding: 0 !important;
+    max-width: none !important;
+}
+
+.knob-column-wrapper:hover {
+    transform: none !important;
+    box-shadow: none !important;
+}
+
+/* Override old grid styles */
+.knobs-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 32px;
+}
+
+/* Clean up transitions */
+* {
+    transition-duration: 0.2s;
+    transition-timing-function: ease;
+}
+</style>
 </head>
 <body>
     <!-- Sidebar Overlay -->
@@ -729,7 +1147,11 @@
                 </div>
 
                 <!-- Filters Panel -->
+
+                <!-- Filters Panel -->
                 <div class="filters-panel">
+                    
+                    <!-- HEADER with Sort By on the right -->
                     <div class="filters-panel__header">
                         <span class="filters-panel__title">
                             Filters <span class="active-filters-badge" id="activeFiltersCount" style="display:none">0</span>
@@ -768,86 +1190,17 @@
                         <div class="filter-block-header">
                             <span class="filter-block-title">💰 Price Filters</span>
                         </div>
-                        <div class="filter-block-content"">
-                            <label class="filter-group__label">Location</label>
-                            <div class="multi-select" id="locationMultiSelect">
-                                <div class="multi-select__trigger" onclick="toggleMultiSelect('location')">
-                                    <span class="multi-select__text" id="locationText">All locations</span>
-                                    <span class="multi-select__arrow">▼</span>
-                                </div>
-                                <div class="multi-select__dropdown" id="locationDropdown"></div>
-                            </div>
-                        </div>
-                        <div class="filter-group">
-                            <label class="filter-group__label">District</label>
-                            <div class="multi-select" id="districtMultiSelect">
-                                <div class="multi-select__trigger" onclick="toggleMultiSelect('district')">
-                                    <span class="multi-select__text" id="districtText">All districts</span>
-                                    <span class="multi-select__arrow">▼</span>
-                                </div>
-                                <div class="multi-select__dropdown" id="districtDropdown"></div>
-                            </div>
-                        </div>
-                        <div class="filter-group" style="display: none;">
-                            <label class="filter-group__label">Type</label>
-                            <div class="multi-select" id="typeMultiSelect">
-                                <div class="multi-select__trigger" onclick="toggleMultiSelect('type')">
-                                    <span class="multi-select__text" id="typeText">All types</span>
-                                    <span class="multi-select__arrow">▼</span>
-                                </div>
-                                <div class="multi-select__dropdown" id="typeDropdown"></div>
-                            </div>
-                        </div>
-                        <div class="filter-group" style="display: none;">
-                            <label class="filter-group__label">Status</label>
-                            <div class="multi-select" id="statusMultiSelect">
-                                <div class="multi-select__trigger" onclick="toggleMultiSelect('status')">
-                                    <span class="multi-select__text" id="statusText">All statuses</span>
-                                    <span class="multi-select__arrow">▼</span>
-                                </div>
-                                <div class="multi-select__dropdown" id="statusDropdown"></div>
-                            </div>
-                        </div>
-                        <div class="filter-group">
-                            <label class="filter-group__label">Main Type</label>
-                            <div class="multi-select" id="mainTypeMultiSelect">
-                                <div class="multi-select__trigger" onclick="toggleMultiSelect('mainType')">
-                                    <span class="multi-select__text" id="mainTypeText">All main types</span>
-                                    <span class="multi-select__arrow">▼</span>
-                                </div>
-                                <!-- Опции заполняются динамически из данных CSV через updateFilters() -->
-                                <div class="multi-select__dropdown" id="mainTypeDropdown"></div>
-                            </div>
-                        </div>
-                        <div class="filter-group">
-                            <label class="filter-group__label">Delivery Date</label>
-                            <div class="delivery-filter">
-                                <select class="input" id="deliveryFilter">
-                                    <option value="">All delivery dates</option>
-                                    <option value="delivered">Already delivered</option>
-                                    <option value="3months">Within 3 months</option>
-                                    <option value="6months">Within 6 months</option>
-                                    <option value="12months">Within 12 months</option>
-                                    <option value="2024">2024</option>
-                                    <option value="2025">2025</option>
-                                    <option value="2026">2026</option>
-                                    <option value="2027+">2027 or later</option>
-                                </select>
-                            </div>
-                        </div>
-                        <div class="filter-group" style="grid-column: span 1;">
-                            <label class="filter-group__label">Price (€)</label>
+                        <div class="filter-block-content">
                             
-                            <!-- Quick Presets -->
-                            <div class="price-presets" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
+                            <!-- Price Presets -->
+                            <div class="price-presets">
                                 <button class="price-preset-btn" onclick="togglePriceRange(0, 200000); event.preventDefault();">
                                     <200K
                                 </button>
                                 <button class="price-preset-btn" onclick="togglePriceRange(200000, 300000); event.preventDefault();">
                                     200-300K
                                 </button>
-                                <button class="price-preset-btn" onclick="togglePriceRange(300000, 400000); event.preventDefault();" 
-                                        style="background: var(--primary, #6366f1); border-color: var(--primary, #6366f1); color: white; font-weight: 600; font-size: 0.9rem; padding: 8px 16px;">
+                                <button class="price-preset-btn price-preset-highlighted" onclick="togglePriceRange(300000, 400000); event.preventDefault();">
                                     300-400K
                                 </button>
                                 <button class="price-preset-btn" onclick="togglePriceRange(400000, 500000); event.preventDefault();">
@@ -862,14 +1215,12 @@
                                 <button class="price-preset-btn" onclick="togglePriceRange(2000000, 50000000); event.preventDefault();">
                                     >2M
                                 </button>
-                                <button class="price-preset-btn" onclick="togglePriceUponRequest(); event.preventDefault();" style="background: var(--warning, #f59e0b); border-color: var(--warning, #f59e0b); color: white;">
+                                <button class="price-preset-btn price-preset-warning" onclick="togglePriceUponRequest(); event.preventDefault();">
                                     💰 Price upon request
                                 </button>
                             </div>
-                            
-                            
-                            <!-- ALL KNOBS SECTION - Price, Area, Price/m² -->
-                            <div class="all-knobs-section" style="margin-top: 20px;">
+
+                                                        <div class="all-knobs-section" style="margin-top: 20px;">
                                 <div class="knobs-grid">
                                     <!-- PRICE (€) Column -->
                                     <div class="knob-column-wrapper">
@@ -1253,716 +1604,131 @@
                             <style>
                             /* Unified Knobs Section - Horizontal Clean Layout */
                             .all-knobs-section {
-                                margin: 24px 0;
-                            }
-                            
-                            .knobs-grid {
-                                display: flex;
-                                justify-content: space-between;
-                                align-items: flex-start;
-                                gap: 20px;
-                                flex-wrap: wrap;
-                            }
-                            
-                            @media (max-width: 1200px) {
-                                .knobs-grid {
-                                    justify-content: center;
-                                    gap: 24px;
-                                }
-                            }
-                            
-                            @media (max-width: 768px) {
-                                .knobs-grid {
-                                    flex-direction: column;
-                                    align-items: center;
-                                    gap: 20px;
-                                }
-                            }
-                            
-                            .knob-column-wrapper {
-                                display: flex;
-                                flex-direction: column;
-                                align-items: center;
-                                gap: 8px;
-                                flex: 0 1 auto;
-                                min-width: 240px;
-                                max-width: 300px;
-                            }
-                            
-                            .knob-column-header {
-                                width: 100%;
-                                text-align: center;
-                                padding-bottom: 8px;
-                                border-bottom: 2px solid #e5e7eb;
-                            }
-                            
-                            .knob-column-title {
-                                font-size: 0.875rem;
-                                font-weight: 700;
-                                color: #374151;
-                                text-transform: uppercase;
-                                letter-spacing: 0.08em;
-                                margin: 0;
-                            }
-                            
-                            .dual-knobs-row {
-                                display: flex;
-                                gap: 16px;
-                                justify-content: center;
-                                align-items: center;
-                            }
-                            
-                            /* Range inputs styling within cards */
-                            .knob-column-wrapper .range-group {
-                                display: flex;
-                                gap: 8px;
-                                align-items: center;
-                                justify-content: center;
-                                width: 100%;
-                                margin-top: 8px;
-                            }
-                            
-                            .knob-column-wrapper .range-group input {
-                                flex: 1;
-                                max-width: 90px;
-                                padding: 6px 8px;
-                                border: 1px solid #d1d5db;
-                                border-radius: 4px;
-                                font-size: 0.8rem;
-                                text-align: center;
-                                background: white;
-                                transition: border-color 0.2s;
-                            }
-                            
-                            .knob-column-wrapper .range-group input:focus {
-                                outline: none;
-                                border-color: #6b7280;
-                            }
-                            
-                            .knob-column-wrapper .range-group input::placeholder {
-                                color: #9ca3af;
-                                font-size: 0.75rem;
-                            }
-                            
-                            .knob-column-wrapper .range-group__sep {
-                                color: #9ca3af;
-                                font-weight: 500;
-                                font-size: 0.875rem;
-                            }
-                            
-                            .dual-price-knobs-container {
-                                display: flex;
-                                flex-direction: column;
-                                align-items: center;
-                                padding: 10px;
-                            }
-                            
-                            .dual-knobs-wrapper {
-                                display: flex;
-                                gap: 30px;
-                                justify-content: center;
-                                align-items: center;
-                                flex-wrap: wrap;
-                            }
-                            
-                            .knob-column {
-                                display: flex;
-                                flex-direction: column;
-                                align-items: center;
-                            }
-                            
-                            .circular-price-knob {
-                                position: relative;
-                                width: 130px;
-                                height: 130px;
-                                cursor: pointer;
-                                user-select: none;
-                                touch-action: none;
-                            }
-                            
-                            .circular-price-knob svg {
-                                width: 130px !important;
-                                height: 130px !important;
-                            }
-                            
-                            .circular-area-knob svg,
-                            .circular-pricesqm-knob svg {
-                                width: 130px !important;
-                                height: 130px !important;
-                            }
-                            
-                            .knob-center-display {
-                                position: absolute;
-                                top: 50%;
-                                left: 50%;
-                                transform: translate(-50%, -50%);
-                                text-align: center;
-                                pointer-events: none;
-                            }
-                            
-                            .knob-value {
-                                font-size: 1.05rem;
-                                font-weight: 700;
-                                color: #1f2937;
-                                margin-bottom: 3px;
-                            }
-                            
-                            .knob-label {
-                                font-size: 0.65rem;
-                                color: #6b7280;
-                                text-transform: uppercase;
-                                letter-spacing: 0.05em;
-                            }
-                            
-                            .circular-price-knob g {
-                                cursor: grab;
-                                transition: transform 0.05s ease-out;
-                            }
-                            
-                            .circular-price-knob g:active {
-                                cursor: grabbing;
-                            }
-                            
-                            .circular-price-knob:hover g circle:first-child {
-                                stroke-width: 3.5;
-                                r: 13;
-                            }
-                            
-                            /* Area and Price/m² Knobs - Gray Tones */
-                            .dual-area-knobs-container,
-                            .dual-pricesqm-knobs-container {
-                                display: flex;
-                                flex-direction: column;
-                                align-items: center;
-                                padding: 4px;
-                            }
-                            
-                            .circular-area-knob,
-                            .circular-pricesqm-knob {
-                                position: relative;
-                                width: 130px;
-                                height: 130px;
-                                cursor: pointer;
-                                user-select: none;
-                                touch-action: none;
-                            }
-                            
-                            .knob-value-gray {
-                                font-size: 1.05rem;
-                                font-weight: 700;
-                                color: #374151;
-                                margin-bottom: 3px;
-                            }
-                            
-                            .knob-label-gray {
-                                font-size: 0.65rem;
-                                color: #9ca3af;
-                                text-transform: uppercase;
-                                letter-spacing: 0.05em;
-                            }
-                            
-                            .circular-area-knob g,
-                            .circular-pricesqm-knob g {
-                                cursor: grab;
-                                transition: transform 0.05s ease-out;
-                            }
-                            
-                            .circular-area-knob g:active,
-                            .circular-pricesqm-knob g:active {
-                                cursor: grabbing;
-                            }
-                            
-                            .circular-area-knob:hover g circle:first-child,
-                            .circular-pricesqm-knob:hover g circle:first-child {
-                                stroke-width: 3.5;
-                                r: 12;
-                            }
-                            </style>
-                            
-                            <script>
-                            // Dual Circular Price Knobs Logic
-                            (function() {
-                                // Create knob controller
-                                function createKnobController(config) {
-                                    const {knobId, handleId, arcId, valueId, inputId, color, isPremium} = config;
-                                    
-                                    const knob = document.getElementById(knobId);
-                                    const handle = document.getElementById(handleId);
-                                    const arc = document.getElementById(arcId);
-                                    const valueDisplay = document.getElementById(valueId);
-                                    const priceInput = document.getElementById(inputId);
-                                    
-                                    let isDragging = false;
-                                    let currentAngle = 0;
-                                    
-                                    function angleToPrice(angle) {
-                                        if (angle <= 345) {
-                                            return Math.round((angle / 345) * 1000000);
-                                        } else {
-                                            return 50000000;
-                                        }
-                                    }
-                                    
-                                    function priceToAngle(price) {
-                                        if (price <= 0) return 0;
-                                        if (price <= 1000000) {
-                                            return (price / 1000000) * 345;
-                                        } else {
-                                            return 352.5;
-                                        }
-                                    }
-                                    
-                                    function formatPrice(price) {
-                                        if (price >= 50000000) return '€1M+';
-                                        if (price >= 1000000) return '€' + (price / 1000000).toFixed(1) + 'M';
-                                        if (price >= 1000) return '€' + (price / 1000).toFixed(0) + 'K';
-                                        if (price === 0) return '€0';
-                                        return '€' + price.toLocaleString();
-                                    }
-                                    
-                                    function updateKnob(angle) {
-                                        currentAngle = Math.max(0, Math.min(360, angle));
-                                        
-                                        // Update handle position
-                                        const handleAngle = currentAngle - 90;
-                                        handle.setAttribute('transform', `rotate(${handleAngle} 90 90)`);
-                                        
-                                        // Update arc (circumference = 2πr = 2π*65 ≈ 408.4)
-                                        const arcLength = (currentAngle / 360) * 408.4;
-                                        arc.setAttribute('stroke-dasharray', `${arcLength} ${408.4 - arcLength}`);
-                                        
-                                        // Update price
-                                        const price = angleToPrice(currentAngle);
-                                        valueDisplay.textContent = formatPrice(price);
-                                        priceInput.value = price >= 50000000 ? '' : price;
-                                        
-                                        // Change color in premium sector
-                                        if (currentAngle > 345) {
-                                            arc.setAttribute('stroke', '#f59e0b');
-                                            valueDisplay.style.color = '#f59e0b';
-                                        } else {
-                                            arc.setAttribute('stroke', color);
-                                            valueDisplay.style.color = '#1f2937';
-                                        }
-                                        
-                                        // Trigger filter update
-                                        if (!isDragging) {
-                                            renderProperties();
-                                        }
-                                    }
-                                    
-                                    function getAngleFromEvent(e) {
-                                        const rect = knob.getBoundingClientRect();
-                                        const centerX = rect.left + rect.width / 2;
-                                        const centerY = rect.top + rect.height / 2;
-                                        
-                                        const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
-                                        const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
-                                        
-                                        if (!clientX || !clientY) return currentAngle;
-                                        
-                                        const deltaX = clientX - centerX;
-                                        const deltaY = clientY - centerY;
-                                        
-                                        let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) + 90;
-                                        if (angle < 0) angle += 360;
-                                        
-                                        return angle;
-                                    }
-                                    
-                                    function startDrag(e) {
-                                        isDragging = true;
-                                        updateKnob(getAngleFromEvent(e));
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                    }
-                                    
-                                    function drag(e) {
-                                        if (isDragging) {
-                                            updateKnob(getAngleFromEvent(e));
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                        }
-                                    }
-                                    
-                                    function stopDrag(e) {
-                                        if (isDragging) {
-                                            isDragging = false;
-                                            renderProperties();
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                        }
-                                    }
-                                    
-                                    // Event listeners on knob itself
-                                    knob.addEventListener('mousedown', startDrag);
-                                    knob.addEventListener('touchstart', startDrag, {passive: false});
-                                    
-                                    // Global listeners for drag and stop
-                                    document.addEventListener('mousemove', drag);
-                                    document.addEventListener('touchmove', drag, {passive: false});
-                                    document.addEventListener('mouseup', stopDrag);
-                                    document.addEventListener('touchend', stopDrag);
-                                    
-                                    return {
-                                        updateKnob,
-                                        priceToAngle,
-                                        getInput: () => priceInput
-                                    };
-                                }
-                                
-                                // Create both knobs
-                                const minKnob = createKnobController({
-                                    knobId: 'priceKnobMin',
-                                    handleId: 'priceKnobMinHandle',
-                                    arcId: 'priceKnobMinArc',
-                                    valueId: 'priceKnobMinValue',
-                                    inputId: 'priceMin',
-                                    color: '#6b7280',
-                                    isPremium: false
-                                });
-                                
-                                const maxKnob = createKnobController({
-                                    knobId: 'priceKnobMax',
-                                    handleId: 'priceKnobMaxHandle',
-                                    arcId: 'priceKnobMaxArc',
-                                    valueId: 'priceKnobMaxValue',
-                                    inputId: 'priceMax',
-                                    color: '#9ca3af',
-                                    isPremium: true
-                                });
-                                
-                                // Update from manual input
-                                window.updatePriceFromInputs = function() {
-                                    const minPrice = parseInt(minKnob.getInput().value) || 0;
-                                    const maxPrice = parseInt(maxKnob.getInput().value) || 50000000;
-                                    
-                                    const minAngle = minKnob.priceToAngle(minPrice);
-                                    const maxAngle = maxKnob.priceToAngle(maxPrice);
-                                    
-                                    minKnob.updateKnob(minAngle);
-                                    maxKnob.updateKnob(maxAngle);
-                                };
-                                
-                                // Initialize
-                                minKnob.updateKnob(0); // Start at 0
-                                maxKnob.updateKnob(360); // Start at max (show all)
-                            })();
-                            
-                            // Dual Circular Area Knobs Logic
-                            (function() {
-                                function createAreaKnob(config) {
-                                    const {knobId, handleId, arcId, valueId, inputId, color, maxValue} = config;
-                                    
-                                    const knob = document.getElementById(knobId);
-                                    const handle = document.getElementById(handleId);
-                                    const arc = document.getElementById(arcId);
-                                    const valueDisplay = document.getElementById(valueId);
-                                    const input = document.getElementById(inputId);
-                                    
-                                    let isDragging = false;
-                                    let currentAngle = 0;
-                                    
-                                    function angleToValue(angle) {
-                                        return Math.round((angle / 360) * maxValue);
-                                    }
-                                    
-                                    function valueToAngle(value) {
-                                        if (value <= 0) return 0;
-                                        return Math.min(360, (value / maxValue) * 360);
-                                    }
-                                    
-                                    function formatValue(value) {
-                                        if (value >= 1000) return (value / 1000).toFixed(0) + 'K m²';
-                                        return value + ' m²';
-                                    }
-                                    
-                                    function updateKnob(angle) {
-                                        currentAngle = Math.max(0, Math.min(360, angle));
-                                        
-                                        const handleAngle = currentAngle - 90;
-                                        handle.setAttribute('transform', `rotate(${handleAngle} 80 80)`);
-                                        
-                                        const arcLength = (currentAngle / 360) * 345;
-                                        arc.setAttribute('stroke-dasharray', `${arcLength} ${345 - arcLength}`);
-                                        
-                                        const value = angleToValue(currentAngle);
-                                        valueDisplay.textContent = formatValue(value);
-                                        input.value = value || '';
-                                    }
-                                    
-                                    function getAngleFromEvent(e) {
-                                        const rect = knob.getBoundingClientRect();
-                                        const centerX = rect.left + rect.width / 2;
-                                        const centerY = rect.top + rect.height / 2;
-                                        
-                                        const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
-                                        const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
-                                        
-                                        if (!clientX || !clientY) return currentAngle;
-                                        
-                                        const deltaX = clientX - centerX;
-                                        const deltaY = clientY - centerY;
-                                        
-                                        let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) + 90;
-                                        if (angle < 0) angle += 360;
-                                        
-                                        return angle;
-                                    }
-                                    
-                                    function startDrag(e) {
-                                        isDragging = true;
-                                        updateKnob(getAngleFromEvent(e));
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                    }
-                                    
-                                    function drag(e) {
-                                        if (isDragging) {
-                                            updateKnob(getAngleFromEvent(e));
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                        }
-                                    }
-                                    
-                                    function stopDrag(e) {
-                                        if (isDragging) {
-                                            isDragging = false;
-                                            renderProperties();
-                                            if (e) {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                            }
-                                        }
-                                    }
-                                    
-                                    knob.addEventListener('mousedown', startDrag);
-                                    knob.addEventListener('touchstart', startDrag, {passive: false});
-                                    document.addEventListener('mousemove', drag);
-                                    document.addEventListener('touchmove', drag, {passive: false});
-                                    document.addEventListener('mouseup', stopDrag);
-                                    document.addEventListener('touchend', stopDrag);
-                                    
-                                    return {updateKnob, valueToAngle, getInput: () => input};
-                                }
-                                
-                                const areaMinKnob = createAreaKnob({
-                                    knobId: 'areaKnobMin',
-                                    handleId: 'areaKnobMinHandle',
-                                    arcId: 'areaKnobMinArc',
-                                    valueId: 'areaKnobMinValue',
-                                    inputId: 'areaMin',
-                                    color: '#4b5563',
-                                    maxValue: 500
-                                });
-                                
-                                const areaMaxKnob = createAreaKnob({
-                                    knobId: 'areaKnobMax',
-                                    handleId: 'areaKnobMaxHandle',
-                                    arcId: 'areaKnobMaxArc',
-                                    valueId: 'areaKnobMaxValue',
-                                    inputId: 'areaMax',
-                                    color: '#6b7280',
-                                    maxValue: 500
-                                });
-                                
-                                window.updateAreaFromInputs = function() {
-                                    const minValue = parseInt(areaMinKnob.getInput().value) || 0;
-                                    const maxValue = parseInt(areaMaxKnob.getInput().value) || 500;
-                                    
-                                    areaMinKnob.updateKnob(areaMinKnob.valueToAngle(minValue));
-                                    areaMaxKnob.updateKnob(areaMaxKnob.valueToAngle(maxValue));
-                                };
-                                
-                                areaMinKnob.updateKnob(0);
-                                areaMaxKnob.updateKnob(360);
-                            })();
-                            
-                            // Dual Circular Price/m² Knobs Logic
-                            (function() {
-                                function createPriceSqmKnob(config) {
-                                    const {knobId, handleId, arcId, valueId, inputId, color, maxValue} = config;
-                                    
-                                    const knob = document.getElementById(knobId);
-                                    const handle = document.getElementById(handleId);
-                                    const arc = document.getElementById(arcId);
-                                    const valueDisplay = document.getElementById(valueId);
-                                    const input = document.getElementById(inputId);
-                                    
-                                    let isDragging = false;
-                                    let currentAngle = 0;
-                                    
-                                    function angleToValue(angle) {
-                                        return Math.round((angle / 360) * maxValue);
-                                    }
-                                    
-                                    function valueToAngle(value) {
-                                        if (value <= 0) return 0;
-                                        return Math.min(360, (value / maxValue) * 360);
-                                    }
-                                    
-                                    function formatValue(value) {
-                                        if (value >= 1000) return '€' + (value / 1000).toFixed(0) + 'K';
-                                        return '€' + value;
-                                    }
-                                    
-                                    function updateKnob(angle) {
-                                        currentAngle = Math.max(0, Math.min(360, angle));
-                                        
-                                        const handleAngle = currentAngle - 90;
-                                        handle.setAttribute('transform', `rotate(${handleAngle} 80 80)`);
-                                        
-                                        const arcLength = (currentAngle / 360) * 345;
-                                        arc.setAttribute('stroke-dasharray', `${arcLength} ${345 - arcLength}`);
-                                        
-                                        const value = angleToValue(currentAngle);
-                                        valueDisplay.textContent = formatValue(value);
-                                        input.value = value || '';
-                                    }
-                                    
-                                    function getAngleFromEvent(e) {
-                                        const rect = knob.getBoundingClientRect();
-                                        const centerX = rect.left + rect.width / 2;
-                                        const centerY = rect.top + rect.height / 2;
-                                        
-                                        const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
-                                        const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
-                                        
-                                        if (!clientX || !clientY) return currentAngle;
-                                        
-                                        const deltaX = clientX - centerX;
-                                        const deltaY = clientY - centerY;
-                                        
-                                        let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) + 90;
-                                        if (angle < 0) angle += 360;
-                                        
-                                        return angle;
-                                    }
-                                    
-                                    function startDrag(e) {
-                                        isDragging = true;
-                                        updateKnob(getAngleFromEvent(e));
-                                        e.preventDefault();
-                                        e.stopPropagation();
-                                    }
-                                    
-                                    function drag(e) {
-                                        if (isDragging) {
-                                            updateKnob(getAngleFromEvent(e));
-                                            e.preventDefault();
-                                            e.stopPropagation();
-                                        }
-                                    }
-                                    
-                                    function stopDrag(e) {
-                                        if (isDragging) {
-                                            isDragging = false;
-                                            renderProperties();
-                                            if (e) {
-                                                e.preventDefault();
-                                                e.stopPropagation();
-                                            }
-                                        }
-                                    }
-                                    
-                                    knob.addEventListener('mousedown', startDrag);
-                                    knob.addEventListener('touchstart', startDrag, {passive: false});
-                                    document.addEventListener('mousemove', drag);
-                                    document.addEventListener('touchmove', drag, {passive: false});
-                                    document.addEventListener('mouseup', stopDrag);
-                                    document.addEventListener('touchend', stopDrag);
-                                    
-                                    return {updateKnob, valueToAngle, getInput: () => input};
-                                }
-                                
-                                const priceSqmMinKnob = createPriceSqmKnob({
-                                    knobId: 'priceSqmKnobMin',
-                                    handleId: 'priceSqmKnobMinHandle',
-                                    arcId: 'priceSqmKnobMinArc',
-                                    valueId: 'priceSqmKnobMinValue',
-                                    inputId: 'priceSqmMin',
-                                    color: '#6b7280',
-                                    maxValue: 10000
-                                });
-                                
-                                const priceSqmMaxKnob = createPriceSqmKnob({
-                                    knobId: 'priceSqmKnobMax',
-                                    handleId: 'priceSqmKnobMaxHandle',
-                                    arcId: 'priceSqmKnobMaxArc',
-                                    valueId: 'priceSqmKnobMaxValue',
-                                    inputId: 'priceSqmMax',
-                                    color: '#9ca3af',
-                                    maxValue: 10000
-                                });
-                                
-                                window.updatePriceSqmFromInputs = function() {
-                                    const minValue = parseInt(priceSqmMinKnob.getInput().value) || 0;
-                                    const maxValue = parseInt(priceSqmMaxKnob.getInput().value) || 10000;
-                                    
-                                    priceSqmMinKnob.updateKnob(priceSqmMinKnob.valueToAngle(minValue));
-                                    priceSqmMaxKnob.updateKnob(priceSqmMaxKnob.valueToAngle(maxValue));
-                                };
-                                
-                                priceSqmMinKnob.updateKnob(0);
-                                priceSqmMaxKnob.updateKnob(360);
-                            })();
-                            </script>
+
+
                         </div>
                     </div>
 
-                    <!-- Bedrooms chips -->
-                    <div style="margin-top: var(--space-md);">
-                        <label class="filter-group__label">Bedrooms</label>
-                        <div class="bedroom-chips" style="margin-top: 4px;">
-                            <button class="bedroom-chip active" data-beds="">Any</button>
-                            <button class="bedroom-chip" data-beds="0">Studio</button>
-                            <button class="bedroom-chip" data-beds="1">1</button>
-                            <button class="bedroom-chip" data-beds="2">2</button>
-                            <button class="bedroom-chip" data-beds="3">3</button>
-                            <button class="bedroom-chip" data-beds="4">4+</button>
+                    <!-- BLOCK 3: Main Filters -->
+                    <div class="filter-block">
+                        <div class="filter-block-header">
+                            <span class="filter-block-title">🏠 Main Filters</span>
                         </div>
-                    </div>
-
-                    <!-- Advanced filters toggle -->
-                    <button class="filters-toggle" onclick="toggleAdvancedFilters()">
-                        <span id="advancedToggleText">More filters</span>
-                        <span id="advancedToggleIcon">▼</span>
-                    </button>
-
-                    <!-- Advanced filters -->
-                    <div class="filters-advanced" id="advancedFilters">
-                        <div class="filter-group">
-                        <div class="filter-group checkbox-filters">
-                            <label class="filter-group__label" style="width: 100%;">Extras</label>
-                            <label class="checkbox-filter">
-                                <input type="checkbox" id="hasVeranda"> Veranda
-                            </label>
-                            <label class="checkbox-filter">
-                                <input type="checkbox" id="hasBasement"> Basement
-                            </label>
-                            <label class="checkbox-filter">
-                                <input type="checkbox" id="hasPool"> Pool
-                            </label>
-                            <label class="checkbox-filter">
-                                <input type="checkbox" id="hasParking"> Parking
-                            </label>
-                            <label class="checkbox-filter">
-                                <input type="checkbox" id="hasSeaView"> Sea View
-                            </label>
-                        </div>
-                        <div class="filter-group">
-                            <label class="filter-group__label">Object Code</label>
-                            <div class="multi-select" id="objectMultiSelect">
-                                <div class="multi-select__trigger" onclick="toggleMultiSelect('object')">
-                                    <span class="multi-select__text" id="objectText">All object codes</span>
-                                    <span class="multi-select__arrow">▼</span>
+                        <div class="filter-block-content">
+                            <div class="filters-row">
+                                
+                                <!-- Location -->
+                                <div class="filter-item">
+                                    <label>Location</label>
+                                    <div class="multi-select" id="locationMultiSelect">
+                                        <div class="multi-select__trigger" onclick="toggleMultiSelect('location')">
+                                            <span class="multi-select__text" id="locationText">All locations</span>
+                                            <span class="multi-select__arrow">▼</span>
+                                        </div>
+                                        <div class="multi-select__dropdown" id="locationDropdown"></div>
+                                    </div>
                                 </div>
-                                <div class="multi-select__dropdown" id="objectDropdown"></div>
+
+                                <!-- District -->
+                                <div class="filter-item">
+                                    <label>District</label>
+                                    <div class="multi-select" id="districtMultiSelect">
+                                        <div class="multi-select__trigger" onclick="toggleMultiSelect('district')">
+                                            <span class="multi-select__text" id="districtText">All districts</span>
+                                            <span class="multi-select__arrow">▼</span>
+                                        </div>
+                                        <div class="multi-select__dropdown" id="districtDropdown"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Main Type -->
+                                <div class="filter-item">
+                                    <label>Main Type</label>
+                                    <div class="multi-select" id="mainTypeMultiSelect">
+                                        <div class="multi-select__trigger" onclick="toggleMultiSelect('mainType')">
+                                            <span class="multi-select__text" id="mainTypeText">All main types</span>
+                                            <span class="multi-select__arrow">▼</span>
+                                        </div>
+                                        <div class="multi-select__dropdown" id="mainTypeDropdown"></div>
+                                    </div>
+                                </div>
+
+                                <!-- Bedrooms -->
+                                <div class="filter-item" style="grid-column: span 2;">
+                                    <label>Bedrooms</label>
+                                    <div class="bedroom-chips">
+                                        <button class="bedroom-chip active" data-beds="">Any</button>
+                                        <button class="bedroom-chip" data-beds="0">Studio</button>
+                                        <button class="bedroom-chip" data-beds="1">1</button>
+                                        <button class="bedroom-chip" data-beds="2">2</button>
+                                        <button class="bedroom-chip" data-beds="3">3</button>
+                                        <button class="bedroom-chip" data-beds="4">4+</button>
+                                    </div>
+                                </div>
+
+                                <!-- Object Code -->
+                                <div class="filter-item">
+                                    <label>Object Code</label>
+                                    <div class="multi-select" id="objectMultiSelect">
+                                        <div class="multi-select__trigger" onclick="toggleMultiSelect('object')">
+                                            <span class="multi-select__text" id="objectText">All object codes</span>
+                                            <span class="multi-select__arrow">▼</span>
+                                        </div>
+                                        <div class="multi-select__dropdown" id="objectDropdown"></div>
+                                    </div>
+                                </div>
+
                             </div>
                         </div>
                     </div>
-                </div>
 
+                    <!-- BLOCK 4: Extras & Delivery -->
+                    <div class="filter-block">
+                        <div class="filter-block-header">
+                            <span class="filter-block-title">✨ Extras & Delivery</span>
+                        </div>
+                        <div class="filter-block-content">
+                            
+                            <!-- Extras checkboxes -->
+                            <div class="extras-row">
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="hasVeranda"> Veranda
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="hasBasement"> Basement
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="hasPool"> Pool
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="hasParking"> Parking
+                                </label>
+                                <label class="checkbox-label">
+                                    <input type="checkbox" id="hasSeaView"> Sea View
+                                </label>
+                            </div>
+
+                            <!-- Delivery Date -->
+                            <div class="delivery-row">
+                                <label>Delivery Date</label>
+                                <select class="input" id="deliveryFilter">
+                                    <option value="">All delivery dates</option>
+                                    <option value="delivered">Already delivered</option>
+                                    <option value="3months">Within 3 months</option>
+                                    <option value="6months">Within 6 months</option>
+                                    <option value="12months">Within 12 months</option>
+                                    <option value="2024">2024</option>
+                                    <option value="2025">2025</option>
+                                    <option value="2026">2026</option>
+                                    <option value="2027+">2027 or later</option>
+                                </select>
+                            </div>
+
+                        </div>
+                    </div>
+
+                </div>
+                <!-- End filters-panel -->
                 <!-- Properties Grid -->
                 <div class="property-grid" id="propertiesGrid">
                     <div class="empty-state">
