@@ -1124,7 +1124,112 @@
                                     <span class="knob-column-title">Price/m² (€)</span>
                                 </div>
                                 <div class="dual-knobs-row">
-                                    <!-- Price/m² knobs will be inserted here by moving from advanced filters -->
+                                    <!-- Min Price/m² Knob (Light Gray) -->
+                                    <div class="knob-column">
+                                        <div class="circular-pricesqm-knob" id="priceSqmKnobMin">
+                                            <svg width="160" height="160" viewBox="0 0 160 160">
+                                                <!-- Background circle with striped pattern -->
+                                                <circle cx="80" cy="80" r="55" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-dasharray="5 2"/>
+                                                
+                                                <!-- Main sector gradient -->
+                                                <circle cx="80" cy="80" r="55" fill="none" 
+                                                        stroke="url(#priceSqmGradientMin)" 
+                                                        stroke-width="14"
+                                                        stroke-dasharray="345 10"
+                                                        stroke-dashoffset="86"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 80 80)"/>
+                                                
+                                                <!-- Active arc -->
+                                                <circle cx="80" cy="80" r="55" fill="none" 
+                                                        id="priceSqmKnobMinArc"
+                                                        stroke="#6b7280" 
+                                                        stroke-width="16"
+                                                        stroke-dasharray="0 345"
+                                                        stroke-dashoffset="86"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 80 80)"/>
+                                                
+                                                <!-- Handle -->
+                                                <g id="priceSqmKnobMinHandle">
+                                                    <circle cx="80" cy="25" r="10" fill="white" stroke="#6b7280" stroke-width="2.5"/>
+                                                    <circle cx="80" cy="25" r="5" fill="#6b7280"/>
+                                                </g>
+                                                
+                                                <!-- Gradients -->
+                                                <defs>
+                                                    <linearGradient id="priceSqmGradientMin" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                        <stop offset="0%" style="stop-color:#d1d5db;stop-opacity:0.4" />
+                                                        <stop offset="100%" style="stop-color:#9ca3af;stop-opacity:0.7" />
+                                                    </linearGradient>
+                                                </defs>
+                                            </svg>
+                                            
+                                            <!-- Center display -->
+                                            <div class="knob-center-display">
+                                                <div class="knob-value-gray" id="priceSqmKnobMinValue">€0</div>
+                                                <div class="knob-label-gray">Min €/m²</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Max Price/m² Knob (Medium Gray) -->
+                                    <div class="knob-column">
+                                        <div class="circular-pricesqm-knob" id="priceSqmKnobMax">
+                                            <svg width="160" height="160" viewBox="0 0 160 160">
+                                                <!-- Background circle with striped pattern -->
+                                                <circle cx="80" cy="80" r="55" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-dasharray="5 2"/>
+                                                
+                                                <!-- Main sector gradient -->
+                                                <circle cx="80" cy="80" r="55" fill="none" 
+                                                        stroke="url(#priceSqmGradientMax)" 
+                                                        stroke-width="14"
+                                                        stroke-dasharray="345 10"
+                                                        stroke-dashoffset="86"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 80 80)"/>
+                                                
+                                                <!-- Active arc -->
+                                                <circle cx="80" cy="80" r="55" fill="none" 
+                                                        id="priceSqmKnobMaxArc"
+                                                        stroke="#9ca3af" 
+                                                        stroke-width="16"
+                                                        stroke-dasharray="0 345"
+                                                        stroke-dashoffset="86"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 80 80)"/>
+                                                
+                                                <!-- Handle -->
+                                                <g id="priceSqmKnobMaxHandle">
+                                                    <circle cx="80" cy="25" r="10" fill="white" stroke="#9ca3af" stroke-width="2.5"/>
+                                                    <circle cx="80" cy="25" r="5" fill="#9ca3af"/>
+                                                </g>
+                                                
+                                                <!-- Gradients -->
+                                                <defs>
+                                                    <linearGradient id="priceSqmGradientMax" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                        <stop offset="0%" style="stop-color:#d1d5db;stop-opacity:0.4" />
+                                                        <stop offset="100%" style="stop-color:#9ca3af;stop-opacity:0.7" />
+                                                    </linearGradient>
+                                                </defs>
+                                            </svg>
+                                            
+                                            <!-- Center display -->
+                                            <div class="knob-center-display">
+                                                <div class="knob-value-gray" id="priceSqmKnobMaxValue">€10K</div>
+                                                <div class="knob-label-gray">Max €/m²</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Price/m² range inputs below knobs -->
+                                <div class="range-group" style="margin-top: 12px; gap: 8px;">
+                                    <input type="number" class="input" placeholder="Min €/m²" id="priceSqmMin" 
+                                           onchange="updatePriceSqmFromInputs()" style="font-size: 0.875rem;">
+                                    <span class="range-group__sep">—</span>
+                                    <input type="number" class="input" placeholder="Max €/m²" id="priceSqmMax" 
+                                           onchange="updatePriceSqmFromInputs()" style="font-size: 0.875rem;">
                                 </div>
                             </div>
                             <!-- End Price/m² Column -->
@@ -1145,22 +1250,23 @@
                             
                             .knobs-grid {
                                 display: grid;
-                                grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
-                                gap: 40px;
-                                justify-items: center;
+                                grid-template-columns: repeat(3, 1fr);
+                                gap: 24px;
+                                justify-items: stretch;
+                                align-items: start;
                             }
                             
                             @media (max-width: 1400px) {
                                 .knobs-grid {
-                                    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-                                    gap: 30px;
+                                    grid-template-columns: repeat(2, 1fr);
+                                    gap: 20px;
                                 }
                             }
                             
                             @media (max-width: 768px) {
                                 .knobs-grid {
                                     grid-template-columns: 1fr;
-                                    gap: 30px;
+                                    gap: 16px;
                                 }
                             }
                             
@@ -1169,29 +1275,114 @@
                                 flex-direction: column;
                                 align-items: center;
                                 width: 100%;
-                                max-width: 450px;
+                                
+                                /* Card Design */
+                                background: #ffffff;
+                                border: 2px solid #e5e7eb;
+                                border-radius: 16px;
+                                padding: 20px;
+                                box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+                                transition: all 0.3s ease;
+                            }
+                            
+                            .knob-column-wrapper:hover {
+                                border-color: #d1d5db;
+                                box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+                                transform: translateY(-2px);
+                            }
+                            
+                            /* Different border colors for each card */
+                            .knob-column-wrapper:nth-child(1) {
+                                border-top: 4px solid #6b7280;
+                            }
+                            
+                            .knob-column-wrapper:nth-child(2) {
+                                border-top: 4px solid #9ca3af;
+                            }
+                            
+                            .knob-column-wrapper:nth-child(3) {
+                                border-top: 4px solid #d1d5db;
                             }
                             
                             .knob-column-header {
-                                margin-bottom: 15px;
+                                margin-bottom: 16px;
                                 text-align: center;
+                                width: 100%;
+                                padding-bottom: 12px;
+                                border-bottom: 2px solid #f3f4f6;
                             }
                             
                             .knob-column-title {
-                                font-size: 1rem;
-                                font-weight: 600;
-                                color: #374151;
+                                font-size: 1.05rem;
+                                font-weight: 700;
+                                color: #1f2937;
                                 text-transform: uppercase;
-                                letter-spacing: 0.05em;
+                                letter-spacing: 0.1em;
                                 margin: 0;
+                                display: flex;
+                                align-items: center;
+                                justify-content: center;
+                                gap: 8px;
+                            }
+                            
+                            .knob-column-title::before {
+                                content: '';
+                                width: 8px;
+                                height: 8px;
+                                background: currentColor;
+                                border-radius: 50%;
+                                opacity: 0.5;
                             }
                             
                             .dual-knobs-row {
                                 display: flex;
-                                gap: 25px;
+                                gap: 20px;
                                 justify-content: center;
                                 align-items: center;
                                 flex-wrap: wrap;
+                                margin-bottom: 16px;
+                            }
+                            
+                            /* Range inputs styling within cards */
+                            .knob-column-wrapper .range-group {
+                                display: flex;
+                                gap: 10px;
+                                align-items: center;
+                                justify-content: center;
+                                width: 100%;
+                                padding: 12px;
+                                background: #f9fafb;
+                                border-radius: 8px;
+                                border: 1px solid #e5e7eb;
+                            }
+                            
+                            .knob-column-wrapper .range-group input {
+                                flex: 1;
+                                max-width: 120px;
+                                padding: 8px 12px;
+                                border: 1px solid #d1d5db;
+                                border-radius: 6px;
+                                font-size: 0.875rem;
+                                text-align: center;
+                                background: white;
+                                transition: all 0.2s;
+                            }
+                            
+                            .knob-column-wrapper .range-group input:focus {
+                                outline: none;
+                                border-color: #6b7280;
+                                box-shadow: 0 0 0 3px rgba(107, 114, 128, 0.1);
+                            }
+                            
+                            .knob-column-wrapper .range-group input::placeholder {
+                                color: #9ca3af;
+                                font-size: 0.8rem;
+                            }
+                            
+                            .knob-column-wrapper .range-group__sep {
+                                color: #6b7280;
+                                font-weight: 600;
+                                font-size: 1rem;
                             }
                             
                             .dual-price-knobs-container {
@@ -1765,120 +1956,6 @@
                     <!-- Advanced filters -->
                     <div class="filters-advanced" id="advancedFilters">
                         <div class="filter-group">
-                            <label class="filter-group__label">Price/m² (€)</label>
-                            
-                            <!-- Dual Circular Price/m² Knobs -->
-                            <div class="dual-pricesqm-knobs-container" style="margin-top: 15px;">
-                                <div class="dual-knobs-wrapper">
-                                    <!-- Min Price/m² Knob (Light Gray) -->
-                                    <div class="knob-column">
-                                        <div class="circular-pricesqm-knob" id="priceSqmKnobMin">
-                                            <svg width="160" height="160" viewBox="0 0 160 160">
-                                                <!-- Background circle with striped pattern -->
-                                                <circle cx="80" cy="80" r="55" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-dasharray="5 2"/>
-                                                
-                                                <!-- Main sector gradient -->
-                                                <circle cx="80" cy="80" r="55" fill="none" 
-                                                        stroke="url(#priceSqmGradientMin)" 
-                                                        stroke-width="14"
-                                                        stroke-dasharray="345 10"
-                                                        stroke-dashoffset="86"
-                                                        stroke-linecap="round"
-                                                        transform="rotate(-90 80 80)"/>
-                                                
-                                                <!-- Active arc -->
-                                                <circle cx="80" cy="80" r="55" fill="none" 
-                                                        id="priceSqmKnobMinArc"
-                                                        stroke="#6b7280" 
-                                                        stroke-width="16"
-                                                        stroke-dasharray="0 345"
-                                                        stroke-dashoffset="86"
-                                                        stroke-linecap="round"
-                                                        transform="rotate(-90 80 80)"/>
-                                                
-                                                <!-- Handle -->
-                                                <g id="priceSqmKnobMinHandle">
-                                                    <circle cx="80" cy="25" r="10" fill="white" stroke="#6b7280" stroke-width="2.5"/>
-                                                    <circle cx="80" cy="25" r="5" fill="#6b7280"/>
-                                                </g>
-                                                
-                                                <!-- Gradients -->
-                                                <defs>
-                                                    <linearGradient id="priceSqmGradientMin" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                        <stop offset="0%" style="stop-color:#d1d5db;stop-opacity:0.4" />
-                                                        <stop offset="100%" style="stop-color:#9ca3af;stop-opacity:0.7" />
-                                                    </linearGradient>
-                                                </defs>
-                                            </svg>
-                                            
-                                            <!-- Center display -->
-                                            <div class="knob-center-display">
-                                                <div class="knob-value-gray" id="priceSqmKnobMinValue">€0</div>
-                                                <div class="knob-label-gray">Min €/m²</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Max Price/m² Knob (Medium Gray) -->
-                                    <div class="knob-column">
-                                        <div class="circular-pricesqm-knob" id="priceSqmKnobMax">
-                                            <svg width="160" height="160" viewBox="0 0 160 160">
-                                                <!-- Background circle with striped pattern -->
-                                                <circle cx="80" cy="80" r="55" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-dasharray="5 2"/>
-                                                
-                                                <!-- Main sector gradient -->
-                                                <circle cx="80" cy="80" r="55" fill="none" 
-                                                        stroke="url(#priceSqmGradientMax)" 
-                                                        stroke-width="14"
-                                                        stroke-dasharray="345 10"
-                                                        stroke-dashoffset="86"
-                                                        stroke-linecap="round"
-                                                        transform="rotate(-90 80 80)"/>
-                                                
-                                                <!-- Active arc -->
-                                                <circle cx="80" cy="80" r="55" fill="none" 
-                                                        id="priceSqmKnobMaxArc"
-                                                        stroke="#9ca3af" 
-                                                        stroke-width="16"
-                                                        stroke-dasharray="0 345"
-                                                        stroke-dashoffset="86"
-                                                        stroke-linecap="round"
-                                                        transform="rotate(-90 80 80)"/>
-                                                
-                                                <!-- Handle -->
-                                                <g id="priceSqmKnobMaxHandle">
-                                                    <circle cx="80" cy="25" r="10" fill="white" stroke="#9ca3af" stroke-width="2.5"/>
-                                                    <circle cx="80" cy="25" r="5" fill="#9ca3af"/>
-                                                </g>
-                                                
-                                                <!-- Gradients -->
-                                                <defs>
-                                                    <linearGradient id="priceSqmGradientMax" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                        <stop offset="0%" style="stop-color:#d1d5db;stop-opacity:0.4" />
-                                                        <stop offset="100%" style="stop-color:#9ca3af;stop-opacity:0.7" />
-                                                    </linearGradient>
-                                                </defs>
-                                            </svg>
-                                            
-                                            <!-- Center display -->
-                                            <div class="knob-center-display">
-                                                <div class="knob-value-gray" id="priceSqmKnobMaxValue">€10K</div>
-                                                <div class="knob-label-gray">Max €/m²</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Price/m² range inputs below knobs -->
-                                <div class="range-group" style="margin-top: 12px; gap: 8px;">
-                                    <input type="number" class="input" placeholder="Min €/m²" id="priceSqmMin" 
-                                           onchange="updatePriceSqmFromInputs()" style="font-size: 0.875rem;">
-                                    <span class="range-group__sep">—</span>
-                                    <input type="number" class="input" placeholder="Max €/m²" id="priceSqmMax" 
-                                           onchange="updatePriceSqmFromInputs()" style="font-size: 0.875rem;">
-                                </div>
-                            </div>
-                        </div>
                         <div class="filter-group checkbox-filters">
                             <label class="filter-group__label" style="width: 100%;">Extras</label>
                             <label class="checkbox-filter">
