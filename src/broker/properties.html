@@ -856,91 +856,174 @@
                                 </button>
                             </div>
                             
-                            <!-- Circular Price Knob -->
-                            <div class="circular-price-knob-container" style="margin-top: 20px;">
-                                <div class="circular-price-knob" id="priceKnob">
-                                    <svg width="220" height="220" viewBox="0 0 220 220">
-                                        <!-- Background circle -->
-                                        <circle cx="110" cy="110" r="80" fill="none" stroke="#e5e7eb" stroke-width="20"/>
-                                        
-                                        <!-- Main sector (0 - 1M): 0° to 345° -->
-                                        <circle cx="110" cy="110" r="80" fill="none" 
-                                                stroke="url(#mainGradient)" 
-                                                stroke-width="20"
-                                                stroke-dasharray="471 31.4"
-                                                stroke-dashoffset="125.7"
-                                                stroke-linecap="round"
-                                                transform="rotate(-90 110 110)"/>
-                                        
-                                        <!-- Premium sector (1M+): 345° to 360° (15°) -->
-                                        <circle cx="110" cy="110" r="80" fill="none" 
-                                                stroke="url(#premiumGradient)" 
-                                                stroke-width="20"
-                                                stroke-dasharray="20.9 481.5"
-                                                stroke-dashoffset="-345.6"
-                                                stroke-linecap="round"
-                                                transform="rotate(-90 110 110)"/>
-                                        
-                                        <!-- Active arc -->
-                                        <circle cx="110" cy="110" r="80" fill="none" 
-                                                id="priceKnobArc"
-                                                stroke="#6366f1" 
-                                                stroke-width="22"
-                                                stroke-dasharray="0 502.4"
-                                                stroke-dashoffset="125.7"
-                                                stroke-linecap="round"
-                                                transform="rotate(-90 110 110)"/>
-                                        
-                                        <!-- Handle -->
-                                        <g id="priceKnobHandle">
-                                            <circle cx="110" cy="30" r="14" fill="white" stroke="#6366f1" stroke-width="3"/>
-                                            <circle cx="110" cy="30" r="8" fill="#6366f1"/>
-                                        </g>
-                                        
-                                        <!-- Gradients -->
-                                        <defs>
-                                            <linearGradient id="mainGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.3" />
-                                                <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.8" />
-                                            </linearGradient>
-                                            <linearGradient id="premiumGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
-                                                <stop offset="100%" style="stop-color:#fbbf24;stop-opacity:1" />
-                                            </linearGradient>
-                                        </defs>
-                                    </svg>
+                            
+                            <!-- Dual Circular Price Knobs -->
+                            <div class="dual-price-knobs-container" style="margin-top: 20px;">
+                                <div class="dual-knobs-wrapper">
+                                    <!-- Min Price Knob (Left, Green) -->
+                                    <div class="knob-column">
+                                        <div class="circular-price-knob" id="priceKnobMin">
+                                            <svg width="180" height="180" viewBox="0 0 180 180">
+                                                <!-- Background circle -->
+                                                <circle cx="90" cy="90" r="65" fill="none" stroke="#e5e7eb" stroke-width="16"/>
+                                                
+                                                <!-- Main sector (0 - 1M): 0° to 345° -->
+                                                <circle cx="90" cy="90" r="65" fill="none" 
+                                                        stroke="url(#mainGradientMin)" 
+                                                        stroke-width="16"
+                                                        stroke-dasharray="384 26"
+                                                        stroke-dashoffset="102"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 90 90)"/>
+                                                
+                                                <!-- Premium sector (1M+): 345° to 360° (15°) -->
+                                                <circle cx="90" cy="90" r="65" fill="none" 
+                                                        stroke="url(#premiumGradientMin)" 
+                                                        stroke-width="16"
+                                                        stroke-dasharray="17 393"
+                                                        stroke-dashoffset="-281"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 90 90)"/>
+                                                
+                                                <!-- Active arc -->
+                                                <circle cx="90" cy="90" r="65" fill="none" 
+                                                        id="priceKnobMinArc"
+                                                        stroke="#10b981" 
+                                                        stroke-width="18"
+                                                        stroke-dasharray="0 410"
+                                                        stroke-dashoffset="102"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 90 90)"/>
+                                                
+                                                <!-- Handle -->
+                                                <g id="priceKnobMinHandle">
+                                                    <circle cx="90" cy="25" r="12" fill="white" stroke="#10b981" stroke-width="3"/>
+                                                    <circle cx="90" cy="25" r="6" fill="#10b981"/>
+                                                </g>
+                                                
+                                                <!-- Gradients -->
+                                                <defs>
+                                                    <linearGradient id="mainGradientMin" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                        <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.3" />
+                                                        <stop offset="100%" style="stop-color:#10b981;stop-opacity:0.8" />
+                                                    </linearGradient>
+                                                    <linearGradient id="premiumGradientMin" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                        <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+                                                        <stop offset="100%" style="stop-color:#fbbf24;stop-opacity:1" />
+                                                    </linearGradient>
+                                                </defs>
+                                            </svg>
+                                            
+                                            <!-- Center display -->
+                                            <div class="knob-center-display">
+                                                <div class="knob-value" id="priceKnobMinValue">€0</div>
+                                                <div class="knob-label">Min Price</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     
-                                    <!-- Center display -->
-                                    <div class="knob-center-display">
-                                        <div class="knob-value" id="priceKnobValue">€0</div>
-                                        <div class="knob-label">Max Price</div>
+                                    <!-- Max Price Knob (Right, Blue) -->
+                                    <div class="knob-column">
+                                        <div class="circular-price-knob" id="priceKnobMax">
+                                            <svg width="180" height="180" viewBox="0 0 180 180">
+                                                <!-- Background circle -->
+                                                <circle cx="90" cy="90" r="65" fill="none" stroke="#e5e7eb" stroke-width="16"/>
+                                                
+                                                <!-- Main sector (0 - 1M): 0° to 345° -->
+                                                <circle cx="90" cy="90" r="65" fill="none" 
+                                                        stroke="url(#mainGradientMax)" 
+                                                        stroke-width="16"
+                                                        stroke-dasharray="384 26"
+                                                        stroke-dashoffset="102"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 90 90)"/>
+                                                
+                                                <!-- Premium sector (1M+): 345° to 360° (15°) -->
+                                                <circle cx="90" cy="90" r="65" fill="none" 
+                                                        stroke="url(#premiumGradientMax)" 
+                                                        stroke-width="16"
+                                                        stroke-dasharray="17 393"
+                                                        stroke-dashoffset="-281"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 90 90)"/>
+                                                
+                                                <!-- Active arc -->
+                                                <circle cx="90" cy="90" r="65" fill="none" 
+                                                        id="priceKnobMaxArc"
+                                                        stroke="#6366f1" 
+                                                        stroke-width="18"
+                                                        stroke-dasharray="0 410"
+                                                        stroke-dashoffset="102"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 90 90)"/>
+                                                
+                                                <!-- Handle -->
+                                                <g id="priceKnobMaxHandle">
+                                                    <circle cx="90" cy="25" r="12" fill="white" stroke="#6366f1" stroke-width="3"/>
+                                                    <circle cx="90" cy="25" r="6" fill="#6366f1"/>
+                                                </g>
+                                                
+                                                <!-- Gradients -->
+                                                <defs>
+                                                    <linearGradient id="mainGradientMax" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                        <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.3" />
+                                                        <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.8" />
+                                                    </linearGradient>
+                                                    <linearGradient id="premiumGradientMax" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                        <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
+                                                        <stop offset="100%" style="stop-color:#fbbf24;stop-opacity:1" />
+                                                    </linearGradient>
+                                                </defs>
+                                            </svg>
+                                            
+                                            <!-- Center display -->
+                                            <div class="knob-center-display">
+                                                <div class="knob-value" id="priceKnobMaxValue">€1M+</div>
+                                                <div class="knob-label">Max Price</div>
+                                            </div>
+                                        </div>
                                     </div>
                                 </div>
                                 
-                                <!-- Price range inputs below knob -->
+                                <!-- Price range inputs below knobs -->
                                 <div class="price-range-inputs" style="margin-top: 15px;">
-                                    <input type="number" class="input" placeholder="Min" id="priceMin" 
+                                    <input type="number" class="input" placeholder="Min €" id="priceMin" 
                                            onchange="updatePriceFromInputs()" style="font-size: 0.875rem;">
-                                    <span style="color: var(--gray-400);">-</span>
-                                    <input type="number" class="input" placeholder="Max" id="priceMax" 
+                                    <span style="color: var(--gray-400);">—</span>
+                                    <input type="number" class="input" placeholder="Max €" id="priceMax" 
                                            onchange="updatePriceFromInputs()" style="font-size: 0.875rem;">
                                 </div>
                             </div>
                             
                             <style>
-                            .circular-price-knob-container {
+                            .dual-price-knobs-container {
                                 display: flex;
                                 flex-direction: column;
                                 align-items: center;
                                 padding: 10px;
                             }
                             
+                            .dual-knobs-wrapper {
+                                display: flex;
+                                gap: 30px;
+                                justify-content: center;
+                                align-items: center;
+                                flex-wrap: wrap;
+                            }
+                            
+                            .knob-column {
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                            }
+                            
                             .circular-price-knob {
                                 position: relative;
-                                width: 220px;
-                                height: 220px;
+                                width: 180px;
+                                height: 180px;
                                 cursor: pointer;
                                 user-select: none;
+                                touch-action: none;
                             }
                             
                             .knob-center-display {
@@ -953,160 +1036,202 @@
                             }
                             
                             .knob-value {
-                                font-size: 1.5rem;
+                                font-size: 1.25rem;
                                 font-weight: 700;
                                 color: #1f2937;
                                 margin-bottom: 4px;
                             }
                             
                             .knob-label {
-                                font-size: 0.75rem;
+                                font-size: 0.7rem;
                                 color: #6b7280;
                                 text-transform: uppercase;
                                 letter-spacing: 0.05em;
                             }
                             
-                            #priceKnobHandle {
+                            .circular-price-knob g {
                                 cursor: grab;
                                 transition: transform 0.05s ease-out;
                             }
                             
-                            #priceKnobHandle:active {
+                            .circular-price-knob g:active {
                                 cursor: grabbing;
                             }
                             
-                            .circular-price-knob:hover #priceKnobHandle circle:first-child {
+                            .circular-price-knob:hover g circle:first-child {
                                 stroke-width: 4;
-                                r: 16;
+                                r: 14;
                             }
                             </style>
                             
                             <script>
-                            // Circular Price Knob Logic
+                            // Dual Circular Price Knobs Logic
                             (function() {
-                                const knob = document.getElementById('priceKnob');
-                                const handle = document.getElementById('priceKnobHandle');
-                                const arc = document.getElementById('priceKnobArc');
-                                const valueDisplay = document.getElementById('priceKnobValue');
-                                const priceMaxInput = document.getElementById('priceMax');
-                                
-                                let isDragging = false;
-                                let currentAngle = 0; // 0 to 360 degrees
-                                
-                                // Price mapping
-                                // Main sector: 0° - 345° maps to 0 - 1,000,000€
-                                // Premium sector: 345° - 360° maps to 1,000,000€ - ∞ (shows all premium)
-                                
-                                function angleToPrice(angle) {
-                                    if (angle <= 345) {
-                                        // Linear mapping: 0-345° → 0-1M€
-                                        return Math.round((angle / 345) * 1000000);
-                                    } else {
-                                        // Premium sector: 345-360° → 1M-50M€
-                                        return 50000000; // Show all premium
-                                    }
-                                }
-                                
-                                function priceToAngle(price) {
-                                    if (price <= 1000000) {
-                                        return (price / 1000000) * 345;
-                                    } else {
-                                        return 352.5; // Middle of premium sector
-                                    }
-                                }
-                                
-                                function formatPrice(price) {
-                                    if (price >= 50000000) return '€1M+';
-                                    if (price >= 1000000) return '€' + (price / 1000000).toFixed(1) + 'M';
-                                    if (price >= 1000) return '€' + (price / 1000).toFixed(0) + 'K';
-                                    return '€' + price;
-                                }
-                                
-                                function updateKnob(angle) {
-                                    currentAngle = Math.max(0, Math.min(360, angle));
+                                // Create knob controller
+                                function createKnobController(config) {
+                                    const {knobId, handleId, arcId, valueId, inputId, color, isPremium} = config;
                                     
-                                    // Update handle position
-                                    const handleAngle = currentAngle - 90; // SVG rotation offset
-                                    handle.setAttribute('transform', `rotate(${handleAngle} 110 110)`);
+                                    const knob = document.getElementById(knobId);
+                                    const handle = document.getElementById(handleId);
+                                    const arc = document.getElementById(arcId);
+                                    const valueDisplay = document.getElementById(valueId);
+                                    const priceInput = document.getElementById(inputId);
                                     
-                                    // Update arc
-                                    const arcLength = (currentAngle / 360) * 502.4;
-                                    arc.setAttribute('stroke-dasharray', `${arcLength} ${502.4 - arcLength}`);
+                                    let isDragging = false;
+                                    let currentAngle = 0;
                                     
-                                    // Update price
-                                    const price = angleToPrice(currentAngle);
-                                    valueDisplay.textContent = formatPrice(price);
-                                    priceMaxInput.value = price >= 50000000 ? '' : price;
-                                    
-                                    // Change color in premium sector
-                                    if (currentAngle > 345) {
-                                        arc.setAttribute('stroke', '#f59e0b');
-                                        valueDisplay.style.color = '#f59e0b';
-                                    } else {
-                                        arc.setAttribute('stroke', '#6366f1');
-                                        valueDisplay.style.color = '#1f2937';
+                                    function angleToPrice(angle) {
+                                        if (angle <= 345) {
+                                            return Math.round((angle / 345) * 1000000);
+                                        } else {
+                                            return 50000000;
+                                        }
                                     }
                                     
-                                    // Trigger filter update
-                                    if (!isDragging || Date.now() % 100 < 10) { // Throttle updates while dragging
-                                        renderProperties();
+                                    function priceToAngle(price) {
+                                        if (price <= 0) return 0;
+                                        if (price <= 1000000) {
+                                            return (price / 1000000) * 345;
+                                        } else {
+                                            return 352.5;
+                                        }
                                     }
-                                }
-                                
-                                function getAngleFromEvent(e) {
-                                    const rect = knob.getBoundingClientRect();
-                                    const centerX = rect.left + rect.width / 2;
-                                    const centerY = rect.top + rect.height / 2;
                                     
-                                    const clientX = e.clientX || (e.touches && e.touches[0].clientX);
-                                    const clientY = e.clientY || (e.touches && e.touches[0].clientY);
+                                    function formatPrice(price) {
+                                        if (price >= 50000000) return '€1M+';
+                                        if (price >= 1000000) return '€' + (price / 1000000).toFixed(1) + 'M';
+                                        if (price >= 1000) return '€' + (price / 1000).toFixed(0) + 'K';
+                                        if (price === 0) return '€0';
+                                        return '€' + price.toLocaleString();
+                                    }
                                     
-                                    const deltaX = clientX - centerX;
-                                    const deltaY = clientY - centerY;
+                                    function updateKnob(angle) {
+                                        currentAngle = Math.max(0, Math.min(360, angle));
+                                        
+                                        // Update handle position
+                                        const handleAngle = currentAngle - 90;
+                                        handle.setAttribute('transform', `rotate(${handleAngle} 90 90)`);
+                                        
+                                        // Update arc (circumference = 2πr = 2π*65 ≈ 408.4)
+                                        const arcLength = (currentAngle / 360) * 408.4;
+                                        arc.setAttribute('stroke-dasharray', `${arcLength} ${408.4 - arcLength}`);
+                                        
+                                        // Update price
+                                        const price = angleToPrice(currentAngle);
+                                        valueDisplay.textContent = formatPrice(price);
+                                        priceInput.value = price >= 50000000 ? '' : price;
+                                        
+                                        // Change color in premium sector
+                                        if (currentAngle > 345) {
+                                            arc.setAttribute('stroke', '#f59e0b');
+                                            valueDisplay.style.color = '#f59e0b';
+                                        } else {
+                                            arc.setAttribute('stroke', color);
+                                            valueDisplay.style.color = '#1f2937';
+                                        }
+                                        
+                                        // Trigger filter update
+                                        if (!isDragging) {
+                                            renderProperties();
+                                        }
+                                    }
                                     
-                                    let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) + 90;
-                                    if (angle < 0) angle += 360;
+                                    function getAngleFromEvent(e) {
+                                        const rect = knob.getBoundingClientRect();
+                                        const centerX = rect.left + rect.width / 2;
+                                        const centerY = rect.top + rect.height / 2;
+                                        
+                                        const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
+                                        const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
+                                        
+                                        if (!clientX || !clientY) return currentAngle;
+                                        
+                                        const deltaX = clientX - centerX;
+                                        const deltaY = clientY - centerY;
+                                        
+                                        let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) + 90;
+                                        if (angle < 0) angle += 360;
+                                        
+                                        return angle;
+                                    }
                                     
-                                    return angle;
-                                }
-                                
-                                function startDrag(e) {
-                                    isDragging = true;
-                                    updateKnob(getAngleFromEvent(e));
-                                    e.preventDefault();
-                                }
-                                
-                                function drag(e) {
-                                    if (isDragging) {
+                                    function startDrag(e) {
+                                        isDragging = true;
                                         updateKnob(getAngleFromEvent(e));
                                         e.preventDefault();
+                                        e.stopPropagation();
                                     }
+                                    
+                                    function drag(e) {
+                                        if (isDragging) {
+                                            updateKnob(getAngleFromEvent(e));
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                        }
+                                    }
+                                    
+                                    function stopDrag(e) {
+                                        if (isDragging) {
+                                            isDragging = false;
+                                            renderProperties();
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                        }
+                                    }
+                                    
+                                    // Event listeners on knob itself
+                                    knob.addEventListener('mousedown', startDrag);
+                                    knob.addEventListener('touchstart', startDrag, {passive: false});
+                                    
+                                    // Global listeners for drag and stop
+                                    document.addEventListener('mousemove', drag);
+                                    document.addEventListener('touchmove', drag, {passive: false});
+                                    document.addEventListener('mouseup', stopDrag);
+                                    document.addEventListener('touchend', stopDrag);
+                                    
+                                    return {
+                                        updateKnob,
+                                        priceToAngle,
+                                        getInput: () => priceInput
+                                    };
                                 }
                                 
-                                function stopDrag() {
-                                    if (isDragging) {
-                                        isDragging = false;
-                                        renderProperties(); // Final update
-                                    }
-                                }
+                                // Create both knobs
+                                const minKnob = createKnobController({
+                                    knobId: 'priceKnobMin',
+                                    handleId: 'priceKnobMinHandle',
+                                    arcId: 'priceKnobMinArc',
+                                    valueId: 'priceKnobMinValue',
+                                    inputId: 'priceMin',
+                                    color: '#10b981',
+                                    isPremium: false
+                                });
                                 
-                                // Event listeners
-                                knob.addEventListener('mousedown', startDrag);
-                                knob.addEventListener('touchstart', startDrag);
-                                document.addEventListener('mousemove', drag);
-                                document.addEventListener('touchmove', drag);
-                                document.addEventListener('mouseup', stopDrag);
-                                document.addEventListener('touchend', stopDrag);
+                                const maxKnob = createKnobController({
+                                    knobId: 'priceKnobMax',
+                                    handleId: 'priceKnobMaxHandle',
+                                    arcId: 'priceKnobMaxArc',
+                                    valueId: 'priceKnobMaxValue',
+                                    inputId: 'priceMax',
+                                    color: '#6366f1',
+                                    isPremium: true
+                                });
                                 
                                 // Update from manual input
                                 window.updatePriceFromInputs = function() {
-                                    const maxPrice = parseInt(priceMaxInput.value) || 50000000;
-                                    const angle = priceToAngle(maxPrice);
-                                    updateKnob(angle);
+                                    const minPrice = parseInt(minKnob.getInput().value) || 0;
+                                    const maxPrice = parseInt(maxKnob.getInput().value) || 50000000;
+                                    
+                                    const minAngle = minKnob.priceToAngle(minPrice);
+                                    const maxAngle = maxKnob.priceToAngle(maxPrice);
+                                    
+                                    minKnob.updateKnob(minAngle);
+                                    maxKnob.updateKnob(maxAngle);
                                 };
                                 
                                 // Initialize
-                                updateKnob(360); // Start at max (show all)
+                                minKnob.updateKnob(0); // Start at 0
+                                maxKnob.updateKnob(360); // Start at max (show all)
                             })();
                             </script>
                         </div>
