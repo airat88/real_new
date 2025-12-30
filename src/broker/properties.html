@@ -777,7 +777,7 @@
                                 <div class="multi-select__dropdown" id="districtDropdown"></div>
                             </div>
                         </div>
-                        <div class="filter-group">
+                        <div class="filter-group" style="display: none;">
                             <label class="filter-group__label">Type</label>
                             <div class="multi-select" id="typeMultiSelect">
                                 <div class="multi-select__trigger" onclick="toggleMultiSelect('type')">
@@ -829,25 +829,29 @@
                             
                             <!-- Quick Presets -->
                             <div class="price-presets" style="display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 12px;">
-                                <button class="price-preset-btn" onclick="setPriceRange(0, 200000); event.preventDefault();">
+                                <button class="price-preset-btn" onclick="togglePriceRange(0, 200000); event.preventDefault();">
                                     <200K
                                 </button>
-                                <button class="price-preset-btn" onclick="setPriceRange(200000, 300000); event.preventDefault();">
+                                <button class="price-preset-btn" onclick="togglePriceRange(200000, 300000); event.preventDefault();">
                                     200-300K
                                 </button>
-                                <button class="price-preset-btn" onclick="setPriceRange(300000, 500000); event.preventDefault();">
-                                    300-500K
+                                <button class="price-preset-btn" onclick="togglePriceRange(300000, 400000); event.preventDefault();" 
+                                        style="background: var(--primary, #6366f1); border-color: var(--primary, #6366f1); color: white; font-weight: 600; font-size: 0.9rem; padding: 8px 16px;">
+                                    300-400K
                                 </button>
-                                <button class="price-preset-btn" onclick="setPriceRange(500000, 1000000); event.preventDefault();">
+                                <button class="price-preset-btn" onclick="togglePriceRange(400000, 500000); event.preventDefault();">
+                                    400-500K
+                                </button>
+                                <button class="price-preset-btn" onclick="togglePriceRange(500000, 1000000); event.preventDefault();">
                                     500K-1M
                                 </button>
-                                <button class="price-preset-btn" onclick="setPriceRange(1000000, 2000000); event.preventDefault();">
+                                <button class="price-preset-btn" onclick="togglePriceRange(1000000, 2000000); event.preventDefault();">
                                     1-2M
                                 </button>
-                                <button class="price-preset-btn" onclick="setPriceRange(2000000, 50000000); event.preventDefault();">
+                                <button class="price-preset-btn" onclick="togglePriceRange(2000000, 50000000); event.preventDefault();">
                                     >2M
                                 </button>
-                                <button class="price-preset-btn" onclick="setPriceUponRequest(); event.preventDefault();" style="background: var(--warning, #f59e0b); border-color: var(--warning, #f59e0b); color: white;">
+                                <button class="price-preset-btn" onclick="togglePriceUponRequest(); event.preventDefault();" style="background: var(--warning, #f59e0b); border-color: var(--warning, #f59e0b); color: white;">
                                     💰 Price upon request
                                 </button>
                             </div>
@@ -1562,6 +1566,73 @@
             return sorted;
         }
 
+        // Toggle price range preset (reset on second click)
+        function togglePriceRange(min, max) {
+            console.log(`Toggle price range: ${min} - ${max}`);
+            
+            // Check if this preset is already active
+            const isActive = activePricePreset && 
+                           activePricePreset.min === min && 
+                           activePricePreset.max === max;
+            
+            if (isActive) {
+                // Second click - clear filter
+                console.log('🔄 Clearing price filter (second click)');
+                clearPriceFilter();
+            } else {
+                // First click - set filter
+                setPriceRange(min, max);
+                activePricePreset = {min, max};
+            }
+        }
+        
+        // Toggle "Price upon request" preset (reset on second click)
+        function togglePriceUponRequest() {
+            console.log('Toggle Price upon request');
+            
+            // Check if this preset is already active
+            const isActive = activePricePreset === 'upon-request';
+            
+            if (isActive) {
+                // Second click - clear filter
+                console.log('🔄 Clearing "Price upon request" filter (second click)');
+                clearPriceFilter();
+            } else {
+                // First click - set filter
+                setPriceUponRequest();
+                activePricePreset = 'upon-request';
+            }
+        }
+        
+        // Clear price filter
+        function clearPriceFilter() {
+            activePricePreset = null;
+            priceUponRequestMode = false;
+            document.getElementById('priceMin').value = '';
+            document.getElementById('priceMax').value = '';
+            
+            // Reset all preset button styles
+            const allPresets = document.querySelectorAll('.price-preset-btn');
+            allPresets.forEach(btn => {
+                // Check if it's the 300-400K highlighted button
+                if (btn.textContent.includes('300-400K')) {
+                    btn.style.background = 'var(--primary, #6366f1)';
+                    btn.style.borderColor = 'var(--primary, #6366f1)';
+                    btn.style.color = 'white';
+                } else if (btn.textContent.includes('Price upon request')) {
+                    btn.style.background = 'var(--warning, #f59e0b)';
+                    btn.style.borderColor = 'var(--warning, #f59e0b)';
+                    btn.style.color = 'white';
+                } else {
+                    btn.style.background = 'white';
+                    btn.style.borderColor = 'var(--gray-200, #e2e8f0)';
+                    btn.style.color = 'var(--gray-700, #374151)';
+                }
+            });
+            
+            renderProperties();
+        }
+
         // Set price range from preset buttons (numeric ranges only)
         function setPriceRange(min, max) {
             console.log(`Setting price range: ${min} - ${max}`);
@@ -1579,22 +1650,34 @@
             // Visual feedback
             const allPresets = document.querySelectorAll('.price-preset-btn');
             allPresets.forEach(btn => {
-                btn.style.background = 'white';
-                btn.style.borderColor = 'var(--gray-200, #e2e8f0)';
-                btn.style.color = 'var(--gray-700, #374151)';
+                // Reset to default styles
+                if (btn.textContent.includes('300-400K')) {
+                    // 300-400K keeps its blue highlight
+                    btn.style.background = 'var(--primary, #6366f1)';
+                    btn.style.borderColor = 'var(--primary, #6366f1)';
+                    btn.style.color = 'white';
+                } else if (btn.textContent.includes('Price upon request')) {
+                    // Price upon request keeps its orange
+                    btn.style.background = 'var(--warning, #f59e0b)';
+                    btn.style.borderColor = 'var(--warning, #f59e0b)';
+                    btn.style.color = 'white';
+                } else {
+                    btn.style.background = 'white';
+                    btn.style.borderColor = 'var(--gray-200, #e2e8f0)';
+                    btn.style.color = 'var(--gray-700, #374151)';
+                }
             });
             
-            // Highlight clicked preset briefly
+            // Add active state to clicked button
             if (event && event.target) {
                 event.target.style.background = 'var(--primary, #6366f1)';
                 event.target.style.borderColor = 'var(--primary, #6366f1)';
                 event.target.style.color = 'white';
+                event.target.style.transform = 'scale(1.05)';
                 
                 setTimeout(() => {
-                    event.target.style.background = 'white';
-                    event.target.style.borderColor = 'var(--primary, #6366f1)';
-                    event.target.style.color = 'var(--primary, #6366f1)';
-                }, 300);
+                    event.target.style.transform = 'scale(1)';
+                }, 200);
             }
         }
 
@@ -1637,6 +1720,9 @@
         let selectedObjects = [];
         let currentSort = 'date-desc';  // Default sort: Newest First
         let priceUponRequestMode = false;  // Filter for "Price upon request" objects
+        
+        // Track active price preset for toggle functionality
+        let activePricePreset = null;  // Stores {min, max} or 'upon-request' or null
 
         // Get filtered properties
         function getFilteredProperties() {
@@ -2007,11 +2093,25 @@
                 chip.classList.toggle('active', chip.dataset.beds === '');
             });
             
+            // Reset active price preset tracking
+            activePricePreset = null;
+            
             // Reset price preset buttons styling
             document.querySelectorAll('.price-preset-btn').forEach(btn => {
-                btn.style.background = 'white';
-                btn.style.borderColor = 'var(--gray-200, #e2e8f0)';
-                btn.style.color = 'var(--gray-700, #374151)';
+                // Preserve special styling for 300-400K and Price upon request
+                if (btn.textContent.includes('300-400K')) {
+                    btn.style.background = 'var(--primary, #6366f1)';
+                    btn.style.borderColor = 'var(--primary, #6366f1)';
+                    btn.style.color = 'white';
+                } else if (btn.textContent.includes('Price upon request')) {
+                    btn.style.background = 'var(--warning, #f59e0b)';
+                    btn.style.borderColor = 'var(--warning, #f59e0b)';
+                    btn.style.color = 'white';
+                } else {
+                    btn.style.background = 'white';
+                    btn.style.borderColor = 'var(--gray-200, #e2e8f0)';
+                    btn.style.color = 'var(--gray-700, #374151)';
+                }
             });
 
             updateActiveFiltersCount();
