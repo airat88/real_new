@@ -864,8 +864,8 @@
                                     <div class="knob-column">
                                         <div class="circular-price-knob" id="priceKnobMin">
                                             <svg width="180" height="180" viewBox="0 0 180 180">
-                                                <!-- Background circle -->
-                                                <circle cx="90" cy="90" r="65" fill="none" stroke="#e5e7eb" stroke-width="16"/>
+                                                <!-- Background circle with dashed pattern -->
+                                                <circle cx="90" cy="90" r="65" fill="none" stroke="#e5e7eb" stroke-width="16" stroke-dasharray="4 2"/>
                                                 
                                                 <!-- Main sector (0 - 1M): 0° to 345° -->
                                                 <circle cx="90" cy="90" r="65" fill="none" 
@@ -888,7 +888,7 @@
                                                 <!-- Active arc -->
                                                 <circle cx="90" cy="90" r="65" fill="none" 
                                                         id="priceKnobMinArc"
-                                                        stroke="#10b981" 
+                                                        stroke="#6b7280" 
                                                         stroke-width="18"
                                                         stroke-dasharray="0 410"
                                                         stroke-dashoffset="102"
@@ -897,15 +897,15 @@
                                                 
                                                 <!-- Handle -->
                                                 <g id="priceKnobMinHandle">
-                                                    <circle cx="90" cy="25" r="12" fill="white" stroke="#10b981" stroke-width="3"/>
-                                                    <circle cx="90" cy="25" r="6" fill="#10b981"/>
+                                                    <circle cx="90" cy="25" r="12" fill="white" stroke="#6b7280" stroke-width="3"/>
+                                                    <circle cx="90" cy="25" r="6" fill="#6b7280"/>
                                                 </g>
                                                 
                                                 <!-- Gradients -->
                                                 <defs>
                                                     <linearGradient id="mainGradientMin" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                        <stop offset="0%" style="stop-color:#10b981;stop-opacity:0.3" />
-                                                        <stop offset="100%" style="stop-color:#10b981;stop-opacity:0.8" />
+                                                        <stop offset="0%" style="stop-color:#9ca3af;stop-opacity:0.3" />
+                                                        <stop offset="100%" style="stop-color:#6b7280;stop-opacity:0.7" />
                                                     </linearGradient>
                                                     <linearGradient id="premiumGradientMin" x1="0%" y1="0%" x2="100%" y2="0%">
                                                         <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
@@ -922,12 +922,12 @@
                                         </div>
                                     </div>
                                     
-                                    <!-- Max Price Knob (Right, Blue) -->
+                                    <!-- Max Price Knob (Right, Gray) -->
                                     <div class="knob-column">
                                         <div class="circular-price-knob" id="priceKnobMax">
                                             <svg width="180" height="180" viewBox="0 0 180 180">
-                                                <!-- Background circle -->
-                                                <circle cx="90" cy="90" r="65" fill="none" stroke="#e5e7eb" stroke-width="16"/>
+                                                <!-- Background circle with dashed pattern -->
+                                                <circle cx="90" cy="90" r="65" fill="none" stroke="#e5e7eb" stroke-width="16" stroke-dasharray="4 2"/>
                                                 
                                                 <!-- Main sector (0 - 1M): 0° to 345° -->
                                                 <circle cx="90" cy="90" r="65" fill="none" 
@@ -950,7 +950,7 @@
                                                 <!-- Active arc -->
                                                 <circle cx="90" cy="90" r="65" fill="none" 
                                                         id="priceKnobMaxArc"
-                                                        stroke="#6366f1" 
+                                                        stroke="#9ca3af" 
                                                         stroke-width="18"
                                                         stroke-dasharray="0 410"
                                                         stroke-dashoffset="102"
@@ -959,15 +959,15 @@
                                                 
                                                 <!-- Handle -->
                                                 <g id="priceKnobMaxHandle">
-                                                    <circle cx="90" cy="25" r="12" fill="white" stroke="#6366f1" stroke-width="3"/>
-                                                    <circle cx="90" cy="25" r="6" fill="#6366f1"/>
+                                                    <circle cx="90" cy="25" r="12" fill="white" stroke="#9ca3af" stroke-width="3"/>
+                                                    <circle cx="90" cy="25" r="6" fill="#9ca3af"/>
                                                 </g>
                                                 
                                                 <!-- Gradients -->
                                                 <defs>
                                                     <linearGradient id="mainGradientMax" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                        <stop offset="0%" style="stop-color:#3b82f6;stop-opacity:0.3" />
-                                                        <stop offset="100%" style="stop-color:#3b82f6;stop-opacity:0.8" />
+                                                        <stop offset="0%" style="stop-color:#d1d5db;stop-opacity:0.4" />
+                                                        <stop offset="100%" style="stop-color:#9ca3af;stop-opacity:0.7" />
                                                     </linearGradient>
                                                     <linearGradient id="premiumGradientMax" x1="0%" y1="0%" x2="100%" y2="0%">
                                                         <stop offset="0%" style="stop-color:#f59e0b;stop-opacity:1" />
@@ -1253,7 +1253,7 @@
                                     arcId: 'priceKnobMinArc',
                                     valueId: 'priceKnobMinValue',
                                     inputId: 'priceMin',
-                                    color: '#10b981',
+                                    color: '#6b7280',
                                     isPremium: false
                                 });
                                 
@@ -1263,7 +1263,7 @@
                                     arcId: 'priceKnobMaxArc',
                                     valueId: 'priceKnobMaxValue',
                                     inputId: 'priceMax',
-                                    color: '#6366f1',
+                                    color: '#9ca3af',
                                     isPremium: true
                                 });
                                 
@@ -1324,10 +1324,6 @@
                                         const value = angleToValue(currentAngle);
                                         valueDisplay.textContent = formatValue(value);
                                         input.value = value || '';
-                                        
-                                        if (!isDragging) {
-                                            renderProperties();
-                                        }
                                     }
                                     
                                     function getAngleFromEvent(e) {
@@ -1368,8 +1364,10 @@
                                         if (isDragging) {
                                             isDragging = false;
                                             renderProperties();
-                                            e.preventDefault();
-                                            e.stopPropagation();
+                                            if (e) {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                            }
                                         }
                                     }
                                     
@@ -1455,10 +1453,6 @@
                                         const value = angleToValue(currentAngle);
                                         valueDisplay.textContent = formatValue(value);
                                         input.value = value || '';
-                                        
-                                        if (!isDragging) {
-                                            renderProperties();
-                                        }
                                     }
                                     
                                     function getAngleFromEvent(e) {
@@ -1499,8 +1493,10 @@
                                         if (isDragging) {
                                             isDragging = false;
                                             renderProperties();
-                                            e.preventDefault();
-                                            e.stopPropagation();
+                                            if (e) {
+                                                e.preventDefault();
+                                                e.stopPropagation();
+                                            }
                                         }
                                     }
                                     
