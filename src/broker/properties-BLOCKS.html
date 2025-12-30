@@ -1220,14 +1220,12 @@
                                 </button>
                             </div>
 
-                                                        <div class="all-knobs-section" style="margin-top: 20px;">
-                                <div class="knobs-grid">
-                                    <!-- PRICE (€) Column -->
-                                    <div class="knob-column-wrapper">
-                                        <div class="knob-column-header">
-                                            <h3 class="knob-column-title">Price (€)</h3>
-                                        </div>
-                                        <div class="dual-knobs-row">
+                            <!-- Knobs Grid - Simple layout WITHOUT inner cards -->
+                            <div class="knobs-grid-simple">
+                                    <!-- PRICE (€) Group -->
+                                    <div class="knob-group">
+                                        <span class="knob-group-title">Price (€)</span>
+                                        <div class="knob-pair">
                                             <!-- Min Price Knob -->
                                     <div class="knob-column">
                                         <div class="circular-price-knob" id="priceKnobMin">
@@ -1353,23 +1351,21 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Price range inputs below knobs -->
-                                <div class="price-range-inputs" style="margin-top: 15px;">
-                                    <input type="number" class="input" placeholder="Min €" id="priceMin" 
-                                           onchange="updatePriceFromInputs()" style="font-size: 0.875rem;">
-                                    <span style="color: var(--gray-400);">—</span>
-                                    <input type="number" class="input" placeholder="Max €" id="priceMax" 
-                                           onchange="updatePriceFromInputs()" style="font-size: 0.875rem;">
+                                <!-- Price range inputs -->
+                                <div class="knob-inputs">
+                                    <input type="number" placeholder="Min €" id="priceMin" 
+                                           onchange="updatePriceFromInputs()">
+                                    <span class="range-group__sep">—</span>
+                                    <input type="number" placeholder="Max €" id="priceMax" 
+                                           onchange="updatePriceFromInputs()">
                                 </div>
                             </div>
-                            <!-- End Price Column -->
+                            <!-- End Price Group -->
                             
-                            <!-- AREA (m²) Column -->
-                            <div class="knob-column-wrapper">
-                                <div class="knob-column-header">
-                                    <span class="knob-column-title">Area (m²)</span>
-                                </div>
-                                <div class="dual-knobs-row">
+                            <!-- AREA (m²) Group -->
+                            <div class="knob-group">
+                                <span class="knob-group-title">Area (m²)</span>
+                                <div class="knob-pair">
                                     <!-- Min Area Knob (Dark Gray) -->
                                     <div class="knob-column">
                                         <div class="circular-area-knob" id="areaKnobMin">
@@ -1469,23 +1465,21 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Area range inputs below knobs -->
-                                <div class="range-group" style="margin-top: 12px; gap: 8px;">
-                                    <input type="number" class="input" placeholder="Min m²" id="areaMin" 
-                                           onchange="updateAreaFromInputs()" style="font-size: 0.875rem;">
+                                <!-- Area range inputs -->
+                                <div class="knob-inputs">
+                                    <input type="number" placeholder="Min m²" id="areaMin" 
+                                           onchange="updateAreaFromInputs()">
                                     <span class="range-group__sep">—</span>
-                                    <input type="number" class="input" placeholder="Max m²" id="areaMax" 
-                                           onchange="updateAreaFromInputs()" style="font-size: 0.875rem;">
+                                    <input type="number" placeholder="Max m²" id="areaMax" 
+                                           onchange="updateAreaFromInputs()">
                                 </div>
                             </div>
-                            <!-- End Area Column -->
+                            <!-- End Area Group -->
                             
-                            <!-- PRICE/M² (€) Column -->
-                            <div class="knob-column-wrapper">
-                                <div class="knob-column-header">
-                                    <span class="knob-column-title">Price/m² (€)</span>
-                                </div>
-                                <div class="dual-knobs-row">
+                            <!-- PRICE/M² (€) Group -->
+                            <div class="knob-group">
+                                <span class="knob-group-title">Price/m² (€)</span>
+                                <div class="knob-pair">
                                     <!-- Min Price/m² Knob (Light Gray) -->
                                     <div class="knob-column">
                                         <div class="circular-pricesqm-knob" id="priceSqmKnobMin">
@@ -1585,29 +1579,23 @@
                                     </div>
                                 </div>
                                 
-                                <!-- Price/m² range inputs below knobs -->
-                                <div class="range-group" style="margin-top: 12px; gap: 8px;">
-                                    <input type="number" class="input" placeholder="Min €/m²" id="priceSqmMin" 
-                                           onchange="updatePriceSqmFromInputs()" style="font-size: 0.875rem;">
+                                <!-- Price/m² range inputs -->
+                                <div class="knob-inputs">
+                                    <input type="number" placeholder="Min €/m²" id="priceSqmMin" 
+                                           onchange="updatePriceSqmFromInputs()">
                                     <span class="range-group__sep">—</span>
-                                    <input type="number" class="input" placeholder="Max €/m²" id="priceSqmMax" 
-                                           onchange="updatePriceSqmFromInputs()" style="font-size: 0.875rem;">
+                                    <input type="number" placeholder="Max €/m²" id="priceSqmMax" 
+                                           onchange="updatePriceSqmFromInputs()">
                                 </div>
                             </div>
-                            <!-- End Price/m² Column -->
+                            <!-- End Price/m² Group -->
                             
                         </div>
-                        <!-- End knobs-grid -->
-                    </div>
-                    <!-- End all-knobs-section -->
-                            
-                            <style>
-                            /* Unified Knobs Section - Horizontal Clean Layout */
-                            .all-knobs-section {
-
+                        <!-- End knobs-grid-simple -->
 
                         </div>
                     </div>
+                    <!-- End BLOCK 2: Price Filters -->
 
                     <!-- BLOCK 3: Main Filters -->
                     <div class="filter-block">
