@@ -744,6 +744,20 @@
                             <input type="text" class="input" placeholder="Title, location, features..." id="searchInput">
                         </div>
                         <div class="filter-group">
+                            <label class="filter-group__label">Sort by</label>
+                            <select class="input" id="sortSelect" onchange="handleSortChange()">
+                                <option value="date-desc">Newest First</option>
+                                <option value="date-asc">Oldest First</option>
+                                <option value="price-desc">Price: High to Low</option>
+                                <option value="price-asc">Price: Low to High</option>
+                                <option value="area-desc">Area: Largest First</option>
+                                <option value="area-asc">Area: Smallest First</option>
+                                <option value="title-asc">Title: A-Z</option>
+                                <option value="title-desc">Title: Z-A</option>
+                                <option value="location-asc">Location: A-Z</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
                             <label class="filter-group__label">Location</label>
                             <div class="multi-select" id="locationMultiSelect">
                                 <div class="multi-select__trigger" onclick="toggleMultiSelect('location')">
@@ -1333,7 +1347,10 @@
         // Render properties grid with pagination
         function renderProperties(append = false) {
             const grid = document.getElementById('propertiesGrid');
-            const allFiltered = getFilteredProperties();
+            let allFiltered = getFilteredProperties();
+            
+            // Apply sorting
+            allFiltered = sortProperties(allFiltered);
 
             if (allFiltered.length === 0) {
                 grid.innerHTML = `
@@ -1447,6 +1464,101 @@
             renderProperties(true);
         }
 
+        // Handle sort change
+        function handleSortChange() {
+            const sortSelect = document.getElementById('sortSelect');
+            currentSort = sortSelect.value;
+            console.log('📊 Sort changed to:', currentSort);
+            renderProperties();
+        }
+
+        // Sort properties array
+        function sortProperties(properties) {
+            if (!properties || properties.length === 0) return properties;
+            
+            const sorted = [...properties]; // Create copy to avoid mutating original
+            
+            switch (currentSort) {
+                case 'date-desc': // Newest First
+                    sorted.sort((a, b) => {
+                        const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+                        const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+                        return dateB - dateA;
+                    });
+                    break;
+                    
+                case 'date-asc': // Oldest First
+                    sorted.sort((a, b) => {
+                        const dateA = a.createdAt ? new Date(a.createdAt) : new Date(0);
+                        const dateB = b.createdAt ? new Date(b.createdAt) : new Date(0);
+                        return dateA - dateB;
+                    });
+                    break;
+                    
+                case 'price-desc': // Price: High to Low
+                    sorted.sort((a, b) => {
+                        const priceA = a.cleanPrice || 0;
+                        const priceB = b.cleanPrice || 0;
+                        return priceB - priceA;
+                    });
+                    break;
+                    
+                case 'price-asc': // Price: Low to High
+                    sorted.sort((a, b) => {
+                        const priceA = a.cleanPrice || 0;
+                        const priceB = b.cleanPrice || 0;
+                        return priceA - priceB;
+                    });
+                    break;
+                    
+                case 'area-desc': // Area: Largest First
+                    sorted.sort((a, b) => {
+                        const areaA = a.totalArea || a.insideArea || 0;
+                        const areaB = b.totalArea || b.insideArea || 0;
+                        return areaB - areaA;
+                    });
+                    break;
+                    
+                case 'area-asc': // Area: Smallest First
+                    sorted.sort((a, b) => {
+                        const areaA = a.totalArea || a.insideArea || 0;
+                        const areaB = b.totalArea || b.insideArea || 0;
+                        return areaA - areaB;
+                    });
+                    break;
+                    
+                case 'title-asc': // Title: A-Z
+                    sorted.sort((a, b) => {
+                        const titleA = (a.title || '').toLowerCase();
+                        const titleB = (b.title || '').toLowerCase();
+                        return titleA.localeCompare(titleB);
+                    });
+                    break;
+                    
+                case 'title-desc': // Title: Z-A
+                    sorted.sort((a, b) => {
+                        const titleA = (a.title || '').toLowerCase();
+                        const titleB = (b.title || '').toLowerCase();
+                        return titleB.localeCompare(titleA);
+                    });
+                    break;
+                    
+                case 'location-asc': // Location: A-Z
+                    sorted.sort((a, b) => {
+                        const locA = (a.location || '').toLowerCase();
+                        const locB = (b.location || '').toLowerCase();
+                        return locA.localeCompare(locB);
+                    });
+                    break;
+                    
+                default:
+                    // No sorting
+                    break;
+            }
+            
+            return sorted;
+        }
+
         // Set price range from preset buttons
         function setPriceRange(min, max) {
             console.log(`Setting price range: ${min} - ${max}`);
@@ -1488,6 +1600,7 @@
         let selectedStatuses = [];
         let selectedMainTypes = [];
         let selectedObjects = [];
+        let currentSort = 'date-desc';  // Default sort: Newest First
 
         // Get filtered properties
         function getFilteredProperties() {
@@ -1809,6 +1922,8 @@
         // Clear all filters
         function clearAllFilters() {
             document.getElementById('searchInput').value = '';
+            document.getElementById('sortSelect').value = 'date-desc';  // Reset sort
+            currentSort = 'date-desc';
             document.getElementById('priceMin').value = '';
             document.getElementById('priceMax').value = '';
             document.getElementById('areaMin').value = '';
