@@ -857,10 +857,16 @@
                             </div>
                             
                             
-                            <!-- Dual Circular Price Knobs -->
-                            <div class="dual-price-knobs-container" style="margin-top: 20px;">
-                                <div class="dual-knobs-wrapper">
-                                    <!-- Min Price Knob (Left, Green) -->
+                            <!-- ALL KNOBS SECTION - Price, Area, Price/m² -->
+                            <div class="all-knobs-section" style="margin-top: 20px;">
+                                <div class="knobs-grid">
+                                    <!-- PRICE (€) Column -->
+                                    <div class="knob-column-wrapper">
+                                        <div class="knob-column-header">
+                                            <h3 class="knob-column-title">Price (€)</h3>
+                                        </div>
+                                        <div class="dual-knobs-row">
+                                            <!-- Min Price Knob -->
                                     <div class="knob-column">
                                         <div class="circular-price-knob" id="priceKnobMin">
                                             <svg width="180" height="180" viewBox="0 0 180 180">
@@ -994,8 +1000,200 @@
                                            onchange="updatePriceFromInputs()" style="font-size: 0.875rem;">
                                 </div>
                             </div>
+                            <!-- End Price Column -->
+                            
+                            <!-- AREA (m²) Column -->
+                            <div class="knob-column-wrapper">
+                                <div class="knob-column-header">
+                                    <span class="knob-column-title">Area (m²)</span>
+                                </div>
+                                <div class="dual-knobs-row">
+                                    <!-- Min Area Knob (Dark Gray) -->
+                                    <div class="knob-column">
+                                        <div class="circular-area-knob" id="areaKnobMin">
+                                            <svg width="160" height="160" viewBox="0 0 160 160">
+                                                <!-- Background circle with dashed pattern -->
+                                                <circle cx="80" cy="80" r="55" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-dasharray="3 3"/>
+                                                
+                                                <!-- Main sector gradient -->
+                                                <circle cx="80" cy="80" r="55" fill="none" 
+                                                        stroke="url(#areaGradientMin)" 
+                                                        stroke-width="14"
+                                                        stroke-dasharray="345 10"
+                                                        stroke-dashoffset="86"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 80 80)"/>
+                                                
+                                                <!-- Active arc -->
+                                                <circle cx="80" cy="80" r="55" fill="none" 
+                                                        id="areaKnobMinArc"
+                                                        stroke="#4b5563" 
+                                                        stroke-width="16"
+                                                        stroke-dasharray="0 345"
+                                                        stroke-dashoffset="86"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 80 80)"/>
+                                                
+                                                <!-- Handle -->
+                                                <g id="areaKnobMinHandle">
+                                                    <circle cx="80" cy="25" r="10" fill="white" stroke="#4b5563" stroke-width="2.5"/>
+                                                    <circle cx="80" cy="25" r="5" fill="#4b5563"/>
+                                                </g>
+                                                
+                                                <!-- Gradients -->
+                                                <defs>
+                                                    <linearGradient id="areaGradientMin" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                        <stop offset="0%" style="stop-color:#9ca3af;stop-opacity:0.3" />
+                                                        <stop offset="100%" style="stop-color:#6b7280;stop-opacity:0.7" />
+                                                    </linearGradient>
+                                                </defs>
+                                            </svg>
+                                            
+                                            <!-- Center display -->
+                                            <div class="knob-center-display">
+                                                <div class="knob-value-gray" id="areaKnobMinValue">0 m²</div>
+                                                <div class="knob-label-gray">Min Area</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Max Area Knob (Medium Gray) -->
+                                    <div class="knob-column">
+                                        <div class="circular-area-knob" id="areaKnobMax">
+                                            <svg width="160" height="160" viewBox="0 0 160 160">
+                                                <!-- Background circle with dashed pattern -->
+                                                <circle cx="80" cy="80" r="55" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-dasharray="3 3"/>
+                                                
+                                                <!-- Main sector gradient -->
+                                                <circle cx="80" cy="80" r="55" fill="none" 
+                                                        stroke="url(#areaGradientMax)" 
+                                                        stroke-width="14"
+                                                        stroke-dasharray="345 10"
+                                                        stroke-dashoffset="86"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 80 80)"/>
+                                                
+                                                <!-- Active arc -->
+                                                <circle cx="80" cy="80" r="55" fill="none" 
+                                                        id="areaKnobMaxArc"
+                                                        stroke="#6b7280" 
+                                                        stroke-width="16"
+                                                        stroke-dasharray="0 345"
+                                                        stroke-dashoffset="86"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 80 80)"/>
+                                                
+                                                <!-- Handle -->
+                                                <g id="areaKnobMaxHandle">
+                                                    <circle cx="80" cy="25" r="10" fill="white" stroke="#6b7280" stroke-width="2.5"/>
+                                                    <circle cx="80" cy="25" r="5" fill="#6b7280"/>
+                                                </g>
+                                                
+                                                <!-- Gradients -->
+                                                <defs>
+                                                    <linearGradient id="areaGradientMax" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                        <stop offset="0%" style="stop-color:#9ca3af;stop-opacity:0.3" />
+                                                        <stop offset="100%" style="stop-color:#6b7280;stop-opacity:0.7" />
+                                                    </linearGradient>
+                                                </defs>
+                                            </svg>
+                                            
+                                            <!-- Center display -->
+                                            <div class="knob-center-display">
+                                                <div class="knob-value-gray" id="areaKnobMaxValue">500 m²</div>
+                                                <div class="knob-label-gray">Max Area</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                                
+                                <!-- Area range inputs below knobs -->
+                                <div class="range-group" style="margin-top: 12px; gap: 8px;">
+                                    <input type="number" class="input" placeholder="Min m²" id="areaMin" 
+                                           onchange="updateAreaFromInputs()" style="font-size: 0.875rem;">
+                                    <span class="range-group__sep">—</span>
+                                    <input type="number" class="input" placeholder="Max m²" id="areaMax" 
+                                           onchange="updateAreaFromInputs()" style="font-size: 0.875rem;">
+                                </div>
+                            </div>
+                            <!-- End Area Column -->
+                            
+                            <!-- PRICE/M² (€) Column -->
+                            <div class="knob-column-wrapper">
+                                <div class="knob-column-header">
+                                    <span class="knob-column-title">Price/m² (€)</span>
+                                </div>
+                                <div class="dual-knobs-row">
+                                    <!-- Price/m² knobs will be inserted here by moving from advanced filters -->
+                                </div>
+                            </div>
+                            <!-- End Price/m² Column -->
+                            
+                        </div>
+                        <!-- End knobs-grid -->
+                    </div>
+                    <!-- End all-knobs-section -->
                             
                             <style>
+                            /* Unified Knobs Section */
+                            .all-knobs-section {
+                                display: flex;
+                                flex-direction: column;
+                                gap: 20px;
+                                padding: 20px 0;
+                            }
+                            
+                            .knobs-grid {
+                                display: grid;
+                                grid-template-columns: repeat(auto-fit, minmax(400px, 1fr));
+                                gap: 40px;
+                                justify-items: center;
+                            }
+                            
+                            @media (max-width: 1400px) {
+                                .knobs-grid {
+                                    grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
+                                    gap: 30px;
+                                }
+                            }
+                            
+                            @media (max-width: 768px) {
+                                .knobs-grid {
+                                    grid-template-columns: 1fr;
+                                    gap: 30px;
+                                }
+                            }
+                            
+                            .knob-column-wrapper {
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                width: 100%;
+                                max-width: 450px;
+                            }
+                            
+                            .knob-column-header {
+                                margin-bottom: 15px;
+                                text-align: center;
+                            }
+                            
+                            .knob-column-title {
+                                font-size: 1rem;
+                                font-weight: 600;
+                                color: #374151;
+                                text-transform: uppercase;
+                                letter-spacing: 0.05em;
+                                margin: 0;
+                            }
+                            
+                            .dual-knobs-row {
+                                display: flex;
+                                gap: 25px;
+                                justify-content: center;
+                                align-items: center;
+                                flex-wrap: wrap;
+                            }
+                            
                             .dual-price-knobs-container {
                                 display: flex;
                                 flex-direction: column;
@@ -1566,121 +1764,6 @@
 
                     <!-- Advanced filters -->
                     <div class="filters-advanced" id="advancedFilters">
-                        <div class="filter-group">
-                            <label class="filter-group__label">Area (m²)</label>
-                            
-                            <!-- Dual Circular Area Knobs -->
-                            <div class="dual-area-knobs-container" style="margin-top: 15px;">
-                                <div class="dual-knobs-wrapper">
-                                    <!-- Min Area Knob (Dark Gray) -->
-                                    <div class="knob-column">
-                                        <div class="circular-area-knob" id="areaKnobMin">
-                                            <svg width="160" height="160" viewBox="0 0 160 160">
-                                                <!-- Background circle with dashed pattern -->
-                                                <circle cx="80" cy="80" r="55" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-dasharray="3 3"/>
-                                                
-                                                <!-- Main sector gradient -->
-                                                <circle cx="80" cy="80" r="55" fill="none" 
-                                                        stroke="url(#areaGradientMin)" 
-                                                        stroke-width="14"
-                                                        stroke-dasharray="345 10"
-                                                        stroke-dashoffset="86"
-                                                        stroke-linecap="round"
-                                                        transform="rotate(-90 80 80)"/>
-                                                
-                                                <!-- Active arc -->
-                                                <circle cx="80" cy="80" r="55" fill="none" 
-                                                        id="areaKnobMinArc"
-                                                        stroke="#4b5563" 
-                                                        stroke-width="16"
-                                                        stroke-dasharray="0 345"
-                                                        stroke-dashoffset="86"
-                                                        stroke-linecap="round"
-                                                        transform="rotate(-90 80 80)"/>
-                                                
-                                                <!-- Handle -->
-                                                <g id="areaKnobMinHandle">
-                                                    <circle cx="80" cy="25" r="10" fill="white" stroke="#4b5563" stroke-width="2.5"/>
-                                                    <circle cx="80" cy="25" r="5" fill="#4b5563"/>
-                                                </g>
-                                                
-                                                <!-- Gradients -->
-                                                <defs>
-                                                    <linearGradient id="areaGradientMin" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                        <stop offset="0%" style="stop-color:#9ca3af;stop-opacity:0.3" />
-                                                        <stop offset="100%" style="stop-color:#6b7280;stop-opacity:0.7" />
-                                                    </linearGradient>
-                                                </defs>
-                                            </svg>
-                                            
-                                            <!-- Center display -->
-                                            <div class="knob-center-display">
-                                                <div class="knob-value-gray" id="areaKnobMinValue">0 m²</div>
-                                                <div class="knob-label-gray">Min Area</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                    
-                                    <!-- Max Area Knob (Medium Gray) -->
-                                    <div class="knob-column">
-                                        <div class="circular-area-knob" id="areaKnobMax">
-                                            <svg width="160" height="160" viewBox="0 0 160 160">
-                                                <!-- Background circle with dashed pattern -->
-                                                <circle cx="80" cy="80" r="55" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-dasharray="3 3"/>
-                                                
-                                                <!-- Main sector gradient -->
-                                                <circle cx="80" cy="80" r="55" fill="none" 
-                                                        stroke="url(#areaGradientMax)" 
-                                                        stroke-width="14"
-                                                        stroke-dasharray="345 10"
-                                                        stroke-dashoffset="86"
-                                                        stroke-linecap="round"
-                                                        transform="rotate(-90 80 80)"/>
-                                                
-                                                <!-- Active arc -->
-                                                <circle cx="80" cy="80" r="55" fill="none" 
-                                                        id="areaKnobMaxArc"
-                                                        stroke="#6b7280" 
-                                                        stroke-width="16"
-                                                        stroke-dasharray="0 345"
-                                                        stroke-dashoffset="86"
-                                                        stroke-linecap="round"
-                                                        transform="rotate(-90 80 80)"/>
-                                                
-                                                <!-- Handle -->
-                                                <g id="areaKnobMaxHandle">
-                                                    <circle cx="80" cy="25" r="10" fill="white" stroke="#6b7280" stroke-width="2.5"/>
-                                                    <circle cx="80" cy="25" r="5" fill="#6b7280"/>
-                                                </g>
-                                                
-                                                <!-- Gradients -->
-                                                <defs>
-                                                    <linearGradient id="areaGradientMax" x1="0%" y1="0%" x2="100%" y2="0%">
-                                                        <stop offset="0%" style="stop-color:#9ca3af;stop-opacity:0.3" />
-                                                        <stop offset="100%" style="stop-color:#6b7280;stop-opacity:0.7" />
-                                                    </linearGradient>
-                                                </defs>
-                                            </svg>
-                                            
-                                            <!-- Center display -->
-                                            <div class="knob-center-display">
-                                                <div class="knob-value-gray" id="areaKnobMaxValue">500 m²</div>
-                                                <div class="knob-label-gray">Max Area</div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                                
-                                <!-- Area range inputs below knobs -->
-                                <div class="range-group" style="margin-top: 12px; gap: 8px;">
-                                    <input type="number" class="input" placeholder="Min m²" id="areaMin" 
-                                           onchange="updateAreaFromInputs()" style="font-size: 0.875rem;">
-                                    <span class="range-group__sep">—</span>
-                                    <input type="number" class="input" placeholder="Max m²" id="areaMax" 
-                                           onchange="updateAreaFromInputs()" style="font-size: 0.875rem;">
-                                </div>
-                            </div>
-                        </div>
                         <div class="filter-group">
                             <label class="filter-group__label">Price/m² (€)</label>
                             
