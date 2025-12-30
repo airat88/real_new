@@ -1062,6 +1062,56 @@
                                 stroke-width: 4;
                                 r: 14;
                             }
+                            
+                            /* Area and Price/m² Knobs - Gray Tones */
+                            .dual-area-knobs-container,
+                            .dual-pricesqm-knobs-container {
+                                display: flex;
+                                flex-direction: column;
+                                align-items: center;
+                                padding: 8px;
+                            }
+                            
+                            .circular-area-knob,
+                            .circular-pricesqm-knob {
+                                position: relative;
+                                width: 160px;
+                                height: 160px;
+                                cursor: pointer;
+                                user-select: none;
+                                touch-action: none;
+                            }
+                            
+                            .knob-value-gray {
+                                font-size: 1.125rem;
+                                font-weight: 700;
+                                color: #374151;
+                                margin-bottom: 3px;
+                            }
+                            
+                            .knob-label-gray {
+                                font-size: 0.65rem;
+                                color: #9ca3af;
+                                text-transform: uppercase;
+                                letter-spacing: 0.05em;
+                            }
+                            
+                            .circular-area-knob g,
+                            .circular-pricesqm-knob g {
+                                cursor: grab;
+                                transition: transform 0.05s ease-out;
+                            }
+                            
+                            .circular-area-knob g:active,
+                            .circular-pricesqm-knob g:active {
+                                cursor: grabbing;
+                            }
+                            
+                            .circular-area-knob:hover g circle:first-child,
+                            .circular-pricesqm-knob:hover g circle:first-child {
+                                stroke-width: 3.5;
+                                r: 12;
+                            }
                             </style>
                             
                             <script>
@@ -1233,6 +1283,268 @@
                                 minKnob.updateKnob(0); // Start at 0
                                 maxKnob.updateKnob(360); // Start at max (show all)
                             })();
+                            
+                            // Dual Circular Area Knobs Logic
+                            (function() {
+                                function createAreaKnob(config) {
+                                    const {knobId, handleId, arcId, valueId, inputId, color, maxValue} = config;
+                                    
+                                    const knob = document.getElementById(knobId);
+                                    const handle = document.getElementById(handleId);
+                                    const arc = document.getElementById(arcId);
+                                    const valueDisplay = document.getElementById(valueId);
+                                    const input = document.getElementById(inputId);
+                                    
+                                    let isDragging = false;
+                                    let currentAngle = 0;
+                                    
+                                    function angleToValue(angle) {
+                                        return Math.round((angle / 360) * maxValue);
+                                    }
+                                    
+                                    function valueToAngle(value) {
+                                        if (value <= 0) return 0;
+                                        return Math.min(360, (value / maxValue) * 360);
+                                    }
+                                    
+                                    function formatValue(value) {
+                                        if (value >= 1000) return (value / 1000).toFixed(0) + 'K m²';
+                                        return value + ' m²';
+                                    }
+                                    
+                                    function updateKnob(angle) {
+                                        currentAngle = Math.max(0, Math.min(360, angle));
+                                        
+                                        const handleAngle = currentAngle - 90;
+                                        handle.setAttribute('transform', `rotate(${handleAngle} 80 80)`);
+                                        
+                                        const arcLength = (currentAngle / 360) * 345;
+                                        arc.setAttribute('stroke-dasharray', `${arcLength} ${345 - arcLength}`);
+                                        
+                                        const value = angleToValue(currentAngle);
+                                        valueDisplay.textContent = formatValue(value);
+                                        input.value = value || '';
+                                        
+                                        if (!isDragging) {
+                                            renderProperties();
+                                        }
+                                    }
+                                    
+                                    function getAngleFromEvent(e) {
+                                        const rect = knob.getBoundingClientRect();
+                                        const centerX = rect.left + rect.width / 2;
+                                        const centerY = rect.top + rect.height / 2;
+                                        
+                                        const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
+                                        const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
+                                        
+                                        if (!clientX || !clientY) return currentAngle;
+                                        
+                                        const deltaX = clientX - centerX;
+                                        const deltaY = clientY - centerY;
+                                        
+                                        let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) + 90;
+                                        if (angle < 0) angle += 360;
+                                        
+                                        return angle;
+                                    }
+                                    
+                                    function startDrag(e) {
+                                        isDragging = true;
+                                        updateKnob(getAngleFromEvent(e));
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                    }
+                                    
+                                    function drag(e) {
+                                        if (isDragging) {
+                                            updateKnob(getAngleFromEvent(e));
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                        }
+                                    }
+                                    
+                                    function stopDrag(e) {
+                                        if (isDragging) {
+                                            isDragging = false;
+                                            renderProperties();
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                        }
+                                    }
+                                    
+                                    knob.addEventListener('mousedown', startDrag);
+                                    knob.addEventListener('touchstart', startDrag, {passive: false});
+                                    document.addEventListener('mousemove', drag);
+                                    document.addEventListener('touchmove', drag, {passive: false});
+                                    document.addEventListener('mouseup', stopDrag);
+                                    document.addEventListener('touchend', stopDrag);
+                                    
+                                    return {updateKnob, valueToAngle, getInput: () => input};
+                                }
+                                
+                                const areaMinKnob = createAreaKnob({
+                                    knobId: 'areaKnobMin',
+                                    handleId: 'areaKnobMinHandle',
+                                    arcId: 'areaKnobMinArc',
+                                    valueId: 'areaKnobMinValue',
+                                    inputId: 'areaMin',
+                                    color: '#4b5563',
+                                    maxValue: 500
+                                });
+                                
+                                const areaMaxKnob = createAreaKnob({
+                                    knobId: 'areaKnobMax',
+                                    handleId: 'areaKnobMaxHandle',
+                                    arcId: 'areaKnobMaxArc',
+                                    valueId: 'areaKnobMaxValue',
+                                    inputId: 'areaMax',
+                                    color: '#6b7280',
+                                    maxValue: 500
+                                });
+                                
+                                window.updateAreaFromInputs = function() {
+                                    const minValue = parseInt(areaMinKnob.getInput().value) || 0;
+                                    const maxValue = parseInt(areaMaxKnob.getInput().value) || 500;
+                                    
+                                    areaMinKnob.updateKnob(areaMinKnob.valueToAngle(minValue));
+                                    areaMaxKnob.updateKnob(areaMaxKnob.valueToAngle(maxValue));
+                                };
+                                
+                                areaMinKnob.updateKnob(0);
+                                areaMaxKnob.updateKnob(360);
+                            })();
+                            
+                            // Dual Circular Price/m² Knobs Logic
+                            (function() {
+                                function createPriceSqmKnob(config) {
+                                    const {knobId, handleId, arcId, valueId, inputId, color, maxValue} = config;
+                                    
+                                    const knob = document.getElementById(knobId);
+                                    const handle = document.getElementById(handleId);
+                                    const arc = document.getElementById(arcId);
+                                    const valueDisplay = document.getElementById(valueId);
+                                    const input = document.getElementById(inputId);
+                                    
+                                    let isDragging = false;
+                                    let currentAngle = 0;
+                                    
+                                    function angleToValue(angle) {
+                                        return Math.round((angle / 360) * maxValue);
+                                    }
+                                    
+                                    function valueToAngle(value) {
+                                        if (value <= 0) return 0;
+                                        return Math.min(360, (value / maxValue) * 360);
+                                    }
+                                    
+                                    function formatValue(value) {
+                                        if (value >= 1000) return '€' + (value / 1000).toFixed(0) + 'K';
+                                        return '€' + value;
+                                    }
+                                    
+                                    function updateKnob(angle) {
+                                        currentAngle = Math.max(0, Math.min(360, angle));
+                                        
+                                        const handleAngle = currentAngle - 90;
+                                        handle.setAttribute('transform', `rotate(${handleAngle} 80 80)`);
+                                        
+                                        const arcLength = (currentAngle / 360) * 345;
+                                        arc.setAttribute('stroke-dasharray', `${arcLength} ${345 - arcLength}`);
+                                        
+                                        const value = angleToValue(currentAngle);
+                                        valueDisplay.textContent = formatValue(value);
+                                        input.value = value || '';
+                                        
+                                        if (!isDragging) {
+                                            renderProperties();
+                                        }
+                                    }
+                                    
+                                    function getAngleFromEvent(e) {
+                                        const rect = knob.getBoundingClientRect();
+                                        const centerX = rect.left + rect.width / 2;
+                                        const centerY = rect.top + rect.height / 2;
+                                        
+                                        const clientX = e.clientX || (e.touches && e.touches[0] && e.touches[0].clientX);
+                                        const clientY = e.clientY || (e.touches && e.touches[0] && e.touches[0].clientY);
+                                        
+                                        if (!clientX || !clientY) return currentAngle;
+                                        
+                                        const deltaX = clientX - centerX;
+                                        const deltaY = clientY - centerY;
+                                        
+                                        let angle = Math.atan2(deltaY, deltaX) * (180 / Math.PI) + 90;
+                                        if (angle < 0) angle += 360;
+                                        
+                                        return angle;
+                                    }
+                                    
+                                    function startDrag(e) {
+                                        isDragging = true;
+                                        updateKnob(getAngleFromEvent(e));
+                                        e.preventDefault();
+                                        e.stopPropagation();
+                                    }
+                                    
+                                    function drag(e) {
+                                        if (isDragging) {
+                                            updateKnob(getAngleFromEvent(e));
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                        }
+                                    }
+                                    
+                                    function stopDrag(e) {
+                                        if (isDragging) {
+                                            isDragging = false;
+                                            renderProperties();
+                                            e.preventDefault();
+                                            e.stopPropagation();
+                                        }
+                                    }
+                                    
+                                    knob.addEventListener('mousedown', startDrag);
+                                    knob.addEventListener('touchstart', startDrag, {passive: false});
+                                    document.addEventListener('mousemove', drag);
+                                    document.addEventListener('touchmove', drag, {passive: false});
+                                    document.addEventListener('mouseup', stopDrag);
+                                    document.addEventListener('touchend', stopDrag);
+                                    
+                                    return {updateKnob, valueToAngle, getInput: () => input};
+                                }
+                                
+                                const priceSqmMinKnob = createPriceSqmKnob({
+                                    knobId: 'priceSqmKnobMin',
+                                    handleId: 'priceSqmKnobMinHandle',
+                                    arcId: 'priceSqmKnobMinArc',
+                                    valueId: 'priceSqmKnobMinValue',
+                                    inputId: 'priceSqmMin',
+                                    color: '#6b7280',
+                                    maxValue: 10000
+                                });
+                                
+                                const priceSqmMaxKnob = createPriceSqmKnob({
+                                    knobId: 'priceSqmKnobMax',
+                                    handleId: 'priceSqmKnobMaxHandle',
+                                    arcId: 'priceSqmKnobMaxArc',
+                                    valueId: 'priceSqmKnobMaxValue',
+                                    inputId: 'priceSqmMax',
+                                    color: '#9ca3af',
+                                    maxValue: 10000
+                                });
+                                
+                                window.updatePriceSqmFromInputs = function() {
+                                    const minValue = parseInt(priceSqmMinKnob.getInput().value) || 0;
+                                    const maxValue = parseInt(priceSqmMaxKnob.getInput().value) || 10000;
+                                    
+                                    priceSqmMinKnob.updateKnob(priceSqmMinKnob.valueToAngle(minValue));
+                                    priceSqmMaxKnob.updateKnob(priceSqmMaxKnob.valueToAngle(maxValue));
+                                };
+                                
+                                priceSqmMinKnob.updateKnob(0);
+                                priceSqmMaxKnob.updateKnob(360);
+                            })();
                             </script>
                         </div>
                     </div>
@@ -1260,39 +1572,231 @@
                     <div class="filters-advanced" id="advancedFilters">
                         <div class="filter-group">
                             <label class="filter-group__label">Area (m²)</label>
-                            <div class="range-group">
-                                <input type="number" class="input" placeholder="Min" id="areaMin">
-                                <span class="range-group__sep">-</span>
-                                <input type="number" class="input" placeholder="Max" id="areaMax">
-                            </div>
-                            <!-- Range Slider -->
-                            <div class="range-slider-container">
-                                <div class="range-values">
-                                    <span id="areaRangeDisplay">0 - 30,000</span>
+                            
+                            <!-- Dual Circular Area Knobs -->
+                            <div class="dual-area-knobs-container" style="margin-top: 15px;">
+                                <div class="dual-knobs-wrapper">
+                                    <!-- Min Area Knob (Dark Gray) -->
+                                    <div class="knob-column">
+                                        <div class="circular-area-knob" id="areaKnobMin">
+                                            <svg width="160" height="160" viewBox="0 0 160 160">
+                                                <!-- Background circle with dashed pattern -->
+                                                <circle cx="80" cy="80" r="55" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-dasharray="3 3"/>
+                                                
+                                                <!-- Main sector gradient -->
+                                                <circle cx="80" cy="80" r="55" fill="none" 
+                                                        stroke="url(#areaGradientMin)" 
+                                                        stroke-width="14"
+                                                        stroke-dasharray="345 10"
+                                                        stroke-dashoffset="86"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 80 80)"/>
+                                                
+                                                <!-- Active arc -->
+                                                <circle cx="80" cy="80" r="55" fill="none" 
+                                                        id="areaKnobMinArc"
+                                                        stroke="#4b5563" 
+                                                        stroke-width="16"
+                                                        stroke-dasharray="0 345"
+                                                        stroke-dashoffset="86"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 80 80)"/>
+                                                
+                                                <!-- Handle -->
+                                                <g id="areaKnobMinHandle">
+                                                    <circle cx="80" cy="25" r="10" fill="white" stroke="#4b5563" stroke-width="2.5"/>
+                                                    <circle cx="80" cy="25" r="5" fill="#4b5563"/>
+                                                </g>
+                                                
+                                                <!-- Gradients -->
+                                                <defs>
+                                                    <linearGradient id="areaGradientMin" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                        <stop offset="0%" style="stop-color:#9ca3af;stop-opacity:0.3" />
+                                                        <stop offset="100%" style="stop-color:#6b7280;stop-opacity:0.7" />
+                                                    </linearGradient>
+                                                </defs>
+                                            </svg>
+                                            
+                                            <!-- Center display -->
+                                            <div class="knob-center-display">
+                                                <div class="knob-value-gray" id="areaKnobMinValue">0 m²</div>
+                                                <div class="knob-label-gray">Min Area</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Max Area Knob (Medium Gray) -->
+                                    <div class="knob-column">
+                                        <div class="circular-area-knob" id="areaKnobMax">
+                                            <svg width="160" height="160" viewBox="0 0 160 160">
+                                                <!-- Background circle with dashed pattern -->
+                                                <circle cx="80" cy="80" r="55" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-dasharray="3 3"/>
+                                                
+                                                <!-- Main sector gradient -->
+                                                <circle cx="80" cy="80" r="55" fill="none" 
+                                                        stroke="url(#areaGradientMax)" 
+                                                        stroke-width="14"
+                                                        stroke-dasharray="345 10"
+                                                        stroke-dashoffset="86"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 80 80)"/>
+                                                
+                                                <!-- Active arc -->
+                                                <circle cx="80" cy="80" r="55" fill="none" 
+                                                        id="areaKnobMaxArc"
+                                                        stroke="#6b7280" 
+                                                        stroke-width="16"
+                                                        stroke-dasharray="0 345"
+                                                        stroke-dashoffset="86"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 80 80)"/>
+                                                
+                                                <!-- Handle -->
+                                                <g id="areaKnobMaxHandle">
+                                                    <circle cx="80" cy="25" r="10" fill="white" stroke="#6b7280" stroke-width="2.5"/>
+                                                    <circle cx="80" cy="25" r="5" fill="#6b7280"/>
+                                                </g>
+                                                
+                                                <!-- Gradients -->
+                                                <defs>
+                                                    <linearGradient id="areaGradientMax" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                        <stop offset="0%" style="stop-color:#9ca3af;stop-opacity:0.3" />
+                                                        <stop offset="100%" style="stop-color:#6b7280;stop-opacity:0.7" />
+                                                    </linearGradient>
+                                                </defs>
+                                            </svg>
+                                            
+                                            <!-- Center display -->
+                                            <div class="knob-center-display">
+                                                <div class="knob-value-gray" id="areaKnobMaxValue">500 m²</div>
+                                                <div class="knob-label-gray">Max Area</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="range-slider" id="areaSlider" data-min="0" data-max="30000">
-                                    <div class="range-slider__track"></div>
-                                    <div class="range-slider__thumb" data-thumb="min"></div>
-                                    <div class="range-slider__thumb" data-thumb="max"></div>
+                                
+                                <!-- Area range inputs below knobs -->
+                                <div class="range-group" style="margin-top: 12px; gap: 8px;">
+                                    <input type="number" class="input" placeholder="Min m²" id="areaMin" 
+                                           onchange="updateAreaFromInputs()" style="font-size: 0.875rem;">
+                                    <span class="range-group__sep">—</span>
+                                    <input type="number" class="input" placeholder="Max m²" id="areaMax" 
+                                           onchange="updateAreaFromInputs()" style="font-size: 0.875rem;">
                                 </div>
                             </div>
                         </div>
                         <div class="filter-group">
                             <label class="filter-group__label">Price/m² (€)</label>
-                            <div class="range-group">
-                                <input type="number" class="input" placeholder="Min" id="priceSqmMin">
-                                <span class="range-group__sep">-</span>
-                                <input type="number" class="input" placeholder="Max" id="priceSqmMax">
-                            </div>
-                            <!-- Range Slider -->
-                            <div class="range-slider-container">
-                                <div class="range-values">
-                                    <span id="priceSqmRangeDisplay">0 - 30,000</span>
+                            
+                            <!-- Dual Circular Price/m² Knobs -->
+                            <div class="dual-pricesqm-knobs-container" style="margin-top: 15px;">
+                                <div class="dual-knobs-wrapper">
+                                    <!-- Min Price/m² Knob (Light Gray) -->
+                                    <div class="knob-column">
+                                        <div class="circular-pricesqm-knob" id="priceSqmKnobMin">
+                                            <svg width="160" height="160" viewBox="0 0 160 160">
+                                                <!-- Background circle with striped pattern -->
+                                                <circle cx="80" cy="80" r="55" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-dasharray="5 2"/>
+                                                
+                                                <!-- Main sector gradient -->
+                                                <circle cx="80" cy="80" r="55" fill="none" 
+                                                        stroke="url(#priceSqmGradientMin)" 
+                                                        stroke-width="14"
+                                                        stroke-dasharray="345 10"
+                                                        stroke-dashoffset="86"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 80 80)"/>
+                                                
+                                                <!-- Active arc -->
+                                                <circle cx="80" cy="80" r="55" fill="none" 
+                                                        id="priceSqmKnobMinArc"
+                                                        stroke="#6b7280" 
+                                                        stroke-width="16"
+                                                        stroke-dasharray="0 345"
+                                                        stroke-dashoffset="86"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 80 80)"/>
+                                                
+                                                <!-- Handle -->
+                                                <g id="priceSqmKnobMinHandle">
+                                                    <circle cx="80" cy="25" r="10" fill="white" stroke="#6b7280" stroke-width="2.5"/>
+                                                    <circle cx="80" cy="25" r="5" fill="#6b7280"/>
+                                                </g>
+                                                
+                                                <!-- Gradients -->
+                                                <defs>
+                                                    <linearGradient id="priceSqmGradientMin" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                        <stop offset="0%" style="stop-color:#d1d5db;stop-opacity:0.4" />
+                                                        <stop offset="100%" style="stop-color:#9ca3af;stop-opacity:0.7" />
+                                                    </linearGradient>
+                                                </defs>
+                                            </svg>
+                                            
+                                            <!-- Center display -->
+                                            <div class="knob-center-display">
+                                                <div class="knob-value-gray" id="priceSqmKnobMinValue">€0</div>
+                                                <div class="knob-label-gray">Min €/m²</div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Max Price/m² Knob (Medium Gray) -->
+                                    <div class="knob-column">
+                                        <div class="circular-pricesqm-knob" id="priceSqmKnobMax">
+                                            <svg width="160" height="160" viewBox="0 0 160 160">
+                                                <!-- Background circle with striped pattern -->
+                                                <circle cx="80" cy="80" r="55" fill="none" stroke="#e5e7eb" stroke-width="14" stroke-dasharray="5 2"/>
+                                                
+                                                <!-- Main sector gradient -->
+                                                <circle cx="80" cy="80" r="55" fill="none" 
+                                                        stroke="url(#priceSqmGradientMax)" 
+                                                        stroke-width="14"
+                                                        stroke-dasharray="345 10"
+                                                        stroke-dashoffset="86"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 80 80)"/>
+                                                
+                                                <!-- Active arc -->
+                                                <circle cx="80" cy="80" r="55" fill="none" 
+                                                        id="priceSqmKnobMaxArc"
+                                                        stroke="#9ca3af" 
+                                                        stroke-width="16"
+                                                        stroke-dasharray="0 345"
+                                                        stroke-dashoffset="86"
+                                                        stroke-linecap="round"
+                                                        transform="rotate(-90 80 80)"/>
+                                                
+                                                <!-- Handle -->
+                                                <g id="priceSqmKnobMaxHandle">
+                                                    <circle cx="80" cy="25" r="10" fill="white" stroke="#9ca3af" stroke-width="2.5"/>
+                                                    <circle cx="80" cy="25" r="5" fill="#9ca3af"/>
+                                                </g>
+                                                
+                                                <!-- Gradients -->
+                                                <defs>
+                                                    <linearGradient id="priceSqmGradientMax" x1="0%" y1="0%" x2="100%" y2="0%">
+                                                        <stop offset="0%" style="stop-color:#d1d5db;stop-opacity:0.4" />
+                                                        <stop offset="100%" style="stop-color:#9ca3af;stop-opacity:0.7" />
+                                                    </linearGradient>
+                                                </defs>
+                                            </svg>
+                                            
+                                            <!-- Center display -->
+                                            <div class="knob-center-display">
+                                                <div class="knob-value-gray" id="priceSqmKnobMaxValue">€10K</div>
+                                                <div class="knob-label-gray">Max €/m²</div>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="range-slider" id="priceSqmSlider" data-min="0" data-max="30000">
-                                    <div class="range-slider__track"></div>
-                                    <div class="range-slider__thumb" data-thumb="min"></div>
-                                    <div class="range-slider__thumb" data-thumb="max"></div>
+                                
+                                <!-- Price/m² range inputs below knobs -->
+                                <div class="range-group" style="margin-top: 12px; gap: 8px;">
+                                    <input type="number" class="input" placeholder="Min €/m²" id="priceSqmMin" 
+                                           onchange="updatePriceSqmFromInputs()" style="font-size: 0.875rem;">
+                                    <span class="range-group__sep">—</span>
+                                    <input type="number" class="input" placeholder="Max €/m²" id="priceSqmMax" 
+                                           onchange="updatePriceSqmFromInputs()" style="font-size: 0.875rem;">
                                 </div>
                             </div>
                         </div>
