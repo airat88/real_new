@@ -847,6 +847,9 @@
                                 <button class="price-preset-btn" onclick="setPriceRange(2000000, 50000000); event.preventDefault();">
                                     >2M
                                 </button>
+                                <button class="price-preset-btn" onclick="setPriceUponRequest(); event.preventDefault();" style="background: var(--warning, #f59e0b); border-color: var(--warning, #f59e0b); color: white;">
+                                    💰 Price upon request
+                                </button>
                             </div>
                             
                             <div class="price-range-inputs">
@@ -1559,9 +1562,12 @@
             return sorted;
         }
 
-        // Set price range from preset buttons
+        // Set price range from preset buttons (numeric ranges only)
         function setPriceRange(min, max) {
             console.log(`Setting price range: ${min} - ${max}`);
+            
+            // Disable "Price upon request" mode
+            priceUponRequestMode = false;
             
             // Update input fields
             document.getElementById('priceMin').value = min;
@@ -1592,6 +1598,35 @@
             }
         }
 
+        // Set "Price upon request" filter
+        function setPriceUponRequest() {
+            console.log('💰 Filtering for "Price upon request" properties');
+            
+            // Enable "Price upon request" mode
+            priceUponRequestMode = true;
+            
+            // Clear price range inputs
+            document.getElementById('priceMin').value = '';
+            document.getElementById('priceMax').value = '';
+            
+            // Trigger filter update
+            renderProperties();
+            
+            // Visual feedback
+            const allPresets = document.querySelectorAll('.price-preset-btn');
+            allPresets.forEach(btn => {
+                if (btn.textContent.includes('Price upon request')) {
+                    btn.style.background = 'var(--warning, #f59e0b)';
+                    btn.style.borderColor = 'var(--warning, #f59e0b)';
+                    btn.style.color = 'white';
+                } else {
+                    btn.style.background = 'white';
+                    btn.style.borderColor = 'var(--gray-200, #e2e8f0)';
+                    btn.style.color = 'var(--gray-700, #374151)';
+                }
+            });
+        }
+
         // Current filter states
         let selectedBedrooms = '';
         let selectedLocations = [];
@@ -1601,6 +1636,7 @@
         let selectedMainTypes = [];
         let selectedObjects = [];
         let currentSort = 'date-desc';  // Default sort: Newest First
+        let priceUponRequestMode = false;  // Filter for "Price upon request" objects
 
         // Get filtered properties
         function getFilteredProperties() {
@@ -1707,9 +1743,22 @@
                     }
                 }
 
-                // Price range
+                // Price range with "Price upon request" handling
                 const price = p.cleanPrice || 0;
-                if (price < priceMin || price > priceMax) return false;
+                
+                if (priceUponRequestMode) {
+                    // "Price upon request" mode - show ONLY objects without price
+                    if (price > 0) return false;
+                } else {
+                    // Normal price range mode
+                    // Exclude "Price upon request" objects from numeric price filters
+                    if (priceMin > 0 || priceMax < Infinity) {
+                        // Numeric price filter is active - exclude objects without price
+                        if (price === 0) return false;
+                    }
+                    // Apply numeric range filter
+                    if (price < priceMin || price > priceMax) return false;
+                }
 
                 // Area
                 const area = p.area || 0;
@@ -1924,6 +1973,7 @@
             document.getElementById('searchInput').value = '';
             document.getElementById('sortSelect').value = 'date-desc';  // Reset sort
             currentSort = 'date-desc';
+            priceUponRequestMode = false;  // Reset "Price upon request" mode
             document.getElementById('priceMin').value = '';
             document.getElementById('priceMax').value = '';
             document.getElementById('areaMin').value = '';
@@ -1955,6 +2005,13 @@
             selectedBedrooms = '';
             document.querySelectorAll('.bedroom-chip').forEach(chip => {
                 chip.classList.toggle('active', chip.dataset.beds === '');
+            });
+            
+            // Reset price preset buttons styling
+            document.querySelectorAll('.price-preset-btn').forEach(btn => {
+                btn.style.background = 'white';
+                btn.style.borderColor = 'var(--gray-200, #e2e8f0)';
+                btn.style.color = 'var(--gray-700, #374151)';
             });
 
             updateActiveFiltersCount();
