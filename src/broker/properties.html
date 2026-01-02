@@ -552,6 +552,20 @@
                 padding: 12px 0 !important;
             }
         }
+        
+        /* Стили для недоступных районов */
+        .multi-select__option.disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .multi-select__option.disabled input[type="checkbox"] {
+            cursor: not-allowed;
+        }
+
+        .multi-select__option.disabled span {
+            color: var(--gray-400);
+        }
     </style>
 </head>
 <body>
@@ -1608,6 +1622,8 @@
         let selectedBedrooms = '';
         let selectedLocations = [];
         let selectedDistricts = [];
+        // Маппинг локаций к районам (динамически заполняется на основе данных)
+        let locationDistrictMap = {};
         let selectedTypes = [];
         let selectedStatuses = [];
         let selectedPropertyTypes = [];
@@ -1778,6 +1794,26 @@
         // Update filter dropdowns with actual data
         function updateFilters() {
             const options = PropertyData.getFilterOptions();
+            const properties = PropertyData.getAll();
+            
+            // Создаём маппинг локаций к районам
+            locationDistrictMap = {};
+            properties.forEach(p => {
+                if (p.location && p.district) {
+                    const loc = p.location.trim();
+                    const dist = p.district.trim();
+                    
+                    if (!locationDistrictMap[loc]) {
+                        locationDistrictMap[loc] = new Set();
+                    }
+                    locationDistrictMap[loc].add(dist);
+                }
+            });
+            
+            // Конвертируем Set в массивы
+            Object.keys(locationDistrictMap).forEach(loc => {
+                locationDistrictMap[loc] = Array.from(locationDistrictMap[loc]).sort();
+            });
 
             // Locations - multi-select
             const locationDropdown = document.getElementById('locationDropdown');
@@ -1788,16 +1824,8 @@
                 </label>
             `).join('');
 
-            // Districts - multi-select
-            const districtDropdown = document.getElementById('districtDropdown');
-            if (districtDropdown && options.districts) {
-                districtDropdown.innerHTML = options.districts.map(district => `
-                    <label class="multi-select__option" data-value="${district}">
-                        <input type="checkbox" value="${district}" onchange="onMultiSelectChange('district')">
-                        <span>${district}</span>
-                    </label>
-                `).join('');
-            }
+            // Districts - multi-select (изначально показываем все)
+            updateDistrictDropdown(options.districts);
 
             // Types - multi-select
             const typeDropdown = document.getElementById('typeDropdown');
@@ -1836,6 +1864,45 @@
             `).join('');
         }
 
+        // Обновляет выпадающий список районов на основе выбранных локаций
+        function updateDistrictDropdown(allDistricts, availableDistricts = null) {
+            const districtDropdown = document.getElementById('districtDropdown');
+            if (!districtDropdown) return;
+            
+            // Если availableDistricts не указан, используем все районы
+            const districtsToShow = availableDistricts || allDistricts;
+            
+            // Получаем текущие выбранные районы
+            const currentlySelected = selectedDistricts.slice();
+            
+            // Создаём HTML для районов
+            districtDropdown.innerHTML = districtsToShow.map(district => {
+                const isSelected = currentlySelected.includes(district);
+                const isAvailable = !availableDistricts || availableDistricts.includes(district);
+                
+                return `
+                    <label class="multi-select__option ${!isAvailable ? 'disabled' : ''}" data-value="${district}">
+                        <input type="checkbox" 
+                               value="${district}" 
+                               ${isSelected ? 'checked' : ''}
+                               ${!isAvailable ? 'disabled' : ''}
+                               onchange="onMultiSelectChange('district')">
+                        <span>${district}</span>
+                    </label>
+                `;
+            }).join('');
+        }
+
+        // Получает локацию для указанного района
+        function getLocationForDistrict(district) {
+            for (const [location, districts] of Object.entries(locationDistrictMap)) {
+                if (districts.includes(district)) {
+                    return location;
+                }
+            }
+            return null;
+        }
+
         // Multi-select toggle
         function toggleMultiSelect(type) {
             const dropdown = document.getElementById(type + 'Dropdown');
@@ -1855,16 +1922,84 @@
         // Multi-select change handler
         function onMultiSelectChange(type) {
             const dropdown = document.getElementById(type + 'Dropdown');
-            const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]:checked');
+            const checkboxes = dropdown.querySelectorAll('input[type="checkbox"]:checked:not([disabled])');
             const values = Array.from(checkboxes).map(cb => cb.value);
 
             // Update state
             if (type === 'location') {
                 selectedLocations = values;
                 updateMultiSelectText('location', values, 'All locations');
+                
+                // Фильтруем районы на основе выбранных локаций
+                const options = PropertyData.getFilterOptions();
+                if (selectedLocations.length > 0) {
+                    // Собираем все районы для выбранных локаций
+                    const availableDistricts = new Set();
+                    selectedLocations.forEach(loc => {
+                        if (locationDistrictMap[loc]) {
+                            locationDistrictMap[loc].forEach(dist => availableDistricts.add(dist));
+                        }
+                    });
+                    
+                    // Обновляем список районов
+                    updateDistrictDropdown(
+                        options.districts,
+                        Array.from(availableDistricts).sort()
+                    );
+                    
+                    // Удаляем выбранные районы, которые не относятся к выбранным локациям
+                    selectedDistricts = selectedDistricts.filter(dist => availableDistricts.has(dist));
+                    updateMultiSelectText('district', selectedDistricts, 'All districts');
+                } else {
+                    // Если локации не выбраны, показываем все районы
+                    updateDistrictDropdown(options.districts);
+                }
+                
             } else if (type === 'district') {
                 selectedDistricts = values;
                 updateMultiSelectText('district', values, 'All districts');
+                
+                // Автоматически выбираем соответствующие локации
+                const relatedLocations = new Set(selectedLocations);
+                values.forEach(district => {
+                    const location = getLocationForDistrict(district);
+                    if (location) {
+                        relatedLocations.add(location);
+                    }
+                });
+                
+                // Обновляем выбранные локации
+                const newLocations = Array.from(relatedLocations);
+                if (newLocations.length !== selectedLocations.length || 
+                    !newLocations.every(loc => selectedLocations.includes(loc))) {
+                    
+                    selectedLocations = newLocations;
+                    
+                    // Обновляем чекбоксы локаций
+                    const locationDropdown = document.getElementById('locationDropdown');
+                    const locationCheckboxes = locationDropdown.querySelectorAll('input[type="checkbox"]');
+                    locationCheckboxes.forEach(cb => {
+                        cb.checked = selectedLocations.includes(cb.value);
+                    });
+                    
+                    updateMultiSelectText('location', selectedLocations, 'All locations');
+                    
+                    // Обновляем доступные районы
+                    const options = PropertyData.getFilterOptions();
+                    if (selectedLocations.length > 0) {
+                        const availableDistricts = new Set();
+                        selectedLocations.forEach(loc => {
+                            if (locationDistrictMap[loc]) {
+                                locationDistrictMap[loc].forEach(dist => availableDistricts.add(dist));
+                            }
+                        });
+                        updateDistrictDropdown(
+                            options.districts,
+                            Array.from(availableDistricts).sort()
+                        );
+                    }
+                }
+                
             } else if (type === 'type') {
                 selectedTypes = values;
                 updateMultiSelectText('type', values, 'All types');
