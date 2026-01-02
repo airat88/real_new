@@ -798,6 +798,16 @@
                             </div>
                         </div>
                         <div class="filter-group">
+                            <label class="filter-group__label">Property type</label>
+                            <div class="multi-select" id="propertyTypeMultiSelect">
+                                <div class="multi-select__trigger" onclick="toggleMultiSelect('propertyType')">
+                                    <span class="multi-select__text" id="propertyTypeText">All property types</span>
+                                    <span class="multi-select__arrow">▼</span>
+                                </div>
+                                <div class="multi-select__dropdown" id="propertyTypeDropdown"></div>
+                            </div>
+                        </div>
+                        <div class="filter-group">
                             <label class="filter-group__label">Delivery Date</label>
                             <div class="delivery-filter">
                                 <select class="input" id="deliveryFilter">
@@ -2067,6 +2077,7 @@
         let selectedDistricts = [];
         let selectedTypes = [];
         let selectedStatuses = [];
+        let selectedPropertyTypes = [];
         let selectedObjects = [];
         let currentSort = 'date-desc';  // Default sort: Newest First
         let priceUponRequestMode = false;  // Filter for "Price upon request" objects
@@ -2159,6 +2170,14 @@
                     if (!matches) return false;
                 }
 
+                // Property type - multi-select
+                if (selectedPropertyTypes.length > 0) {
+                    const propPropertyType = (p.propertyType || '').toLowerCase().trim();
+                    const matches = selectedPropertyTypes.some(pt => 
+                        pt.toLowerCase().trim() === propPropertyType
+                    );
+                    if (!matches) return false;
+                }
 
                 // Bedrooms
                 if (selectedBedrooms !== '') {
@@ -2294,6 +2313,14 @@
                 </label>
             `).join('');
 
+            // Property types - multi-select
+            const propertyTypeDropdown = document.getElementById('propertyTypeDropdown');
+            propertyTypeDropdown.innerHTML = options.propertyTypes.map(propertyType => `
+                <label class="multi-select__option" data-value="${propertyType}">
+                    <input type="checkbox" value="${propertyType}" onchange="onMultiSelectChange('propertyType')">
+                    <span>${propertyType}</span>
+                </label>
+            `).join('');
 
             // Object Codes - multi-select
             const objectDropdown = document.getElementById('objectDropdown');
@@ -2340,6 +2367,9 @@
             } else if (type === 'status') {
                 selectedStatuses = values;
                 updateMultiSelectText('status', values, 'All statuses');
+            } else if (type === 'propertyType') {
+                selectedPropertyTypes = values;
+                updateMultiSelectText('propertyType', values, 'All property types');
             } else if (type === 'object') {
                 selectedObjects = values;
                 updateMultiSelectText('object', values, 'All object codes');
@@ -2407,12 +2437,14 @@
             selectedDistricts = [];
             selectedTypes = [];
             selectedStatuses = [];
+            selectedPropertyTypes = [];
             selectedObjects = [];
             document.querySelectorAll('.multi-select__dropdown input[type="checkbox"]').forEach(cb => cb.checked = false);
             updateMultiSelectText('location', [], 'All locations');
             updateMultiSelectText('district', [], 'All districts');
             updateMultiSelectText('type', [], 'All types');
             updateMultiSelectText('status', [], 'All statuses');
+            updateMultiSelectText('propertyType', [], 'All property types');
             updateMultiSelectText('object', [], 'All object codes');
 
             // Clear bedroom selection
@@ -2455,6 +2487,7 @@
             if (selectedDistricts.length > 0) count++;
             if (selectedTypes.length > 0) count++;
             if (selectedStatuses.length > 0) count++;
+            if (selectedPropertyTypes.length > 0) count++;
             if (document.getElementById('priceMin').value || document.getElementById('priceMax').value) count++;
             if (selectedBedrooms !== '') count++;
             if (document.getElementById('areaMin').value || document.getElementById('areaMax').value) count++;
