@@ -798,17 +798,6 @@
                             </div>
                         </div>
                         <div class="filter-group">
-                            <label class="filter-group__label">Main Type</label>
-                            <div class="multi-select" id="mainTypeMultiSelect">
-                                <div class="multi-select__trigger" onclick="toggleMultiSelect('mainType')">
-                                    <span class="multi-select__text" id="mainTypeText">All main types</span>
-                                    <span class="multi-select__arrow">▼</span>
-                                </div>
-                                <!-- Опции заполняются динамически из данных CSV через updateFilters() -->
-                                <div class="multi-select__dropdown" id="mainTypeDropdown"></div>
-                            </div>
-                        </div>
-                        <div class="filter-group">
                             <label class="filter-group__label">Delivery Date</label>
                             <div class="delivery-filter">
                                 <select class="input" id="deliveryFilter">
@@ -2078,7 +2067,6 @@
         let selectedDistricts = [];
         let selectedTypes = [];
         let selectedStatuses = [];
-        let selectedMainTypes = [];
         let selectedObjects = [];
         let currentSort = 'date-desc';  // Default sort: Newest First
         let priceUponRequestMode = false;  // Filter for "Price upon request" objects
@@ -2171,15 +2159,6 @@
                     if (!matches) return false;
                 }
 
-                // Main Type - multi-select (прямое сравнение с полем mainType из CSV)
-                // ✅ FIX: Main Type - multi-select with case-insensitive comparison
-                if (selectedMainTypes.length > 0) {
-                    const propMainType = (p.mainType || '').toLowerCase().trim();
-                    const matches = selectedMainTypes.some(t => 
-                        t.toLowerCase().trim() === propMainType
-                    );
-                    if (!matches) return false;
-                }
 
                 // Bedrooms
                 if (selectedBedrooms !== '') {
@@ -2315,14 +2294,6 @@
                 </label>
             `).join('');
 
-            // Main Types - multi-select (динамически из данных)
-            const mainTypeDropdown = document.getElementById('mainTypeDropdown');
-            mainTypeDropdown.innerHTML = options.mainTypes.map(mainType => `
-                <label class="multi-select__option" data-value="${mainType}">
-                    <input type="checkbox" value="${mainType}" onchange="onMultiSelectChange('mainType')">
-                    <span>${mainType}</span>
-                </label>
-            `).join('');
 
             // Object Codes - multi-select
             const objectDropdown = document.getElementById('objectDropdown');
@@ -2369,9 +2340,6 @@
             } else if (type === 'status') {
                 selectedStatuses = values;
                 updateMultiSelectText('status', values, 'All statuses');
-            } else if (type === 'mainType') {
-                selectedMainTypes = values;
-                updateMultiSelectText('mainType', values, 'All main types');
             } else if (type === 'object') {
                 selectedObjects = values;
                 updateMultiSelectText('object', values, 'All object codes');
@@ -2439,14 +2407,12 @@
             selectedDistricts = [];
             selectedTypes = [];
             selectedStatuses = [];
-            selectedMainTypes = [];
             selectedObjects = [];
             document.querySelectorAll('.multi-select__dropdown input[type="checkbox"]').forEach(cb => cb.checked = false);
             updateMultiSelectText('location', [], 'All locations');
             updateMultiSelectText('district', [], 'All districts');
             updateMultiSelectText('type', [], 'All types');
             updateMultiSelectText('status', [], 'All statuses');
-            updateMultiSelectText('mainType', [], 'All main types');
             updateMultiSelectText('object', [], 'All object codes');
 
             // Clear bedroom selection
@@ -2489,7 +2455,6 @@
             if (selectedDistricts.length > 0) count++;
             if (selectedTypes.length > 0) count++;
             if (selectedStatuses.length > 0) count++;
-            if (selectedMainTypes.length > 0) count++;
             if (document.getElementById('priceMin').value || document.getElementById('priceMax').value) count++;
             if (selectedBedrooms !== '') count++;
             if (document.getElementById('areaMin').value || document.getElementById('areaMax').value) count++;
