@@ -822,7 +822,7 @@
                         ⚙️ Settings
                     </button>
                     <button class="btn btn-secondary" id="syncBtn" onclick="syncData()">
-                        📁 Load from base
+                        📁 Load from CSV
                     </button>
                 </div>
             </header>
@@ -3114,25 +3114,41 @@
         // Initialize bedroom chips
         initBedroomChips();
 
-        // Modal close handlers
-        document.getElementById('linkModal').addEventListener('click', (e) => {
-            if (e.target.id === 'linkModal') closeLinkModal();
-        });
-        document.getElementById('propertyModal').addEventListener('click', (e) => {
-            if (e.target.id === 'propertyModal') closePropertyModal();
-        });
-        document.getElementById('clientModal').addEventListener('click', (e) => {
-            if (e.target.id === 'clientModal') closeClientModal();
-        });
-        document.getElementById('brokerSettingsModal').addEventListener('click', (e) => {
-            if (e.target.id === 'brokerSettingsModal') closeBrokerSettingsModal();
-        });
+        // Modal close handlers - с проверкой на существование элементов
+        const linkModal = document.getElementById('linkModal');
+        if (linkModal) {
+            linkModal.addEventListener('click', (e) => {
+                if (e.target.id === 'linkModal') closeLinkModal();
+            });
+        }
+        
+        const propertyModal = document.getElementById('propertyModal');
+        if (propertyModal) {
+            propertyModal.addEventListener('click', (e) => {
+                if (e.target.id === 'propertyModal') closePropertyModal();
+            });
+        }
+        
+        const clientModal = document.getElementById('clientModal');
+        if (clientModal) {
+            clientModal.addEventListener('click', (e) => {
+                if (e.target.id === 'clientModal') closeClientModal();
+            });
+        }
+        
+        const brokerSettingsModal = document.getElementById('brokerSettingsModal');
+        if (brokerSettingsModal) {
+            brokerSettingsModal.addEventListener('click', (e) => {
+                if (e.target.id === 'brokerSettingsModal') closeBrokerSettingsModal();
+            });
+        }
+        
         document.addEventListener('keydown', (e) => {
             if (e.key === 'Escape') {
-                closeClientModal();
-                closePropertyModal();
-                closeLinkModal();
-                closeBrokerSettingsModal();
+                if (typeof closeClientModal === 'function') closeClientModal();
+                if (typeof closePropertyModal === 'function') closePropertyModal();
+                if (typeof closeLinkModal === 'function') closeLinkModal();
+                if (typeof closeBrokerSettingsModal === 'function') closeBrokerSettingsModal();
             }
         });
 
