@@ -566,6 +566,47 @@
         .multi-select__option.disabled span {
             color: var(--gray-400);
         }
+        
+        /* Стили для блока Additional */
+        .additional-filters {
+            grid-column: span 2;
+        }
+        
+        .additional-grid {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: var(--space-lg);
+            width: 100%;
+        }
+        
+        .additional-column {
+            display: flex;
+            flex-direction: column;
+            gap: var(--space-sm);
+        }
+        
+        /* Адаптивность для блока Additional */
+        @media (max-width: 1200px) {
+            .additional-grid {
+                grid-template-columns: repeat(3, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .additional-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+            
+            .additional-filters {
+                grid-column: span 1;
+            }
+        }
+        
+        @media (max-width: 480px) {
+            .additional-grid {
+                grid-template-columns: 1fr;
+            }
+        }
     </style>
 </head>
 <body>
@@ -842,23 +883,65 @@
 
                     <!-- Advanced filters -->
                     <div class="filters-advanced" id="advancedFilters">
-                        <div class="filter-group checkbox-filters">
-                            <label class="filter-group__label" style="width: 100%;">Extras</label>
-                            <label class="checkbox-filter">
-                                <input type="checkbox" id="hasVeranda"> Veranda
-                            </label>
-                            <label class="checkbox-filter">
-                                <input type="checkbox" id="hasBasement"> Basement
-                            </label>
-                            <label class="checkbox-filter">
-                                <input type="checkbox" id="hasPool"> Pool
-                            </label>
-                            <label class="checkbox-filter">
-                                <input type="checkbox" id="hasParking"> Parking
-                            </label>
-                            <label class="checkbox-filter">
-                                <input type="checkbox" id="hasSeaView"> Sea View
-                            </label>
+                        <div class="filter-group additional-filters">
+                            <label class="filter-group__label" style="width: 100%;">Additional</label>
+                            <div class="additional-grid">
+                                <div class="additional-column">
+                                    <label class="checkbox-filter">
+                                        <input type="checkbox" id="gatedComplex" onchange="updateActiveFiltersCount(); renderProperties();"> Gated complex
+                                    </label>
+                                    <label class="checkbox-filter">
+                                        <input type="checkbox" id="gym" onchange="updateActiveFiltersCount(); renderProperties();"> Gym
+                                    </label>
+                                    <label class="checkbox-filter">
+                                        <input type="checkbox" id="airConditioner" onchange="updateActiveFiltersCount(); renderProperties();"> Air conditioner
+                                    </label>
+                                </div>
+                                <div class="additional-column">
+                                    <label class="checkbox-filter">
+                                        <input type="checkbox" id="newBuilding" onchange="updateActiveFiltersCount(); renderProperties();"> New building
+                                    </label>
+                                    <label class="checkbox-filter">
+                                        <input type="checkbox" id="penthouses" onchange="updateActiveFiltersCount(); renderProperties();"> Penthouses
+                                    </label>
+                                    <label class="checkbox-filter">
+                                        <input type="checkbox" id="hasPool" onchange="updateActiveFiltersCount(); renderProperties();"> Pool
+                                    </label>
+                                </div>
+                                <div class="additional-column">
+                                    <label class="checkbox-filter">
+                                        <input type="checkbox" id="elite" onchange="updateActiveFiltersCount(); renderProperties();"> Elite
+                                    </label>
+                                    <label class="checkbox-filter">
+                                        <input type="checkbox" id="playground" onchange="updateActiveFiltersCount(); renderProperties();"> Playground
+                                    </label>
+                                    <label class="checkbox-filter">
+                                        <input type="checkbox" id="firstCoastal" onchange="updateActiveFiltersCount(); renderProperties();"> First coastal
+                                    </label>
+                                </div>
+                                <div class="additional-column">
+                                    <label class="checkbox-filter">
+                                        <input type="checkbox" id="householdAppliances" onchange="updateActiveFiltersCount(); renderProperties();"> Household appliances
+                                    </label>
+                                    <label class="checkbox-filter">
+                                        <input type="checkbox" id="objectsWithVideo" onchange="updateActiveFiltersCount(); renderProperties();"> Objects with video
+                                    </label>
+                                    <label class="checkbox-filter">
+                                        <input type="checkbox" id="furniture" onchange="updateActiveFiltersCount(); renderProperties();"> Furniture
+                                    </label>
+                                </div>
+                                <div class="additional-column">
+                                    <label class="checkbox-filter">
+                                        <input type="checkbox" id="titleDeed" onchange="updateActiveFiltersCount(); renderProperties();"> Title deed
+                                    </label>
+                                    <label class="checkbox-filter">
+                                        <input type="checkbox" id="heating" onchange="updateActiveFiltersCount(); renderProperties();"> Heating
+                                    </label>
+                                    <label class="checkbox-filter">
+                                        <input type="checkbox" id="sauna" onchange="updateActiveFiltersCount(); renderProperties();"> Sauna
+                                    </label>
+                                </div>
+                            </div>
                         </div>
                         <div class="filter-group">
                             <label class="filter-group__label">Object Code</label>
@@ -1651,12 +1734,22 @@
                 document.getElementById('priceMax').value = priceMax;
             }
 
-            // Checkbox filters
-            const hasVeranda = document.getElementById('hasVeranda').checked;
-            const hasBasement = document.getElementById('hasBasement').checked;
-            const hasPool = document.getElementById('hasPool').checked;
-            const hasParking = document.getElementById('hasParking').checked;
-            const hasSeaView = document.getElementById('hasSeaView').checked;
+            // Additional filters
+            const gatedComplex = document.getElementById('gatedComplex')?.checked || false;
+            const gym = document.getElementById('gym')?.checked || false;
+            const airConditioner = document.getElementById('airConditioner')?.checked || false;
+            const newBuilding = document.getElementById('newBuilding')?.checked || false;
+            const penthouses = document.getElementById('penthouses')?.checked || false;
+            const hasPool = document.getElementById('hasPool')?.checked || false;
+            const elite = document.getElementById('elite')?.checked || false;
+            const playground = document.getElementById('playground')?.checked || false;
+            const firstCoastal = document.getElementById('firstCoastal')?.checked || false;
+            const householdAppliances = document.getElementById('householdAppliances')?.checked || false;
+            const objectsWithVideo = document.getElementById('objectsWithVideo')?.checked || false;
+            const furniture = document.getElementById('furniture')?.checked || false;
+            const titleDeed = document.getElementById('titleDeed')?.checked || false;
+            const heating = document.getElementById('heating')?.checked || false;
+            const sauna = document.getElementById('sauna')?.checked || false;
 
             // Delivery date filter
             const deliveryFilter = document.getElementById('deliveryFilter')?.value || '';
@@ -1764,21 +1857,26 @@
                     }
                 }
 
-                // Veranda
-                if (hasVeranda && !((p.coveredVeranda || 0) > 0 || (p.uncoveredVeranda || 0) > 0)) {
-                    return false;
-                }
-
-                // Basement
-                if (hasBasement && !((p.basement || 0) > 0)) {
-                    return false;
-                }
-
-                // Features-based filters
+                // Additional filters - based on features field
                 const features = (p.features || '').toLowerCase();
-                if (hasPool && !features.includes('pool')) return false;
-                if (hasParking && !features.includes('parking')) return false;
-                if (hasSeaView && !(features.includes('sea view') || features.includes('sea-view') || features.includes('seaview'))) return false;
+                const additionalInfo = (p.additionalInfo || '').toLowerCase();
+                const allText = features + ' ' + additionalInfo;
+                
+                if (gatedComplex && !allText.includes('gated')) return false;
+                if (gym && !allText.includes('gym')) return false;
+                if (airConditioner && !(allText.includes('air conditioner') || allText.includes('a/c') || allText.includes('ac'))) return false;
+                if (newBuilding && !(allText.includes('new building') || p.status?.toLowerCase().includes('new'))) return false;
+                if (penthouses && !(allText.includes('penthouse') || p.type?.toLowerCase().includes('penthouse'))) return false;
+                if (hasPool && !allText.includes('pool')) return false;
+                if (elite && !allText.includes('elite')) return false;
+                if (playground && !allText.includes('playground')) return false;
+                if (firstCoastal && !(allText.includes('first coastal') || allText.includes('seafront') || allText.includes('beachfront'))) return false;
+                if (householdAppliances && !(allText.includes('appliances') || allText.includes('household'))) return false;
+                if (objectsWithVideo && !allText.includes('video')) return false;
+                if (furniture && !(allText.includes('furniture') || allText.includes('furnished'))) return false;
+                if (titleDeed && !(allText.includes('title deed') || allText.includes('title'))) return false;
+                if (heating && !allText.includes('heating')) return false;
+                if (sauna && !allText.includes('sauna')) return false;
 
                 // Object Code - multi-select
                 if (selectedObjects.length > 0) {
@@ -2061,11 +2159,23 @@
             priceUponRequestMode = false;  // Reset "Price upon request" mode
             document.getElementById('priceMin').value = '';
             document.getElementById('priceMax').value = '';
-            document.getElementById('hasVeranda').checked = false;
-            document.getElementById('hasBasement').checked = false;
-            document.getElementById('hasPool').checked = false;
-            document.getElementById('hasParking').checked = false;
-            document.getElementById('hasSeaView').checked = false;
+            
+            // Clear Additional filters
+            if (document.getElementById('gatedComplex')) document.getElementById('gatedComplex').checked = false;
+            if (document.getElementById('gym')) document.getElementById('gym').checked = false;
+            if (document.getElementById('airConditioner')) document.getElementById('airConditioner').checked = false;
+            if (document.getElementById('newBuilding')) document.getElementById('newBuilding').checked = false;
+            if (document.getElementById('penthouses')) document.getElementById('penthouses').checked = false;
+            if (document.getElementById('hasPool')) document.getElementById('hasPool').checked = false;
+            if (document.getElementById('elite')) document.getElementById('elite').checked = false;
+            if (document.getElementById('playground')) document.getElementById('playground').checked = false;
+            if (document.getElementById('firstCoastal')) document.getElementById('firstCoastal').checked = false;
+            if (document.getElementById('householdAppliances')) document.getElementById('householdAppliances').checked = false;
+            if (document.getElementById('objectsWithVideo')) document.getElementById('objectsWithVideo').checked = false;
+            if (document.getElementById('furniture')) document.getElementById('furniture').checked = false;
+            if (document.getElementById('titleDeed')) document.getElementById('titleDeed').checked = false;
+            if (document.getElementById('heating')) document.getElementById('heating').checked = false;
+            if (document.getElementById('sauna')) document.getElementById('sauna').checked = false;
 
             // Clear multi-selects
             selectedLocations = [];
@@ -2125,11 +2235,24 @@
             if (selectedPropertyTypes.length > 0) count++;
             if (document.getElementById('priceMin').value || document.getElementById('priceMax').value) count++;
             if (selectedBedrooms !== '') count++;
-            if (document.getElementById('hasVeranda').checked) count++;
-            if (document.getElementById('hasBasement').checked) count++;
-            if (document.getElementById('hasPool').checked) count++;
-            if (document.getElementById('hasParking').checked) count++;
-            if (document.getElementById('hasSeaView').checked) count++;
+            
+            // Count Additional filters
+            if (document.getElementById('gatedComplex')?.checked) count++;
+            if (document.getElementById('gym')?.checked) count++;
+            if (document.getElementById('airConditioner')?.checked) count++;
+            if (document.getElementById('newBuilding')?.checked) count++;
+            if (document.getElementById('penthouses')?.checked) count++;
+            if (document.getElementById('hasPool')?.checked) count++;
+            if (document.getElementById('elite')?.checked) count++;
+            if (document.getElementById('playground')?.checked) count++;
+            if (document.getElementById('firstCoastal')?.checked) count++;
+            if (document.getElementById('householdAppliances')?.checked) count++;
+            if (document.getElementById('objectsWithVideo')?.checked) count++;
+            if (document.getElementById('furniture')?.checked) count++;
+            if (document.getElementById('titleDeed')?.checked) count++;
+            if (document.getElementById('heating')?.checked) count++;
+            if (document.getElementById('sauna')?.checked) count++;
+            
             if (selectedObjects.length > 0) count++;
 
             const badge = document.getElementById('activeFiltersCount');
