@@ -194,7 +194,7 @@
 .property-card__actions {
     position: absolute;
     top: auto;
-    bottom: 20px; /* Lower position - above the bottom edge */
+    bottom: 25px; /* Lower position - above the bottom edge */
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -1099,7 +1099,7 @@
 
     /* Card action buttons on mobile */
     .property-card__actions {
-        bottom: 20px; /* Near the bottom on mobile */
+        bottom: 25px; /* Near the bottom on mobile */
         gap: var(--space-sm);
     }
 
@@ -1208,7 +1208,7 @@
 
     /* Card action buttons for medium devices */
     .property-card__actions {
-        bottom: 20px; /* Near the bottom on tablets */
+        bottom: 25px; /* Near the bottom on tablets */
     }
 
     .details-modal__content {
