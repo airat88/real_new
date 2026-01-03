@@ -32,8 +32,29 @@
     <style>
         .property-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            grid-template-columns: repeat(4, 1fr); /* 4 колонки на десктопе */
             gap: var(--space-lg);
+        }
+        
+        /* Адаптивность для разных экранов */
+        @media (max-width: 1400px) {
+            .property-grid {
+                grid-template-columns: repeat(3, 1fr); /* 3 колонки на средних экранах */
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .property-grid {
+                grid-template-columns: repeat(2, 1fr); /* 2 колонки на планшетах */
+                gap: var(--space-md);
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .property-grid {
+                grid-template-columns: 1fr; /* 1 колонка на мобильных */
+                gap: var(--space-md);
+            }
         }
 
         .property-card-broker {
@@ -121,6 +142,64 @@
             border-radius: var(--radius);
             font-size: 0.75rem;
             color: var(--gray-600);
+        }
+        
+        /* Адаптивные стили для карточек */
+        @media (max-width: 1400px) {
+            .property-card-broker__image {
+                height: 220px; /* Немного выше на средних экранах */
+            }
+            
+            .property-card-broker__price {
+                font-size: 1.2rem;
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            .property-card-broker__image {
+                height: 240px; /* Еще выше на планшетах (2 колонки) */
+            }
+            
+            .property-card-broker__body {
+                padding: var(--space-md) var(--space-sm);
+            }
+            
+            .property-card-broker__price {
+                font-size: 1.15rem;
+            }
+            
+            .property-card-broker__title {
+                font-size: 0.95rem;
+            }
+        }
+        
+        @media (max-width: 640px) {
+            .property-card-broker__image {
+                height: 280px; /* Максимальная высота на мобильных (1 колонка) */
+            }
+            
+            .property-card-broker__body {
+                padding: var(--space-md);
+            }
+            
+            .property-card-broker__price {
+                font-size: 1.4rem; /* Крупнее на мобильных */
+            }
+            
+            .property-card-broker__title {
+                font-size: 1rem;
+                white-space: normal; /* Разрешаем перенос на мобильных */
+                overflow: visible;
+            }
+            
+            .property-card-broker__tags {
+                gap: var(--space-xs);
+            }
+            
+            .property-card-broker__tag {
+                font-size: 0.8rem;
+                padding: var(--space-xs) var(--space-sm);
+            }
         }
 
         .selection-bar {
