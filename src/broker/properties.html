@@ -774,7 +774,7 @@
                                     200-300K
                                 </button>
                                 <button class="price-preset-btn" onclick="togglePriceRange(300000, 400000); event.preventDefault();" 
-                                        style="background: #e5e7eb; border-color: #d1d5db; color: #374151; font-weight: 600; font-size: 0.9rem; padding: 8px 16px;">
+                                        style="background: var(--primary, #6366f1); border-color: var(--primary, #6366f1); color: white; font-weight: 600; font-size: 0.9rem; padding: 8px 16px;">
                                     300-400K
                                 </button>
                                 <button class="price-preset-btn" onclick="togglePriceRange(400000, 500000); event.preventDefault();">
@@ -1510,9 +1510,9 @@
             allPresets.forEach(btn => {
                 // Check if it's the 300-400K highlighted button
                 if (btn.textContent.includes('300-400K')) {
-                    btn.style.background = '#e5e7eb';
-                    btn.style.borderColor = '#d1d5db';
-                    btn.style.color = '#374151';
+                    btn.style.background = 'var(--primary, #6366f1)';
+                    btn.style.borderColor = 'var(--primary, #6366f1)';
+                    btn.style.color = 'white';
                 } else if (btn.textContent.includes('Price upon request')) {
                     btn.style.background = 'var(--warning, #f59e0b)';
                     btn.style.borderColor = 'var(--warning, #f59e0b)';
@@ -1546,10 +1546,10 @@
             allPresets.forEach(btn => {
                 // Reset to default styles
                 if (btn.textContent.includes('300-400K')) {
-                    // 300-400K keeps its gray highlight
-                    btn.style.background = '#e5e7eb';
-                    btn.style.borderColor = '#d1d5db';
-                    btn.style.color = '#374151';
+                    // 300-400K keeps its blue highlight
+                    btn.style.background = 'var(--primary, #6366f1)';
+                    btn.style.borderColor = 'var(--primary, #6366f1)';
+                    btn.style.color = 'white';
                 } else if (btn.textContent.includes('Price upon request')) {
                     // Price upon request keeps its orange
                     btn.style.background = 'var(--warning, #f59e0b)';
@@ -1960,9 +1960,9 @@
             document.querySelectorAll('.price-preset-btn').forEach(btn => {
                 // Preserve special styling for 300-400K and Price upon request
                 if (btn.textContent.includes('300-400K')) {
-                    btn.style.background = '#e5e7eb';
-                    btn.style.borderColor = '#d1d5db';
-                    btn.style.color = '#374151';
+                    btn.style.background = 'var(--primary, #6366f1)';
+                    btn.style.borderColor = 'var(--primary, #6366f1)';
+                    btn.style.color = 'white';
                 } else if (btn.textContent.includes('Price upon request')) {
                     btn.style.background = 'var(--warning, #f59e0b)';
                     btn.style.borderColor = 'var(--warning, #f59e0b)';

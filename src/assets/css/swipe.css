@@ -86,7 +86,7 @@
 .cards-stack {
     position: relative;
     width: 100%;
-    max-width: 420px; /* Увеличено с 400px */
+    max-width: 400px;
     aspect-ratio: 3/4;
 }
 
@@ -194,7 +194,7 @@
 .property-card__actions {
     position: absolute;
     top: auto;
-    bottom: 10px; /* Опущено с 15px до 10px - кнопки ниже */
+    bottom: 15px; /* Lower position - above the bottom edge */
     left: 50%;
     transform: translateX(-50%);
     display: flex;
@@ -1238,7 +1238,7 @@
     }
 
     .cards-stack {
-        max-width: 500px; /* Увеличено с 380px до 500px */
+        max-width: 380px;
         aspect-ratio: 2/3;
     }
 
@@ -1279,22 +1279,8 @@
     .property-card__actions {
         position: absolute;
         top: auto;
-        bottom: 5px; /* Опущено с 10px до 5px - кнопки ниже */
+        bottom: 10px; /* Very bottom of the card, just above the edge */
         left: 50%;
         transform: translateX(-50%);
-    }
-}
-
-/* Большие экраны (>1200px) - еще крупнее карточки */
-@media (min-width: 1200px) {
-    .cards-stack {
-        max-width: 600px; /* Крупнее на больших мониторах */
-    }
-}
-
-/* Очень большие экраны (>1600px) */
-@media (min-width: 1600px) {
-    .cards-stack {
-        max-width: 700px; /* Максимальный размер */
     }
 }
