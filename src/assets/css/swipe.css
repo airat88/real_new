@@ -86,8 +86,9 @@
 .cards-stack {
     position: relative;
     width: 100%;
-    max-width: 400px;
+    max-width: 500px;
     aspect-ratio: 3/4;
+    height: auto;
 }
 
 /* Property card */
@@ -1205,7 +1206,7 @@
 
     .cards-stack {
         width: 100%;
-        max-width: 400px;
+        max-width: 500px; /* Увеличенная ширина для планшетов */
         flex-shrink: 0;
         height: 100%; /* Занимает всю доступную высоту */
         max-height: 100%;
@@ -1252,13 +1253,15 @@
     .swipe-container {
         flex-direction: row;
         height: calc(100vh - 80px); /* Максимальная высота с учетом header */
+        padding: var(--space-md); /* Уменьшенный паддинг для большей карточки */
     }
 
     .cards-stack {
-        max-width: 380px;
-        aspect-ratio: 2/3;
+        max-width: 600px; /* Увеличенная ширина */
+        width: 90%; /* Занимает 90% доступного пространства */
+        aspect-ratio: 3/4; /* Более вертикальное соотношение */
         height: auto;
-        max-height: 85vh; /* Ограничение высоты для десктопа */
+        max-height: 90vh; /* Увеличенная максимальная высота */
     }
 
     .property-card {
@@ -1302,5 +1305,21 @@
         bottom: 8px; /* Ближе к низу карточки на десктопе */
         left: 50%;
         transform: translateX(-50%);
+    }
+}
+
+/* Адаптация для больших экранов (широкие мониторы) */
+@media (min-width: 1200px) {
+    .cards-stack {
+        max-width: 700px; /* Еще больше на широких экранах */
+        max-height: 92vh;
+    }
+}
+
+/* Адаптация для очень больших экранов */
+@media (min-width: 1600px) {
+    .cards-stack {
+        max-width: 800px; /* Максимальный размер для очень широких экранов */
+        max-height: 95vh;
     }
 }
