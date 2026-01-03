@@ -1,738 +1,1074 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Dashboard | Cyprus Real Estate</title>
-
-    <!-- Fonts -->
+    <title>Личный кабинет | Cyprus Real Estate</title>
+    
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-
-    <!-- Styles -->
+    
     <link rel="stylesheet" href="../assets/css/common.css">
-    <link rel="stylesheet" href="../assets/css/broker.css">
-
-    <!-- Favicon -->
-    <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>🏠</text></svg>">
-
-    <!-- PWA -->
-    <link rel="manifest" href="../manifest.json">
-    <meta name="theme-color" content="#1e1b4b">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="../assets/icons/icon-192.png">
+    
+    <style>
+        body {
+            background: #f8fafc;
+            min-height: 100vh;
+        }
+        
+        /* Header */
+        .header {
+            background: #0f172a;
+            color: white;
+            padding: 0 24px;
+            height: 64px;
+            display: flex;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+        }
+        
+        .header-content {
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        
+        .header-logo {
+            width: 32px;
+            height: 32px;
+            color: #0d9488;
+        }
+        
+        .header-title {
+            font-size: 1rem;
+            font-weight: 600;
+        }
+        
+        .header-right {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        
+        .user-name {
+            font-size: 0.875rem;
+            color: #94a3b8;
+        }
+        
+        .btn-logout {
+            background: transparent;
+            border: 1px solid #334155;
+            color: #94a3b8;
+            padding: 8px 16px;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .btn-logout:hover {
+            background: #1e293b;
+            color: white;
+        }
+        
+        /* Main */
+        .main {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 24px;
+        }
+        
+        /* Welcome Section */
+        .welcome-section {
+            margin-bottom: 24px;
+        }
+        
+        .welcome-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 4px;
+        }
+        
+        .welcome-subtitle {
+            color: #64748b;
+            font-size: 0.9375rem;
+        }
+        
+        /* Stats */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .stat-card {
+            background: white;
+            border-radius: 10px;
+            padding: 20px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .stat-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+        
+        .stat-icon {
+            width: 40px;
+            height: 40px;
+            background: #f1f5f9;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #64748b;
+        }
+        
+        .stat-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        .stat-value {
+            font-size: 1.75rem;
+            font-weight: 700;
+            color: #1e293b;
+        }
+        
+        .stat-label {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        
+        /* Tabs */
+        .tabs {
+            display: flex;
+            gap: 4px;
+            margin-bottom: 24px;
+            background: #f1f5f9;
+            padding: 4px;
+            border-radius: 8px;
+            width: fit-content;
+        }
+        
+        .tab {
+            padding: 10px 20px;
+            background: transparent;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #64748b;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .tab svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        .tab--active {
+            background: white;
+            color: #1e293b;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+        }
+        
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
+        
+        .tab-content--active {
+            display: block;
+        }
+        
+        /* Selections Grid */
+        .selections-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+            gap: 16px;
+        }
+        
+        .selection-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        
+        .selection-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .selection-header {
+            padding: 20px;
+            border-bottom: 1px solid #f1f5f9;
+        }
+        
+        .selection-name {
+            font-size: 1rem;
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+        }
+        
+        .selection-meta {
+            display: flex;
+            gap: 16px;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        
+        .selection-meta span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .selection-meta svg {
+            width: 14px;
+            height: 14px;
+        }
+        
+        .selection-body {
+            padding: 20px;
+        }
+        
+        .selection-stats {
+            display: flex;
+            gap: 24px;
+            margin-bottom: 16px;
+        }
+        
+        .selection-stat {
+            text-align: center;
+        }
+        
+        .selection-stat__value {
+            font-size: 1.5rem;
+            font-weight: 700;
+        }
+        
+        .selection-stat__value--total { color: #1e3a5f; }
+        .selection-stat__value--liked { color: #059669; }
+        .selection-stat__value--passed { color: #dc2626; }
+        
+        .selection-stat__label {
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        
+        .selection-progress {
+            margin-bottom: 16px;
+        }
+        
+        .progress-bar {
+            height: 6px;
+            background: #e2e8f0;
+            border-radius: 3px;
+            overflow: hidden;
+        }
+        
+        .progress-fill {
+            height: 100%;
+            background: #1e3a5f;
+            border-radius: 3px;
+            transition: width 0.5s;
+        }
+        
+        .progress-label {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-top: 6px;
+        }
+        
+        .selection-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .btn-view {
+            flex: 1;
+            padding: 10px 16px;
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            text-align: center;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+        }
+        
+        .btn-view:hover {
+            background: #2d5a87;
+        }
+        
+        .btn-view svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        /* Status Badge */
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 4px 10px;
+            border-radius: 4px;
+            font-size: 0.75rem;
+            font-weight: 500;
+        }
+        
+        .status-badge--pending {
+            background: #fef3c7;
+            color: #d97706;
+        }
+        
+        .status-badge--active {
+            background: #dbeafe;
+            color: #2563eb;
+        }
+        
+        .status-badge--completed {
+            background: #d1fae5;
+            color: #059669;
+        }
+        
+        /* Favorites Grid */
+        .favorites-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 16px;
+        }
+        
+        .property-card {
+            background: white;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 1px solid #e2e8f0;
+            transition: all 0.2s;
+        }
+        
+        .property-card:hover {
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+        }
+        
+        .property-image {
+            height: 160px;
+            background: #f1f5f9;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #94a3b8;
+            position: relative;
+        }
+        
+        .property-image img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        
+        .property-image svg {
+            width: 48px;
+            height: 48px;
+        }
+        
+        .btn-remove-favorite {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            width: 32px;
+            height: 32px;
+            background: white;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #dc2626;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+        }
+        
+        .btn-remove-favorite:hover {
+            background: #fef2f2;
+        }
+        
+        .btn-remove-favorite svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .property-info {
+            padding: 16px;
+        }
+        
+        .property-id {
+            font-size: 0.75rem;
+            color: #64748b;
+            margin-bottom: 4px;
+        }
+        
+        .property-title {
+            font-weight: 600;
+            color: #1e293b;
+            margin-bottom: 8px;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+        
+        .property-details {
+            display: flex;
+            gap: 12px;
+            font-size: 0.75rem;
+            color: #64748b;
+        }
+        
+        .property-details span {
+            display: flex;
+            align-items: center;
+            gap: 4px;
+        }
+        
+        .property-details svg {
+            width: 14px;
+            height: 14px;
+        }
+        
+        /* Empty State */
+        .empty-state {
+            text-align: center;
+            padding: 60px 20px;
+            color: #64748b;
+        }
+        
+        .empty-state__icon {
+            width: 64px;
+            height: 64px;
+            margin: 0 auto 16px;
+            color: #cbd5e1;
+        }
+        
+        .empty-state__title {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #475569;
+            margin-bottom: 8px;
+        }
+        
+        /* Profile Section */
+        .profile-card {
+            background: white;
+            border-radius: 10px;
+            padding: 24px;
+            max-width: 480px;
+            border: 1px solid #e2e8f0;
+        }
+        
+        .profile-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+        
+        .profile-avatar {
+            width: 64px;
+            height: 64px;
+            background: #1e3a5f;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: white;
+        }
+        
+        .profile-name {
+            font-size: 1.125rem;
+            font-weight: 600;
+            color: #1e293b;
+        }
+        
+        .profile-email {
+            font-size: 0.875rem;
+            color: #64748b;
+        }
+        
+        .form-group {
+            margin-bottom: 16px;
+        }
+        
+        .form-label {
+            display: block;
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: #475569;
+            margin-bottom: 6px;
+        }
+        
+        .form-input {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #e2e8f0;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            transition: all 0.2s;
+        }
+        
+        .form-input:focus {
+            outline: none;
+            border-color: #1e3a5f;
+        }
+        
+        .form-input:disabled {
+            background: #f8fafc;
+            color: #64748b;
+        }
+        
+        .btn-save {
+            padding: 12px 24px;
+            background: #1e3a5f;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 0.9375rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .btn-save:hover {
+            background: #2d5a87;
+        }
+        
+        .btn-save svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        /* Loading */
+        .loading {
+            text-align: center;
+            padding: 40px;
+            color: #64748b;
+        }
+        
+        .spinner {
+            width: 32px;
+            height: 32px;
+            border: 3px solid #e2e8f0;
+            border-top-color: #1e3a5f;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin: 0 auto 12px;
+        }
+        
+        /* Toast */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
+            background: #1e293b;
+            color: white;
+            padding: 12px 20px;
+            border-radius: 8px;
+            font-size: 0.875rem;
+            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            opacity: 0;
+            transition: all 0.3s;
+        }
+        
+        .toast--visible {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
+        }
+        
+        /* Mobile */
+        @media (max-width: 768px) {
+            .header-title { display: none; }
+            .user-name { display: none; }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .tabs {
+                width: 100%;
+                overflow-x: auto;
+            }
+            
+            .selections-grid,
+            .favorites-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
 </head>
 <body>
-    <!-- Sidebar Overlay -->
-    <div class="sidebar-overlay" id="sidebarOverlay" onclick="toggleMobileMenu()"></div>
-
-    <div class="broker-layout">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="sidebar__header">
-                <a href="dashboard.html" class="sidebar__logo">
-                    <span>🏠</span>
-                    <span>RealEstate</span>
-                </a>
+    <!-- Header -->
+    <header class="header">
+        <div class="header-content">
+            <div class="header-left">
+                <div class="header-logo">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                        <polyline points="9 22 9 12 15 12 15 22"></polyline>
+                    </svg>
+                </div>
+                <span class="header-title">Cyprus Real Estate</span>
             </div>
-
-            <nav class="sidebar__nav">
-                <a href="dashboard.html" class="nav-item nav-item--active">
-                    <span class="nav-item__icon">📊</span>
-                    <span>Dashboard</span>
-                </a>
-                <a href="properties.html" class="nav-item">
-                    <span class="nav-item__icon">🏢</span>
-                    <span>Properties</span>
-                </a>
-                <a href="add-property.html" class="nav-item" style="background: rgba(99, 102, 241, 0.1); border-left: 3px solid var(--primary);">
-                    <span class="nav-item__icon">➕</span>
-                    <span>Add Property</span>
-                </a>
-                <a href="selections.html" class="nav-item">
-                    <span class="nav-item__icon">📋</span>
-                    <span>Selections</span>
-                </a>
-                <a href="complex-manager.html" class="nav-item">
-                    <span class="nav-item__icon">🏗️</span>
-                    <span>Комплексы</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <span class="nav-item__icon">👥</span>
-                    <span>Clients</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <span class="nav-item__icon">📈</span>
-                    <span>Analytics</span>
-                </a>
-                <a href="#" class="nav-item">
-                    <span class="nav-item__icon">⚙️</span>
-                    <span>Settings</span>
-                </a>
-                <a href="#" class="nav-item" onclick="logout(); return false;">
-                    <span class="nav-item__icon">🚪</span>
-                    <span>Logout</span>
-                </a>
-                <a href="../index.html" class="nav-item nav-item--home">
-                    <span class="nav-item__icon">🌐</span>
-                    <span>Home Page</span>
-                </a>
-            </nav>
-
-            <div class="sidebar__footer">
-                <div class="user-info">
-                    <div class="user-avatar">MK</div>
-                    <div class="user-details">
-                        <div class="user-name">Maria Konstantinou</div>
-                        <div class="user-role">Senior Broker</div>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Top Bar -->
-            <header class="topbar">
-                <button class="mobile-menu-btn" id="menuBtn" onclick="toggleMobileMenu()">
-                    <span></span>
-                    <span></span>
-                    <span></span>
-                </button>
-                <h1 class="topbar__title">Dashboard</h1>
-                <div class="topbar__actions">
-                    <button class="btn btn-secondary" onclick="loadDashboardData()" title="Refresh Dashboard Data" style="padding: 0 16px;">
-                        🔄 Refresh
-                    </button>
-                    <button class="btn btn-secondary" onclick="window.location.href='add-property.html'" title="Add New Property">
-                        ➕ Add Property
-                    </button>
-                    <button class="btn btn-primary" onclick="openCreateModal()">
-                        + New Selection
-                    </button>
-                </div>
-            </header>
-
-            <!-- Page Content -->
-            <div class="page-content">
-                <!-- Stats -->
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-card__header">
-                            <div class="stat-card__icon stat-card__icon--primary">🏢</div>
-                        </div>
-                        <div class="stat-card__value" id="statProperties">-</div>
-                        <div class="stat-card__label">Total Properties</div>
-                        <div class="stat-card__change" id="statPropertiesChange">Loading...</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-card__header">
-                            <div class="stat-card__icon stat-card__icon--success">📋</div>
-                        </div>
-                        <div class="stat-card__value" id="statSelections">-</div>
-                        <div class="stat-card__label">Active Selections</div>
-                        <div class="stat-card__change" id="statSelectionsChange">Loading...</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-card__header">
-                            <div class="stat-card__icon stat-card__icon--warning">👀</div>
-                        </div>
-                        <div class="stat-card__value" id="statViewRate">-</div>
-                        <div class="stat-card__label">View Rate</div>
-                        <div class="stat-card__change" id="statViewRateChange">Loading...</div>
-                    </div>
-
-                    <div class="stat-card">
-                        <div class="stat-card__header">
-                            <div class="stat-card__icon stat-card__icon--danger">❤️</div>
-                        </div>
-                        <div class="stat-card__value" id="statLikeRate">-</div>
-                        <div class="stat-card__label">Like Rate</div>
-                        <div class="stat-card__change" id="statLikeRateChange">Loading...</div>
-                    </div>
-                </div>
-
-                <!-- Content Grid -->
-                <div class="content-grid">
-                    <!-- Recent Selections -->
-                    <div class="section">
-                        <div class="section__header">
-                            <h2 class="section__title">Recent Selections</h2>
-                            <a href="selections.html" class="btn btn-secondary">View All</a>
-                        </div>
-                        <div class="section__body">
-                            <div class="selections-list" id="recentSelectionsList">
-                                <div class="selection-item">
-                                    <div class="selection-item__info">
-                                        <div class="selection-item__name" style="color: var(--gray-400);">Loading selections...</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Recent Activity -->
-                    <div class="section">
-                        <div class="section__header">
-                            <h2 class="section__title">Recent Activity</h2>
-                        </div>
-                        <div class="section__body">
-                            <div class="activity-list" id="recentActivityList">
-                                <div class="activity-item">
-                                    <div class="activity-item__content">
-                                        <div class="activity-item__text" style="color: var(--gray-400);">Loading activity...</div>
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </main>
-    </div>
-
-    <!-- Create Selection Modal -->
-    <div class="modal-overlay" id="createModal">
-        <div class="modal">
-            <div class="modal__header">
-                <h3 class="modal__title">Create New Selection</h3>
-                <button class="modal__close" onclick="closeCreateModal()">✕</button>
-            </div>
-            <div class="modal__body">
-                <div class="form-group">
-                    <label class="form-label">Selection Name</label>
-                    <input type="text" class="input" placeholder="e.g., Apartments for John Smith">
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Description (optional)</label>
-                    <textarea class="input" rows="3" placeholder="Add a personal message for your client..."></textarea>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Link Expiry</label>
-                    <select class="input">
-                        <option>7 days</option>
-                        <option>14 days</option>
-                        <option>30 days</option>
-                        <option>No expiry</option>
-                    </select>
-                </div>
-
-                <div class="form-group">
-                    <label class="form-label">Select Properties</label>
-                    <p class="form-hint">You'll select properties on the next step</p>
-                </div>
-            </div>
-            <div class="modal__footer">
-                <button class="btn btn-secondary" onclick="closeCreateModal()">Cancel</button>
-                <button class="btn btn-primary" onclick="goToSelectProperties()">Continue</button>
+            <div class="header-right">
+                <span class="user-name" id="userName"></span>
+                <button class="btn-logout" onclick="handleLogout()">Выйти</button>
             </div>
         </div>
-    </div>
-
-    <!-- Supabase -->
+    </header>
+    
+    <!-- Main Content -->
+    <main class="main">
+        <!-- Welcome Section -->
+        <section class="welcome-section">
+            <h1 class="welcome-title">Добро пожаловать, <span id="welcomeName"></span></h1>
+            <p class="welcome-subtitle">Ваши подборки и избранные объекты</p>
+        </section>
+        
+        <!-- Stats -->
+        <div class="stats-grid">
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                            <polyline points="14 2 14 8 20 8"></polyline>
+                            <line x1="16" y1="13" x2="8" y2="13"></line>
+                            <line x1="16" y1="17" x2="8" y2="17"></line>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-value" id="statSelections">0</div>
+                <div class="stat-label">Подборок</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-value" id="statFavorites">0</div>
+                <div class="stat-label">В избранном</div>
+            </div>
+            <div class="stat-card">
+                <div class="stat-header">
+                    <div class="stat-icon">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path>
+                            <circle cx="12" cy="12" r="3"></circle>
+                        </svg>
+                    </div>
+                </div>
+                <div class="stat-value" id="statViewed">0</div>
+                <div class="stat-label">Просмотрено</div>
+            </div>
+        </div>
+        
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab tab--active" data-tab="selections">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                    <polyline points="14 2 14 8 20 8"></polyline>
+                </svg>
+                Подборки
+            </button>
+            <button class="tab" data-tab="favorites">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                </svg>
+                Избранное
+            </button>
+            <button class="tab" data-tab="profile">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
+                    <circle cx="12" cy="7" r="4"></circle>
+                </svg>
+                Профиль
+            </button>
+        </div>
+        
+        <!-- Tab: Selections -->
+        <div class="tab-content tab-content--active" id="selectionsTab">
+            <div class="loading" id="selectionsLoading">
+                <div class="spinner"></div>
+                <p>Загрузка подборок...</p>
+            </div>
+            <div class="selections-grid" id="selectionsGrid" style="display: none;"></div>
+            <div class="empty-state" id="selectionsEmpty" style="display: none;">
+                <div class="empty-state__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path>
+                        <polyline points="14 2 14 8 20 8"></polyline>
+                    </svg>
+                </div>
+                <div class="empty-state__title">Подборок пока нет</div>
+                <p>Когда брокер создаст для вас подборку, она появится здесь</p>
+            </div>
+        </div>
+        
+        <!-- Tab: Favorites -->
+        <div class="tab-content" id="favoritesTab">
+            <div class="loading" id="favoritesLoading">
+                <div class="spinner"></div>
+                <p>Загрузка избранного...</p>
+            </div>
+            <div class="favorites-grid" id="favoritesGrid" style="display: none;"></div>
+            <div class="empty-state" id="favoritesEmpty" style="display: none;">
+                <div class="empty-state__icon">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                        <path d="M20.84 4.61a5.5 5.5 0 0 0-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 0 0-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 0 0 0-7.78z"></path>
+                    </svg>
+                </div>
+                <div class="empty-state__title">Избранное пусто</div>
+                <p>Отмечайте понравившиеся объекты, чтобы сохранить их здесь</p>
+            </div>
+        </div>
+        
+        <!-- Tab: Profile -->
+        <div class="tab-content" id="profileTab">
+            <div class="profile-card">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profileAvatar">A</div>
+                    <div>
+                        <div class="profile-name" id="profileDisplayName"></div>
+                        <div class="profile-email" id="profileDisplayEmail"></div>
+                    </div>
+                </div>
+                
+                <form id="profileForm">
+                    <div class="form-group">
+                        <label class="form-label">Имя</label>
+                        <input type="text" class="form-input" id="profileName" placeholder="Ваше имя">
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-input" id="profileEmail" disabled>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Телефон</label>
+                        <input type="tel" class="form-input" id="profilePhone" placeholder="+357 99 123456">
+                    </div>
+                    
+                    <button type="submit" class="btn-save">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path>
+                            <polyline points="17 21 17 13 7 13 7 21"></polyline>
+                            <polyline points="7 3 7 8 15 8"></polyline>
+                        </svg>
+                        Сохранить
+                    </button>
+                </form>
+            </div>
+        </div>
+    </main>
+    
+    <!-- Toast -->
+    <div class="toast" id="toast"></div>
+    
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="../assets/js/data-sync.js"></script>
     <script src="../assets/js/supabase-client.js"></script>
-
+    <script src="../assets/js/client-auth.js"></script>
+    
     <script>
-        // Supabase will be initialized by SupabaseClient.init() after page loads
-        // This ensures the library is fully loaded before trying to create a client
+        let clientInfo = null;
+        let allProperties = [];
         
-        // Register Service Worker
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('../sw.js')
-                .then(reg => console.log('SW registered'))
-                .catch(err => console.log('SW failed:', err));
-        }
-
-        // Helper function to check if all components are ready
-        function areComponentsReady() {
-            const checks = {
-                supabase: typeof supabase !== 'undefined',
-                DataSync: typeof DataSync !== 'undefined',
-                SupabaseClient: typeof SupabaseClient !== 'undefined',
-                supabaseInit: SupabaseClient && SupabaseClient.initialized,
-                domReady: document.readyState === 'complete' || document.readyState === 'interactive'
-            };
+        document.addEventListener('DOMContentLoaded', async () => {
+            const authResult = await ClientAuth.requireAuth();
+            if (!authResult) return;
             
-            console.log('📋 Components readiness check:', checks);
+            clientInfo = ClientAuth.getClientInfo();
             
-            const allReady = Object.values(checks).every(v => v === true);
-            if (!allReady) {
-                const missing = Object.entries(checks)
-                    .filter(([k, v]) => !v)
-                    .map(([k]) => k);
-                console.warn('⚠️ Not ready yet. Missing:', missing.join(', '));
-            }
-            return allReady;
-        }
-
-        // Check authentication
-        async function checkAuth() {
-            console.log('🔍 Checking authentication...');
+            document.getElementById('userName').textContent = clientInfo.name;
+            document.getElementById('welcomeName').textContent = clientInfo.name.split(' ')[0];
+            document.getElementById('profileAvatar').textContent = clientInfo.name.charAt(0).toUpperCase();
+            document.getElementById('profileDisplayName').textContent = clientInfo.name;
+            document.getElementById('profileDisplayEmail').textContent = clientInfo.email;
             
-            // Prevent redirect loops - check if we're already redirecting
-            if (sessionStorage.getItem('redirecting') === 'true') {
-                console.log('⏳ Already redirecting, skipping check');
-                return;
-            }
+            document.getElementById('profileName').value = clientInfo.name || '';
+            document.getElementById('profileEmail').value = clientInfo.email || '';
+            document.getElementById('profilePhone').value = clientInfo.phone || '';
             
-            // Check localStorage session (demo accounts)
-            const session = localStorage.getItem('broker_session');
-            
-            if (!session) {
-                console.log('❌ No session found, redirecting to login');
-                sessionStorage.setItem('redirecting', 'true');
-                window.location.href = 'login.html?from=dashboard';
-                return;
-            }
-
+            await loadProperties();
+            loadSelections();
+            loadFavorites();
+        });
+        
+        async function loadProperties() {
             try {
-                const sessionData = JSON.parse(session);
-                console.log('✅ Session found:', sessionData.email);
-                
-                // Clear redirect flag - we're successfully loaded
-                sessionStorage.removeItem('redirecting');
-                
-                // Update user info in sidebar
-                const userName = sessionData.email.split('@')[0];
-                const userNameEl = document.querySelector('.user-name');
-                if (userNameEl) {
-                    userNameEl.textContent = userName.charAt(0).toUpperCase() + userName.slice(1);
-                }
-                
-                // Initialize Supabase for data operations (not auth)
-                console.log('🔧 Initializing Supabase...');
-                
-                // Initialize with retry logic (CDN scripts may load async)
-                const initSupabase = () => {
-                    console.log('⏳ Calling SupabaseClient.init()...');
-                    const result = SupabaseClient.init();
-                    if (result && SupabaseClient.client) {
-                        console.log('✅ Supabase initialized successfully');
-                        return true;
-                    } else {
-                        console.log('❌ Supabase init failed - library may not be loaded yet');
-                        return false;
-                    }
-                };
-                
-                // Try to initialize, with retry if needed
-                if (!initSupabase()) {
-                    console.log('⏳ Waiting for Supabase library to load (retry in 800ms)...');
-                    // Wait a bit and try again
-                    setTimeout(() => {
-                        if (!initSupabase()) {
-                            console.error('❌ Failed to initialize Supabase after retry');
-                            console.error('Check that CDN script loaded: https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2');
-                        } else {
-                            console.log('✅ Supabase initialized after retry:', !!SupabaseClient.client);
-                            // Load dashboard data after successful retry with additional delay
-                            console.log('⏳ Scheduling loadDashboardData() after retry (400ms additional delay)...');
-                            setTimeout(() => {
-                                console.log('🚀 Calling loadDashboardData() after retry...');
-                                loadDashboardData();
-                            }, 400); // Additional 400ms after retry
-                        }
-                    }, 800); // Wait 800ms for scripts to load
-                    return; // Exit early, will continue in setTimeout
-                }
-                
-                console.log('✅ Supabase ready immediately:', !!SupabaseClient.client);
-                
-                // Check if DataSync is available
-                console.log('🔧 Checking DataSync availability...', typeof DataSync);
-                console.log('🔧 Checking SupabaseClient availability...', typeof SupabaseClient);
-
-                // Load dashboard data with delay to ensure all libraries are ready
-                // This fixes the issue where data doesn't appear until manual call
-                console.log('⏳ Scheduling loadDashboardData() with 800ms delay...');
-                setTimeout(() => {
-                    // Double-check that all components are ready
-                    if (areComponentsReady()) {
-                        console.log('🚀 Now calling loadDashboardData()...');
-                        loadDashboardData();
-                        console.log('✅ loadDashboardData() called (async, will complete later)');
-                    } else {
-                        console.error('❌ Components still not ready after 800ms delay');
-                        // Try one more time with longer delay
-                        console.log('⏳ Attempting final retry in 1200ms...');
-                        setTimeout(() => {
-                            console.log('🚀 Final attempt to call loadDashboardData()...');
-                            loadDashboardData();
-                        }, 1200);
-                    }
-                }, 800); // 800ms delay ensures all libraries are fully loaded
-            } catch (e) {
-                console.error('❌ Invalid session data:', e);
-                localStorage.removeItem('broker_session');
-                sessionStorage.setItem('redirecting', 'true');
-                window.location.href = 'login.html?from=dashboard';
-                return;
-            }
-        }
-
-        // Logout function
-        async function logout() {
-            console.log('🚪 Logging out...');
-            
-            // Clear localStorage session first
-            localStorage.removeItem('broker_session');
-            
-            // Sign out from Supabase
-            try {
-                await supabaseClient.auth.signOut();
-                console.log('✅ Signed out from Supabase');
-            } catch (e) {
-                console.log('⚠️ Supabase signout error:', e);
-            }
-            
-            // Redirect to login with parameter to prevent auto-redirect back
-            window.location.href = 'login.html?from=dashboard';
-        }
-
-        // Load dashboard data
-        async function loadDashboardData() {
-            console.log('🚀 [START] loadDashboardData called');
-            
-            // Check if DOM elements exist
-            const elements = {
-                statProperties: document.getElementById('statProperties'),
-                statPropertiesChange: document.getElementById('statPropertiesChange'),
-                statSelections: document.getElementById('statSelections'),
-                statSelectionsChange: document.getElementById('statSelectionsChange'),
-                statViewRate: document.getElementById('statViewRate'),
-                statViewRateChange: document.getElementById('statViewRateChange'),
-                statLikeRate: document.getElementById('statLikeRate'),
-                statLikeRateChange: document.getElementById('statLikeRateChange')
-            };
-            
-            console.log('📋 DOM elements check:', {
-                statProperties: !!elements.statProperties,
-                statSelections: !!elements.statSelections,
-                statViewRate: !!elements.statViewRate,
-                statLikeRate: !!elements.statLikeRate
-            });
-            
-            if (!elements.statProperties) {
-                console.error('❌ CRITICAL: DOM elements not found!');
-                return;
-            }
-            
-            try {
-                console.log('📊 Step 1: Loading dashboard data...');
-                
-                // Auto-load CSV data if not in memory
-                console.log('📊 Step 2: Calling DataSync.autoSync()...');
-                await DataSync.autoSync();
-                console.log('✅ Step 2: DataSync.autoSync() completed');
-
-                // Load properties count
-                console.log('📊 Step 3: Getting properties from DataSync...');
-                const properties = DataSync.getProperties();
-                const propCount = properties.length;
-                console.log(`✅ Step 3: Loaded ${propCount} properties`);
-                
-                elements.statProperties.textContent = propCount || '-';
-                elements.statPropertiesChange.textContent = propCount > 0 ? 'From CSV' : 'Load data';
-                elements.statPropertiesChange.className = 'stat-card__change';
-                console.log('✅ Step 3: Updated properties stats in DOM');
-
-                // Load selections from Supabase (with fallback to mock data)
-                console.log('📊 Step 4: Loading selections from Supabase...');
-                let selections = [];
-                
-                try {
-                    selections = await SupabaseClient.getBrokerSelections();
-                    console.log(`✅ Step 4: Loaded ${selections.length} selections from Supabase`);
-                } catch (supabaseError) {
-                    console.warn('⚠️ Supabase failed, using mock data:', supabaseError.message);
-                    
-                    // Use mock data as fallback
-                    selections = [
-                        {
-                            id: 'mock-1',
-                            name: 'Demo Selection 1',
-                            status: 'active',
-                            total_properties: 10,
-                            viewed_count: 8,
-                            liked_count: 5,
-                            disliked_count: 3,
-                            created_at: new Date().toISOString()
-                        },
-                        {
-                            id: 'mock-2',
-                            name: 'Demo Selection 2',
-                            status: 'active',
-                            total_properties: 5,
-                            viewed_count: 5,
-                            liked_count: 3,
-                            disliked_count: 2,
-                            created_at: new Date().toISOString()
-                        },
-                        {
-                            id: 'mock-3',
-                            name: 'Demo Selection 3',
-                            status: 'completed',
-                            total_properties: 7,
-                            viewed_count: 7,
-                            liked_count: 4,
-                            disliked_count: 3,
-                            created_at: new Date().toISOString(),
-                            completed_at: new Date().toISOString()
-                        }
-                    ];
-                    console.log('✅ Using mock data:', selections.length, 'selections');
-                }
-                
-                console.log(`✅ Step 4: Processing ${selections.length} selections`);
-                
-                const activeSelections = selections.filter(s => s.status !== 'completed');
-                console.log(`✅ Step 4: Found ${activeSelections.length} active selections`);
-
-                elements.statSelections.textContent = activeSelections.length || '-';
-                elements.statSelectionsChange.textContent = `${selections.length} total`;
-                elements.statSelectionsChange.className = 'stat-card__change';
-                console.log('✅ Step 4: Updated selections stats in DOM');
-
-                // Calculate view and like rates
-                console.log('📊 Step 5: Calculating rates...');
-                let totalViewed = 0;
-                let totalProperties = 0;
-                let totalLiked = 0;
-                let totalReacted = 0;
-
-                selections.forEach(s => {
-                    totalProperties += s.total_properties || 0;
-                    totalViewed += s.viewed_count || 0;
-                    totalLiked += s.liked_count || 0;
-                    totalReacted += (s.liked_count || 0) + (s.disliked_count || 0);
-                });
-
-                const viewRate = totalProperties > 0 ? Math.round((totalViewed / totalProperties) * 100) : 0;
-                const likeRate = totalReacted > 0 ? Math.round((totalLiked / totalReacted) * 100) : 0;
-                
-                console.log('✅ Step 5: Calculated rates', {
-                    viewRate,
-                    likeRate,
-                    totalViewed,
-                    totalProperties,
-                    totalLiked,
-                    totalReacted
-                });
-
-                elements.statViewRate.textContent = viewRate + '%';
-                elements.statViewRateChange.textContent = `${totalViewed}/${totalProperties} viewed`;
-                elements.statViewRateChange.className = 'stat-card__change';
-
-                elements.statLikeRate.textContent = likeRate + '%';
-                elements.statLikeRateChange.textContent = `${totalLiked} liked`;
-                elements.statLikeRateChange.className = 'stat-card__change';
-                console.log('✅ Step 5: Updated rates in DOM');
-
-                console.log('✅ [COMPLETE] Dashboard stats loaded successfully!');
-
-                // Render recent selections
-                console.log('📊 Step 6: Rendering recent selections...');
-                renderRecentSelections(selections.slice(0, 5));
-                console.log('✅ Step 6: Recent selections rendered');
-
-                // Render recent activity
-                console.log('📊 Step 7: Rendering recent activity...');
-                await renderRecentActivity(selections);
-                console.log('✅ Step 7: Recent activity rendered');
-                
-                console.log('🎉 [SUCCESS] All dashboard data loaded!');
-
+                await DataSync.syncProperties();
+                allProperties = DataSync.getProperties();
             } catch (error) {
-                console.error('❌ [ERROR] Failed to load dashboard data:', error);
-                console.error('❌ Error message:', error.message);
-                console.error('❌ Error stack:', error.stack);
-                
-                // Set default values if loading fails
-                if (elements.statProperties) {
-                    elements.statProperties.textContent = '-';
-                    elements.statPropertiesChange.textContent = 'Error loading';
-                    elements.statPropertiesChange.className = 'stat-card__change stat-card__change--negative';
-                }
-                
-                if (elements.statSelections) {
-                    elements.statSelections.textContent = '-';
-                    elements.statSelectionsChange.textContent = 'Error loading';
-                    elements.statSelectionsChange.className = 'stat-card__change stat-card__change--negative';
-                }
-                
-                if (elements.statViewRate) {
-                    elements.statViewRate.textContent = '-';
-                    elements.statViewRateChange.textContent = 'Error loading';
-                    elements.statViewRateChange.className = 'stat-card__change stat-card__change--negative';
-                }
-                
-                if (elements.statLikeRate) {
-                    elements.statLikeRate.textContent = '-';
-                    elements.statLikeRateChange.textContent = 'Error loading';
-                    elements.statLikeRateChange.className = 'stat-card__change stat-card__change--negative';
-                }
+                console.error('Failed to load properties:', error);
             }
         }
-
-        // Render recent selections
-        function renderRecentSelections(selections) {
-            const container = document.getElementById('recentSelectionsList');
-
-            if (selections.length === 0) {
-                container.innerHTML = `
-                    <div class="selection-item">
-                        <div class="selection-item__info">
-                            <div class="selection-item__name" style="color: var(--gray-400);">No selections yet</div>
-                            <div class="selection-item__meta">
-                                <span>Go to Properties to create one</span>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                return;
+        
+        async function loadSelections() {
+            const result = await ClientAuth.getClientSelections();
+            
+            document.getElementById('selectionsLoading').style.display = 'none';
+            
+            if (result.success && result.selections.length > 0) {
+                document.getElementById('selectionsGrid').style.display = 'grid';
+                renderSelections(result.selections);
+                document.getElementById('statSelections').textContent = result.selections.length;
+                
+                const viewed = result.selections.reduce((sum, s) => sum + (s.viewed_count || 0), 0);
+                document.getElementById('statViewed').textContent = viewed;
+            } else {
+                document.getElementById('selectionsEmpty').style.display = 'block';
             }
-
-            const icons = ['🏠', '🏢', '🏖️', '🏙️', '🌳'];
-
-            container.innerHTML = selections.map((s, i) => {
-                const timeAgo = getTimeAgo(s.created_at);
-                const icon = icons[i % icons.length];
-                const hasReactions = s.liked_count > 0 || s.disliked_count > 0;
-
+        }
+        
+        function renderSelections(selections) {
+            const grid = document.getElementById('selectionsGrid');
+            
+            grid.innerHTML = selections.map(selection => {
+                const total = selection.total_properties || 0;
+                const liked = selection.liked_count || 0;
+                const disliked = selection.disliked_count || 0;
+                const viewed = liked + disliked;
+                const progress = total > 0 ? Math.round((viewed / total) * 100) : 0;
+                
+                const statusClass = selection.status === 'completed' ? 'completed' : 
+                                   selection.status === 'active' ? 'active' : 'pending';
+                const statusText = selection.status === 'completed' ? 'Завершена' :
+                                  selection.status === 'active' ? 'Активна' : 'Ожидает';
+                
+                const date = new Date(selection.created_at).toLocaleDateString('ru-RU', {
+                    day: 'numeric',
+                    month: 'short'
+                });
+                
                 return `
-                    <div class="selection-item" onclick="window.location.href='selections.html'" style="cursor: pointer;">
-                        <div class="selection-item__icon">${icon}</div>
-                        <div class="selection-item__info">
-                            <div class="selection-item__name">${s.name}</div>
-                            <div class="selection-item__meta">
-                                <span>${s.total_properties} properties</span>
-                                <span>•</span>
-                                <span>${timeAgo}</span>
+                    <div class="selection-card">
+                        <div class="selection-header">
+                            <div class="selection-name">${selection.name}</div>
+                            <div class="selection-meta">
+                                <span>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
+                                        <line x1="16" y1="2" x2="16" y2="6"></line>
+                                        <line x1="8" y1="2" x2="8" y2="6"></line>
+                                        <line x1="3" y1="10" x2="21" y2="10"></line>
+                                    </svg>
+                                    ${date}
+                                </span>
+                                <span class="status-badge status-badge--${statusClass}">${statusText}</span>
                             </div>
                         </div>
-                        <div class="selection-item__stats">
-                            ${hasReactions ? `
-                                <span class="selection-item__stat selection-item__stat--like">${s.liked_count} ❤️</span>
-                                <span class="selection-item__stat selection-item__stat--dislike">${s.disliked_count} ✕</span>
-                            ` : `
-                                <span class="selection-item__stat selection-item__stat--pending">${s.status}</span>
-                            `}
+                        <div class="selection-body">
+                            <div class="selection-stats">
+                                <div class="selection-stat">
+                                    <div class="selection-stat__value selection-stat__value--total">${total}</div>
+                                    <div class="selection-stat__label">Объектов</div>
+                                </div>
+                                <div class="selection-stat">
+                                    <div class="selection-stat__value selection-stat__value--liked">${liked}</div>
+                                    <div class="selection-stat__label">Понравилось</div>
+                                </div>
+                                <div class="selection-stat">
+                                    <div class="selection-stat__value selection-stat__value--passed">${disliked}</div>
+                                    <div class="selection-stat__label">Пропущено</div>
+                                </div>
+                            </div>
+                            <div class="selection-progress">
+                                <div class="progress-bar">
+                                    <div class="progress-fill" style="width: ${progress}%"></div>
+                                </div>
+                                <div class="progress-label">Просмотрено ${progress}%</div>
+                            </div>
+                            <div class="selection-actions">
+                                <a href="swipe.html?t=${selection.token}" class="btn-view">
+                                    ${selection.status === 'completed' ? 
+                                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg> Посмотреть' : 
+                                        '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="5 3 19 12 5 21 5 3"></polygon></svg> Продолжить'}
+                                </a>
+                            </div>
                         </div>
                     </div>
                 `;
             }).join('');
         }
-
-        // Render recent activity
-        async function renderRecentActivity(selections) {
-            const container = document.getElementById('recentActivityList');
-            const activities = [];
-
-            // Add selection creation events
-            selections.slice(0, 3).forEach(s => {
-                activities.push({
-                    type: 'selection',
-                    text: `Selection <strong>"${s.name}"</strong> created`,
-                    time: s.created_at,
-                    dotClass: 'activity-item__dot--primary'
-                });
-            });
-
-            // Add completion events
-            selections.filter(s => s.status === 'completed').slice(0, 2).forEach(s => {
-                activities.push({
-                    type: 'completed',
-                    text: `Client finished viewing <strong>"${s.name}"</strong>`,
-                    time: s.completed_at || s.created_at,
-                    dotClass: 'activity-item__dot--success'
-                });
-            });
-
-            // Sort by time
-            activities.sort((a, b) => new Date(b.time) - new Date(a.time));
-
-            if (activities.length === 0) {
-                container.innerHTML = `
-                    <div class="activity-item">
-                        <div class="activity-item__content">
-                            <div class="activity-item__text" style="color: var(--gray-400);">No activity yet</div>
+        
+        async function loadFavorites() {
+            const result = await ClientAuth.getFavorites();
+            
+            document.getElementById('favoritesLoading').style.display = 'none';
+            
+            if (result.success && result.favorites.length > 0) {
+                document.getElementById('favoritesGrid').style.display = 'grid';
+                renderFavorites(result.favorites);
+                document.getElementById('statFavorites').textContent = result.favorites.length;
+            } else {
+                document.getElementById('favoritesEmpty').style.display = 'block';
+            }
+        }
+        
+        function renderFavorites(favorites) {
+            const grid = document.getElementById('favoritesGrid');
+            
+            grid.innerHTML = favorites.map(fav => {
+                const property = allProperties.find(p => p.id === fav.property_id);
+                
+                if (!property) {
+                    return `
+                        <div class="property-card">
+                            <div class="property-image">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                </svg>
+                            </div>
+                            <div class="property-info">
+                                <div class="property-id">${fav.property_id}</div>
+                                <div class="property-title">Объект не найден</div>
+                            </div>
+                        </div>
+                    `;
+                }
+                
+                const imageUrl = property.photos?.[0] || null;
+                const hasImage = imageUrl && !imageUrl.includes('unsplash');
+                
+                return `
+                    <div class="property-card">
+                        <div class="property-image">
+                            ${hasImage ? `<img src="${imageUrl}" alt="${property.title}" onerror="this.style.display='none'">` : 
+                                `<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5">
+                                    <path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path>
+                                </svg>`}
+                            <button class="btn-remove-favorite" onclick="removeFavorite('${property.id}')" title="Удалить">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="18" y1="6" x2="6" y2="18"></line>
+                                    <line x1="6" y1="6" x2="18" y2="18"></line>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="property-info">
+                            <div class="property-id">${property.id}</div>
+                            <div class="property-title">${property.title || 'Без названия'}</div>
+                            <div class="property-details">
+                                <span>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path>
+                                        <circle cx="12" cy="10" r="3"></circle>
+                                    </svg>
+                                    ${property.location || 'Кипр'}
+                                </span>
+                                <span>
+                                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <path d="M3 12l2-2m0 0l7-7 7 7M5 10v10a1 1 0 001 1h3m10-11l2 2m-2-2v10a1 1 0 01-1 1h-3m-6 0a1 1 0 001-1v-4a1 1 0 011-1h2a1 1 0 011 1v4a1 1 0 001 1m-6 0h6"></path>
+                                    </svg>
+                                    ${property.bedrooms || 0} сп.
+                                </span>
+                            </div>
                         </div>
                     </div>
                 `;
-                return;
+            }).join('');
+        }
+        
+        async function removeFavorite(propertyId) {
+            const result = await ClientAuth.removeFromFavorites(propertyId);
+            if (result.success) {
+                showToast('Удалено из избранного');
+                loadFavorites();
             }
-
-            container.innerHTML = activities.slice(0, 5).map(a => `
-                <div class="activity-item">
-                    <div class="activity-item__dot ${a.dotClass}"></div>
-                    <div class="activity-item__content">
-                        <div class="activity-item__text">${a.text}</div>
-                        <div class="activity-item__time">${getTimeAgo(a.time)}</div>
-                    </div>
-                </div>
-            `).join('');
         }
-
-        // Get time ago string
-        function getTimeAgo(dateStr) {
-            const date = new Date(dateStr);
-            const now = new Date();
-            const diffMs = now - date;
-            const diffMins = Math.floor(diffMs / 60000);
-            const diffHours = Math.floor(diffMins / 60);
-            const diffDays = Math.floor(diffHours / 24);
-
-            if (diffMins < 1) return 'Just now';
-            if (diffMins < 60) return `${diffMins}m ago`;
-            if (diffHours < 24) return `${diffHours}h ago`;
-            if (diffDays === 1) return 'Yesterday';
-            if (diffDays < 7) return `${diffDays} days ago`;
-            return date.toLocaleDateString();
-        }
-
-        checkAuth();
-
-        function openCreateModal() {
-            document.getElementById('createModal').classList.add('modal-overlay--open');
-        }
-
-        function closeCreateModal() {
-            document.getElementById('createModal').classList.remove('modal-overlay--open');
-        }
-
-        function goToSelectProperties() {
-            window.location.href = 'properties.html?mode=select';
-        }
-
-        // Close modal on backdrop click
-        document.getElementById('createModal').addEventListener('click', (e) => {
-            if (e.target.id === 'createModal') {
-                closeCreateModal();
+        
+        document.querySelectorAll('.tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('.tab').forEach(t => t.classList.remove('tab--active'));
+                tab.classList.add('tab--active');
+                
+                document.querySelectorAll('.tab-content').forEach(c => c.classList.remove('tab-content--active'));
+                document.getElementById(tab.dataset.tab + 'Tab').classList.add('tab-content--active');
+            });
+        });
+        
+        document.getElementById('profileForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+            
+            const name = document.getElementById('profileName').value.trim();
+            const phone = document.getElementById('profilePhone').value.trim();
+            
+            const result = await ClientAuth.updateProfile({ name, phone });
+            
+            if (result.success) {
+                showToast('Профиль сохранён');
+                document.getElementById('userName').textContent = name;
+                document.getElementById('welcomeName').textContent = name.split(' ')[0];
+                document.getElementById('profileAvatar').textContent = name.charAt(0).toUpperCase();
+                document.getElementById('profileDisplayName').textContent = name;
+            } else {
+                showToast('Ошибка сохранения');
             }
         });
-
-        // Close on Escape key
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') closeCreateModal();
-        });
-
-        // Mobile menu toggle
-        function toggleMobileMenu() {
-            const sidebar = document.getElementById('sidebar');
-            const overlay = document.getElementById('sidebarOverlay');
-            const btn = document.getElementById('menuBtn');
-
-            sidebar.classList.toggle('sidebar--open');
-            overlay.classList.toggle('active');
-            btn.classList.toggle('active');
+        
+        async function handleLogout() {
+            await ClientAuth.logout();
+            window.location.href = 'login.html';
+        }
+        
+        function showToast(message) {
+            const toast = document.getElementById('toast');
+            toast.textContent = message;
+            toast.classList.add('toast--visible');
+            
+            setTimeout(() => {
+                toast.classList.remove('toast--visible');
+            }, 3000);
         }
     </script>
 </body>
