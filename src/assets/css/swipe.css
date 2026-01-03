@@ -9,6 +9,8 @@
     display: flex;
     flex-direction: column;
     overflow: hidden;
+    /* Поддержка safe area для iPhone */
+    padding-bottom: env(safe-area-inset-bottom, 0px);
 }
 
 /* Header */
@@ -1075,16 +1077,20 @@
     .swipe-container {
         flex-direction: column;
         justify-content: flex-start;
-        padding: var(--space-md) var(--space-sm);
-        height: calc(100vh - 80px); /* Максимальная высота с учетом header */
+        padding: var(--space-sm) var(--space-sm);
+        /* Учитываем safe area для iPhone */
+        height: calc(100vh - 80px - env(safe-area-inset-bottom, 0px));
+        min-height: 500px; /* Минимальная высота для очень маленьких экранов */
+        padding-bottom: max(var(--space-md), env(safe-area-inset-bottom, 0px));
     }
 
     .cards-stack {
         max-width: 100%;
         width: 100%;
         flex-shrink: 0;
-        height: 100%; /* Занимает всю доступную высоту */
-        max-height: 100%;
+        /* Гибкая высота с учетом кнопок и safe area */
+        height: calc(100% - 80px); /* Оставляем место для кнопок */
+        max-height: calc(100vh - 160px - env(safe-area-inset-bottom, 0px));
     }
 
     .property-card {
@@ -1109,7 +1115,7 @@
 
     /* Card action buttons on mobile */
     .property-card__actions {
-        bottom: 8px; /* Ближе к низу на мобильных */
+        bottom: max(12px, env(safe-area-inset-bottom, 12px)); /* Учитываем safe area */
         gap: var(--space-sm);
     }
 
@@ -1196,20 +1202,62 @@
     }
 }
 
+/* Специальная адаптация для очень маленьких экранов (iPhone SE, iPhone 8 и меньше) */
+@media (max-width: 375px) {
+    .swipe-container {
+        padding: var(--space-xs) var(--space-xs);
+    }
+
+    .cards-stack {
+        /* Еще более компактная высота для маленьких экранов */
+        height: calc(100% - 70px);
+        max-height: calc(100vh - 150px - env(safe-area-inset-bottom, 0px));
+    }
+
+    .property-card__actions {
+        bottom: max(8px, env(safe-area-inset-bottom, 8px));
+        gap: var(--space-xs);
+    }
+
+    .card-action-btn--dislike,
+    .card-action-btn--like {
+        width: 54px;
+        height: 54px;
+        font-size: 1.5rem;
+    }
+
+    .card-action-btn--info {
+        width: 44px;
+        height: 44px;
+        font-size: 1.25rem;
+    }
+
+    .property-card__price {
+        font-size: 1.5rem;
+    }
+
+    .property-card__title {
+        font-size: 1rem;
+    }
+}
+
 @media (max-width: 768px) and (min-width: 481px) {
     /* Адаптация для средних мобильных устройств */
     .swipe-container {
         flex-direction: column;
         justify-content: flex-start;
-        height: calc(100vh - 80px); /* Максимальная высота с учетом header */
+        /* Учитываем safe area */
+        height: calc(100vh - 80px - env(safe-area-inset-bottom, 0px));
+        padding-bottom: max(var(--space-md), env(safe-area-inset-bottom, 0px));
     }
 
     .cards-stack {
         width: 100%;
         max-width: 500px; /* Увеличенная ширина для планшетов */
         flex-shrink: 0;
-        height: 100%; /* Занимает всю доступную высоту */
-        max-height: 100%;
+        /* Гибкая высота с учетом кнопок */
+        height: calc(100% - 80px);
+        max-height: calc(100vh - 160px - env(safe-area-inset-bottom, 0px));
     }
 
     .property-card {
@@ -1225,7 +1273,7 @@
 
     /* Card action buttons for medium devices */
     .property-card__actions {
-        bottom: 8px; /* Ближе к низу на планшетах */
+        bottom: max(12px, env(safe-area-inset-bottom, 12px)); /* Учитываем safe area */
     }
 
     .details-modal__content {
